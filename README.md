@@ -28,11 +28,14 @@ docker run -d -p 8080:8080 --name bookingprovider a2sibookingprovider
 Runs a in a Docker container in ECS, at http://appointments.directoryofservices.nhs.uk:8080/poc/index
 
 Uses BitBucket pipeline (see bitbucket-pipelines.yml) to deploy whenever a successful (i.e. unit tests passing) push is made to the Master branch:
-
+```
 $(aws ecr get-login --no-include-email --region eu-west-2 --profile domainb)
-docker build -t a2sibookingpoc .
-docker tag -f a2sibookingpoc:latest 410123189863.dkr.ecr.eu-west-2.amazonaws.com/a2sibookingpoc:latest
+docker build -t a2sibookingprovider .
+docker tag a2sibookingprovider:latest ${AWS_REGISTRY_URL}:latest
 docker push ${AWS_REGISTRY_URL}:latest
+sleep 2
+aws ecs update-service --cluster BookingPOCCluster --service Demonstrator --force-new-deployment
+```
 
 ## JWT details
 In order for requests to be accespted, they need to include an access_token in an Authorization header, for example:
