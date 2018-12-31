@@ -49,4 +49,4 @@ curl -X POST \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   -d 'client_id=0f7bc08b-3395-4b4b-b23b-f790fc62bf91&client_secret=mVBtuzR-------XreUpnBVb8%3D&grant_type=client_credentials&scope=http%3A%2F%2Fappointments.directoryofservices.nhs.uk%3A8080%2Fpoc%2F.default'
 
-Where scope is the root of the FHIR Server being teragetted.
+Where scope is the root of the FHIR Server being targeted.
