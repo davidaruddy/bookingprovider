@@ -40,16 +40,19 @@ aws ecs update-service --cluster BookingPOCCluster --service Demonstrator --forc
 ## JWT details
 In order for requests to be accespted, they need to include an access_token in an Authorization header, for example:
 
+```
 curl -X GET \
   http://localhost:8080/poc/Slot \
   -H 'Accept: application/json' \
   -H 'Authorization: Bearer:  eyJ0eX----wCXBzcEVg'
-
+```
 In order to get an access_token, make a call as follows:
 
+```
 curl -X POST \
   https://login.microsoftonline.com/e52111c7-4048-4f34-aea9-6326afa44a8d/oauth2/v2.0/token \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   -d 'client_id=0f7bc08b-3395-4b4b-b23b-f790fc62bf91&client_secret=mVBtuzR-------XreUpnBVb8%3D&grant_type=client_credentials&scope=http%3A%2F%2Fappointments.directoryofservices.nhs.uk%3A8080%2Fpoc%2F.default'
+```
 
 Where scope is the root of the FHIR Server being targeted.
