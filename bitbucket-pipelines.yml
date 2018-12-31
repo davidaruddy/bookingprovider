@@ -9,6 +9,7 @@ pipelines:
   branches:
     master:
     - step:
+        name: Build WAR file and save in Downloads.
         caches:
           - maven
         script: # Modify the commands below to build your repository.
@@ -24,6 +25,8 @@ pipelines:
           - target/*.war
 # Requires a different image, with AWS CLI installed...
     - step:
+        name: Deploy to ECS
+        deployment: production
         image: tstrohmeier/awscli:3.6.4
         caches:
           - docker
