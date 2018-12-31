@@ -1,0 +1,41 @@
+# This is a sample build configuration for Java (Maven).
+# Check our guides at https://confluence.atlassian.com/x/zd-5Mw for more examples.
+# Only use spaces to indent your .yml configuration.
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+image: maven:3.3.9
+
+pipelines:
+  branches:
+    master:
+    - step:
+        caches:
+          - maven
+        script: # Modify the commands below to build your repository.
+          - mvn -B clean install
+          - git rev-parse HEAD >> tagret/classes/version.txt
+          - curl -X POST "https://${BB_AUTH_STRING}@api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"target/bookingprovider-2.0-SNAPSHOT.war"
+          - curl -X POST "https://${BB_AUTH_STRING}@api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"Dockerfile"
+        artifacts:
+          - target/*.war
+# Requires a different image, with AWS CLI installed...
+    - step:
+        image: tstrohmeier/awscli:3.6.4
+        caches:
+          - docker
+        script:
+            - eval $(aws ecr get-login --region ${AWS_DEFAULT_REGION} --no-include-email)
+            - docker build -t a2sibookingprovider .
+            - docker tag a2sibookingprovider:latest 410123189863.dkr.ecr.eu-west-2.amazonaws.com/a2sibookingprovider:latest
+            - docker push ${AWS_REGISTRY_URL}:latest
+            - sleep 2
+            - aws ecs update-service --cluster BookingPOCCluster --service Demonstrator --force-new-deployment
+        services:
+          - docker
+# Pipeline for develop branch...
+    develop:
+    - step:
+        caches:
+          - maven
+        script: # Modify the commands below to build your repository.
+          - mvn -B verify # -B batch mode makes Maven less verbose
