@@ -39,7 +39,7 @@ import uk.nhs.fhir.bookingprovider.data.DataStore;
  * This is the actual Servlet, which hosts a set of ResourceProviders for each
  * Resource type that we're handling.
  *
- * Serves out FHIR base at localhost:8080/poc/ See for example
+ * Serves out FHIR base at localhost:443/poc/ See for example
  * /poc/metadata
  *
  * @author tim.coates@nhs.net
@@ -51,7 +51,7 @@ public class RestfulServlet extends RestfulServer {
      * Constructor, just sets the base URL (to a static fixed value for now)
      */
     public RestfulServlet() {
-        //String serverBaseUrl = "http://localhost:8080/poc";
+        //String serverBaseUrl = "http://localhost:443/poc";
         //setServerAddressStrategy(new HardcodedServerAddressStrategy(serverBaseUrl));
     }
 
@@ -77,7 +77,7 @@ public class RestfulServlet extends RestfulServer {
     AppointmentChecker checker;
 
     /**
-     * This handles requests to URL: http://tim-lenovo-g570:8080/poc/reset where
+     * This handles requests to URL: http://localhost:443/poc/reset where
      * it resets the in-memory data store, so creates all new Slots as free and
      * removes any booked appointments.
      *
@@ -222,7 +222,7 @@ public class RestfulServlet extends RestfulServer {
         outputStream.append("  <p>\n   <form action='https://login.microsoftonline.com/e52111c7-4048-4f34-aea9-6326afa44a8d/oauth2/v2.0/token' method='post'>");
         outputStream.append("<table>\n");
         outputStream.append(" <tr>\n  <td>grant_type:</td><td><input type='text' size='22' name='grant_type' value='client_credentials' readonly='true'></td>\n</tr>\n");
-        outputStream.append(" <tr>\n  <td>scope:</td><td><input type='text' size='55' name='scope' value='http://appointments.directoryofservices.nhs.uk:8080/poc/.default'></td>\n</tr>\n");
+        outputStream.append(" <tr>\n  <td>scope:</td><td><input type='text' size='55' name='scope' value='http://appointments.directoryofservices.nhs.uk:443/poc/.default'></td>\n</tr>\n");
         outputStream.append(" <tr>\n  <td>client_id:</td><td><input type='text' size='36' name='client_id' value='' placeholder='Value issued by NHS Digital'></td>\n</tr>\n");
         outputStream.append(" <tr>\n  <td>client_secret:</td><td><input type='text' size='50' name='client_secret' value='' placeholder='Value issued by NHS Digital'></td>\n</tr>\n");
         outputStream.append("</table>\n");

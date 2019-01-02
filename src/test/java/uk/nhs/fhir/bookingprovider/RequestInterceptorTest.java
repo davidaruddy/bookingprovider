@@ -67,7 +67,7 @@ public class RequestInterceptorTest {
     public void testValidateToken() {
         System.out.println("validateToken");
         String token = getToken();
-        String reqURI = "http://appointments.directoryofservices.nhs.uk:8080/poc";
+        String reqURI = "http://appointments.directoryofservices.nhs.uk:443/poc";
         RequestInterceptor instance = new RequestInterceptor();
         boolean expResult = true;
         boolean result = instance.validateToken(token, reqURI);
@@ -81,7 +81,7 @@ public class RequestInterceptorTest {
     public void testValidateBadToken() {
         System.out.println("validateToken");
         String token = getToken();
-        String reqURI = "http://localhost:8080/poc";
+        String reqURI = "http://localhost:443/poc";
         RequestInterceptor instance = new RequestInterceptor();
         String expResult = "The supplied JWT was not intended for: " + reqURI;
         try {
@@ -101,7 +101,7 @@ public class RequestInterceptorTest {
             OkHttpClient client = new OkHttpClient();
 
             MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
-            RequestBody body = RequestBody.create(mediaType, "client_id=0f7bc08b-3395-4b4b-b23b-f790fc62bf91&client_secret=mVBtuzRIwYhuDkSSFZIbp3Qmx7OWiL35BXreUpnBVb8%3D&grant_type=client_credentials&scope=http%3A%2F%2Fappointments.directoryofservices.nhs.uk%3A8080%2Fpoc%2F.default");
+            RequestBody body = RequestBody.create(mediaType, "client_id=0f7bc08b-3395-4b4b-b23b-f790fc62bf91&client_secret=mVBtuzRIwYhuDkSSFZIbp3Qmx7OWiL35BXreUpnBVb8%3D&grant_type=client_credentials&scope=http%3A%2F%2Fappointments.directoryofservices.nhs.uk%3A443%2Fpoc%2F.default");
             Request request = new Request.Builder()
                     .url("https://login.microsoftonline.com/e52111c7-4048-4f34-aea9-6326afa44a8d/oauth2/v2.0/token")
                     .post(body)
@@ -171,7 +171,7 @@ public class RequestInterceptorTest {
     public void testIncomingRequestPreProcessed() {
         System.out.println("incomingRequestPreProcessed");
         RequestInterceptor instance = new RequestInterceptor();
-        String queryString = "http://appointments.directoryofservices.nhs.uk:8080/poc";
+        String queryString = "http://appointments.directoryofservices.nhs.uk:443/poc";
         String token = getToken();
         String authheader = "Bearer " + token;
         HttpServletRequest myRequestMock = new MockRequest(queryString, authheader);

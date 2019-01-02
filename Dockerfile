@@ -14,10 +14,10 @@ EXPOSE 8080
 # This creates an image called a2sibookingprovider based on this dockerfile
 #
 # To run a container based on this image use:
-# $docker run -d -p 8080:8080 --name bookingprovider a2sibookingprovider
-# This creates a running (in the background) container called bookingprovider on port 8080.
+# $docker run -d -p 443:8080 --name bookingprovider a2sibookingprovider
+# This creates a running (in the background) container called bookingprovider on port 443.
 #
-# Browse to http://localhost:8080/poc
+# Browse to http://localhost:443/poc
 #
 # To stop the running container use:
 # $docker stop bookingprovider
