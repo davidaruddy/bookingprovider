@@ -44,6 +44,12 @@ import javax.servlet.http.HttpServletResponse;
 public class RequestInterceptor extends InterceptorAdapter {
 
     private static final Logger LOG = Logger.getLogger(RequestInterceptor.class.getName());
+    private static final String JWKURL =
+            "https://login.microsoftonline.com/common/discovery/keys";
+    private static final String ISSUER =
+            "https://sts.windows.net/e52111c7-4048-4f34-aea9-6326afa44a8d/";
+    
+    
 
     /**
      * Override the incomingRequestPreProcessed method, which is called for each
@@ -93,33 +99,34 @@ public class RequestInterceptor extends InterceptorAdapter {
     public final boolean validateToken(final String token, final String reqURI) {
         try {
             DecodedJWT actualJWT = JWT.decode(token);
-            JwkProvider JWKSProvider = new UrlJwkProvider(new URL("https://login.microsoftonline.com/common/discovery/keys"));
+            JwkProvider JWKSProvider = new UrlJwkProvider(new URL(JWKURL));
             String keyUsedID = actualJWT.getKeyId();
             Jwk jwk = JWKSProvider.get(keyUsedID);
             Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey(), null);
             algorithm.verify(actualJWT);
             // Here we know it was signed properly
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
-
-            // Check it hasn't yet expired
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND, -450);
-            if (actualJWT.getExpiresAt().before(calendar.getTime())) {
-                Calendar expiresAt = Calendar.getInstance();
-                expiresAt.setTime(actualJWT.getExpiresAt());
-                throw new UnprocessableEntityException("The supplied JWT has expired (exp = " + sdf.format(expiresAt.getTime()) + ") is before Now = " + sdf.format(calendar.getTime()));
+            // Check it's current etc
+            if(!checkTimes(actualJWT)) {
+                LOG.severe("Times didn't check out properly.");
+                return false;
             }
-
-            // Check it's ready to be used
-            calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND, 450);
-            if (actualJWT.getNotBefore().after(calendar.getTime())) {
-                Calendar notBefore = Calendar.getInstance();
-                notBefore.setTime(actualJWT.getNotBefore());
-                throw new UnprocessableEntityException("The supplied JWT is not yet ready to be used (nbf = " + sdf.format(notBefore.getTime()) + ") is after Now = " + sdf.format(calendar.getTime()));
+            
+            // Check who issued it
+            if(!checkIssuer(actualJWT)) {
+                LOG.severe("Issuer of JWT was not trusted.");
+                return false;
             }
-            // Here we know it's current
+            
+            // Check client is a mamber of the right Groups.
+            if(!checkGroups(actualJWT)) {
+                LOG.severe("Client was not a member of the required Groups.");
+                return false;
+            }
+            
+            // Log the client's ID
+            logAppID(actualJWT);;
+
             List<String> audienceList = actualJWT.getAudience();
             boolean correctAudience = false;
             for (String audience : audienceList) {
@@ -181,5 +188,100 @@ public class RequestInterceptor extends InterceptorAdapter {
             out.close();
         }
 
+    }
+
+    /**
+     * Method to check the various times; Not Before, Issued At and Expiry.
+     * 
+     * @param theJWT The Decoded JWT as per:
+     * https://static.javadoc.io/com.auth0/java-jwt/3.3.0/com/auth0/jwt/interfaces/DecodedJWT.html
+     * 
+     * @return Whether or not this token is current.
+     * 
+     */
+    private boolean checkTimes(DecodedJWT theJWT) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
+
+        // Check it hasn't yet expired
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, -450);
+        if (theJWT.getExpiresAt().before(calendar.getTime())) {
+            Calendar expiresAt = Calendar.getInstance();
+            expiresAt.setTime(theJWT.getExpiresAt());
+            return false;
+        }
+
+        // Check it's ready to be used
+        calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, 450);
+        if (theJWT.getNotBefore().after(calendar.getTime())) {
+            Calendar notBefore = Calendar.getInstance();
+            notBefore.setTime(theJWT.getNotBefore());
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Method to check that the issuer claim (iss) in the supplied JWT matches
+     * the expected value.
+     * 
+     * @param theJWT A Decoded JWT
+     * @return Indication of whether to trust or not.
+     */
+    private boolean checkIssuer(DecodedJWT theJWT) {
+        String issuer = theJWT.getIssuer();
+        return issuer.equals(ISSUER);
+    }
+    
+    /**
+     * Method to check whether the client is a member of the two required
+     * groups.
+     * 
+     * TODO: This should differentiate between the ability to read Slots and
+     *       to book an appointment.
+     * 
+     * @param theJWT The incoming JWT
+     * @return 
+     */
+    private boolean checkGroups(DecodedJWT theJWT) {
+        
+        boolean canReadSlots = false;
+        boolean canBookAppts = false;
+        
+        // urn:nhs:names:services:careconnect:fhir:rest:create:appointment
+        String createAppointments = "dacb82c5-aea8-4509-887f-281324062dfd";
+        
+        // urn:nhs:names:services:careconnect:fhir:rest:read:slot
+        String readSlots = "ab412fe9-3f68-4368-9810-9dc24d1659b1";
+        
+        String[] groups = theJWT.getClaim("groups").asArray(String.class);
+        if(groups == null) {
+            LOG.info("groups claim returned null !");
+            return false;
+        }
+        for(int i = 0; i < groups.length; i++) {
+            LOG.info("Found group: " + groups[i]);
+            if(groups[i].equals(createAppointments)) {
+                canBookAppts = true;
+            }
+            if(groups[i].equals(readSlots)) {
+                canReadSlots = true;
+            }
+        }
+        return (canBookAppts && canReadSlots);
+    }
+    
+    /**
+     * Method to simply log out which client made the request.
+     * 
+     * TODO: This really SHOULd do a lookup into Azure AD and determine and log
+     * the name as well as the GUID.
+     * 
+     * @param theJWT The incoming JWT 
+     */
+    private void logAppID(DecodedJWT theJWT) {
+        String clientID = theJWT.getClaim("appid").asString();
+        LOG.log(Level.INFO, "JWT was for: {0}", clientID);
     }
 }

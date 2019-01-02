@@ -15,7 +15,6 @@
  */
 package uk.nhs.fhir.bookingprovider;
 
-import uk.nhs.fhir.bookingprovider.RequestInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.gson.Gson;
 import com.squareup.okhttp.MediaType;
