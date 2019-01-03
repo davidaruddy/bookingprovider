@@ -48,19 +48,31 @@ import javax.servlet.http.HttpServletResponse;
 public class RequestInterceptor extends InterceptorAdapter {
 
     private static final Logger LOG = Logger.getLogger(RequestInterceptor.class.getName());
-    private static final String JWKURL
-            = "https://login.microsoftonline.com/common/discovery/keys";
-    private static final String ISSUER
-            = "https://sts.windows.net/e52111c7-4048-4f34-aea9-6326afa44a8d/";
+    private String JWKURL;
+    private String ISSUER;
 
+    /**
+     * Properties file in which we hold a lookup between appid claim in the JWT
+     * and the App registration name in Azure AD. Allows for simpler logging.
+     * 
+     */
     Properties appIDList;
+    
+    /**
+     * Properties file in which we store the URLs used for checking tokens.
+     */
+    Properties jwtURLs;
 
     /**
      * Constructor, just tells us to load the properties file holding all of the
-     * App IDs
+     * App IDs, and the properties file which configures the AzureAD endpoints.
+     * 
      */
     public RequestInterceptor() {
-        LoadProperties();
+        loadAppIDs();
+        loadJWTURLs();
+        JWKURL = jwtURLs.getProperty("JWKURL");
+        ISSUER = jwtURLs.getProperty("ISSUER");
     }
 
     /**
@@ -277,17 +289,16 @@ public class RequestInterceptor extends InterceptorAdapter {
      * is purely to allow the demonstrator to log which users are using it.
      *
      */
-    private void LoadProperties() {
+    private void loadAppIDs() {
         InputStream input = null;
         try {
             appIDList = new Properties();
             ClassLoader classLoader = getClass().getClassLoader();
             input = classLoader.getResource("appid.properties").openStream();
             appIDList.load(input);
-
         }
         catch (IOException ex) {
-            Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.severe("Error reading appid.properties file " + ex.getMessage());
         }
         finally {
             if (input != null) {
@@ -295,10 +306,36 @@ public class RequestInterceptor extends InterceptorAdapter {
                     input.close();
                 }
                 catch (IOException e) {
-                    LOG.severe("Error closing config.properties file: " + e.getMessage());
+                    LOG.severe("Error closing appid.properties file: " + e.getMessage());
                 }
             }
         }
-
+    }
+    
+    /**
+     * Method to load the URLs used for JWT handling, from jwt.properties file.
+     * 
+     */
+    private void loadJWTURLs() {
+        InputStream input = null;
+        try {
+            jwtURLs = new Properties();
+            ClassLoader classLoader = getClass().getClassLoader();
+            input = classLoader.getResource("jwt.properties").openStream();
+            jwtURLs.load(input);
+        }
+        catch (IOException ex) {
+            LOG.severe("Error reading appid.properties file " + ex.getMessage());
+        }
+        finally {
+            if (input != null) {
+                try {
+                    input.close();
+                }
+                catch (IOException e) {
+                    LOG.severe("Error closing appid.properties file: " + e.getMessage());
+                }
+            }
+        }
     }
 }
