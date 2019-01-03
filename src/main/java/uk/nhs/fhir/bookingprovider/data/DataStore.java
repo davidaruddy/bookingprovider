@@ -362,30 +362,38 @@ public class DataStore {
         HealthcareService hcs2 = new HealthcareService();
         Meta met = new Meta();
         met.addProfile("https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-HealthcareService-1");
-        hcs1.setMeta(met);
-        hcs2.setMeta(met);
-
-        hcs1.setId(new IdDt("918999198999"));
-        hcs2.setId(new IdDt("118111118111"));
-
-        hcs1.setName("Service One");
-        hcs2.setName("Service Two");
 
         Reference providerRef = new Reference();
         providerRef.setReference("/Organization/A91545");
 
-        hcs1.setProvidedBy(providerRef);
-        hcs2.setProvidedBy(providerRef);
-
         Reference locRef = new Reference();
 
+        hcs1.setMeta(met);
+        hcs1.setId(new IdDt("918999198999"));
+        hcs1.setName("Service One");
+        hcs1.setProvidedBy(providerRef);
         locRef.setReference("/Location/loc1111");
         hcs1.addLocation(locRef);
+        
+        Identifier newId1 = new Identifier();
+        newId1.setSystem("https://system.supplier.co.uk/My/Services");
+        newId1.setValue("357");
+        hcs1.addIdentifier(newId1);
 
+        HealthcareServices.add(hcs1);
+        
+        hcs2.setMeta(met);
+        hcs2.setId(new IdDt("118111118111"));
+        hcs2.setName("Service Two");
+        hcs2.setProvidedBy(providerRef);
         locRef.setReference("/Location/loc2222");
         hcs2.addLocation(locRef);
 
-        HealthcareServices.add(hcs1);
+        Identifier newId2 = new Identifier();
+        newId2.setSystem("https://system.supplier.co.uk/My/Services");
+        newId2.setValue("457");
+        hcs2.addIdentifier(newId2);
+
         HealthcareServices.add(hcs2);
 
         return HealthcareServices;
@@ -419,6 +427,11 @@ public class DataStore {
         hcsRef.setReference("/HealthcareService/918999198999");
         sched1.addActor(hcsRef);
         sched1.addActor(practRef);
+        
+        Identifier newId1 = new Identifier();
+        newId1.setSystem("https://system.supplier.co.uk/MyDiary/Numbering");
+        newId1.setValue("1015432");
+        sched1.addIdentifier(newId1);
         Schedules.add(sched1);
 
         sched2.setId(new IdDt("sched2222"));
@@ -426,6 +439,11 @@ public class DataStore {
         hcsRef.setReference("/HealthcareService/118111118111");
         sched2.addActor(hcsRef);
         sched2.addActor(practRef);
+
+        Identifier newId2 = new Identifier();
+        newId2.setSystem("https://system.supplier.co.uk/MyDiary/Numbering");
+        newId2.setValue("6543189");
+        sched2.addIdentifier(newId2);
         Schedules.add(sched2);
 
         return Schedules;
