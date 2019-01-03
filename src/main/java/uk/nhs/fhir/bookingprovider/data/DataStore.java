@@ -463,7 +463,7 @@ public class DataStore {
         String newID = UUID.randomUUID().toString();
         newAppt.setId(newID);
         Appointments.add(newAppt);
-        LOG.info("Appointment: " + newID + " added");
+        //LOG.info("Appointment: " + newID + " added");
         return newID;
     }
 
@@ -479,7 +479,7 @@ public class DataStore {
         for (int i = 0; i < Appointments.size(); i++) {
             appt = (Appointment) Appointments.get(i);
             String thisone = "Appointment/" + appt.getId();
-            LOG.info("Trying appointment: [" + thisone + "] comparing to [" + identifier + "]");
+            //LOG.info("Trying appointment: [" + thisone + "] comparing to [" + identifier + "]");
             if (thisone.equals(identifier)) {
                 LOG.info("Found it");
                 return appt;
@@ -494,7 +494,7 @@ public class DataStore {
      * @param id
      */
     public void setSlotBooked(String id) {
-        LOG.info("Setting Slot " + id + " to 'BUSY'");
+
         // First we extract just the ID part from any id we've been sent...
         String[] words = id.split("/");
         id = words[words.length - 1];
@@ -518,7 +518,7 @@ public class DataStore {
     }
 
     public ArrayList<Appointment> getAppointments() {
-        LOG.info("Returning a set of: " + Appointments.size() + " appointments.");
+        //LOG.info("Returning a set of: " + Appointments.size() + " appointments.");
         return Appointments;
     }
 
