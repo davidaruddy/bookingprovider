@@ -36,7 +36,7 @@ pipelines:
             - docker tag a2sibookingprovider:latest 410123189863.dkr.ecr.eu-west-2.amazonaws.com/a2sibookingprovider:latest
             - docker push ${AWS_REGISTRY_URL}:latest
             - sleep 2
-            - aws ecs update-service --cluster BookingPOCCluster --service Demonstrator --force-new-deployment
+            - aws ecs update-service --cluster BookingPOCCluster --service BookDemonstrator --force-new-deployment
         services:
           - docker
 # Pipeline for develop branch...
