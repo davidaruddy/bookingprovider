@@ -8,6 +8,7 @@
     <contained>
         <!-- A DocumentReference, which links this to the CDA Document -->
         <DocumentReference xmlns="http://hl7.org/fhir">
+<!-- Because this is a Contained resource, this ID ONLY has meaning within the containing (Appointment) resource -->
             <id value="123"/>
             <identifier>
                 <system value="uuid"/>
@@ -15,7 +16,7 @@
                 <value value="A709A442-3CF4-476E-8377-376500E829C9"/>
             </identifier>
             <status value="current"/>
-            <type>
+            <type> <!-- This describes the type of the document. Here we assume it's a CDA but could be other -->
                 <coding>
                     <system value="urn:oid:2.16.840.1.113883.2.1.3.2.4.18.17"/>
                     <code value="POCD_MT200001GB02"/>
@@ -35,6 +36,7 @@
     <contained>
         <!-- A Patient which gives details of the Patient the Appointment is for -->
         <Patient xmlns="http://hl7.org/fhir">
+<!-- Because this is a Contained resource, this ID only has any meaning within the containing (Appointment) resource -->
             <id value="P1"/>
             <meta>
                 <profile value="https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Patient-1"/>
@@ -83,6 +85,7 @@
     <description value="Reason for calling"/>
     <!-- supportingInformation points to the contained DocumentReference resource (reference prefixed with # indicates contained resource) identified with #123. -->
     <supportingInformation>
+<!-- Here the hash prefix on #123 indicates that this is a reference to a contained resource. -->
         <reference value="#123"/>
     </supportingInformation>
     <!-- Slot points to a Slot as referenced (by the Provider) when Get Slots was called. -->
@@ -93,13 +96,14 @@
     <!-- participant | actor points to the contained Patient resource identified with P1 -->
     <participant>
         <actor>
+<!-- Here the hash prefix on #P1 indicates that this is a reference to a contained resource. -->
             <reference value="#P1"/>
             <identifier>
                 <use value="official"/>
                 <system value="https://fhir.nhs.uk/Id/nhs-number"/>
-                <value value="1234554321"/>
+                <value value="1231231234"/>
             </identifier>
-            <display value="Peter James Chalmers"/>
+            <display value="Mr John Smith"/>
         </actor>
     </participant>
 </Appointment>

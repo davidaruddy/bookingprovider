@@ -112,9 +112,9 @@
                 "identifier": {
                     "use": "official",
                     "system": "https://fhir.nhs.uk/Id/nhs-number",
-                    "value": "1234554321"
+                    "value": "1231231234"
                 },
-                "display": "Peter James Chalmers"
+                "display": "Mr John Smith"
             }
         }
     ]
