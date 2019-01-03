@@ -226,18 +226,21 @@ public class RequestInterceptor extends InterceptorAdapter {
         boolean correctAudience = false;
         for (String audience : audienceList) {
             LOG.info("Audience: " + audience);
+
+// Necessary hack here, as ECS strips off the port number on the way in.
+            if (audience.equals("http://appointments.directoryofservices.nhs.uk:443/poc")) {
+                audience = "http://appointments.directoryofservices.nhs.uk/poc";
+            }
+
             if (URI.startsWith(audience)) {
                 correctAudience = true;
             }
-            if (correctAudience) {
-                LOG.info("Allowing as correct audience");
-                return true;
-            }// else {
-            //throw new ForbiddenOperationException("The supplied JWT was not intended for: " + URI);
-            //}
         }
-        LOG.info("Allowing for now - INCORRECT audience");
-        return true;
+        if (correctAudience) {
+            LOG.info("Allowing as correct audience");
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -67,7 +67,7 @@ public class RequestInterceptorTest {
     public void testValidateToken() {
         System.out.println("validateToken");
         String token = getToken();
-        String reqURI = "http://appointments.directoryofservices.nhs.uk:443/poc";
+        String reqURI = "http://appointments.directoryofservices.nhs.uk/poc";
         RequestInterceptor instance = new RequestInterceptor();
         boolean expResult = true;
         boolean result = instance.validateToken(token, reqURI);
@@ -171,7 +171,7 @@ public class RequestInterceptorTest {
     public void testIncomingRequestPreProcessed() {
         System.out.println("incomingRequestPreProcessed");
         RequestInterceptor instance = new RequestInterceptor();
-        String queryString = "http://appointments.directoryofservices.nhs.uk:443/poc";
+        String queryString = "http://appointments.directoryofservices.nhs.uk/poc";
         String token = getToken();
         String authheader = "Bearer " + token;
         HttpServletRequest myRequestMock = new MockRequest(queryString, authheader);
