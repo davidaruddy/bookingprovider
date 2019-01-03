@@ -15,6 +15,8 @@
  */
 package uk.nhs.fhir.bookingprovider;
 
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import com.auth0.jwk.Jwk;
@@ -24,12 +26,9 @@ import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.interfaces.RSAPublicKey;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.logging.Level;
@@ -44,12 +43,10 @@ import javax.servlet.http.HttpServletResponse;
 public class RequestInterceptor extends InterceptorAdapter {
 
     private static final Logger LOG = Logger.getLogger(RequestInterceptor.class.getName());
-    private static final String JWKURL =
-            "https://login.microsoftonline.com/common/discovery/keys";
-    private static final String ISSUER =
-            "https://sts.windows.net/e52111c7-4048-4f34-aea9-6326afa44a8d/";
-    
-    
+    private static final String JWKURL
+            = "https://login.microsoftonline.com/common/discovery/keys";
+    private static final String ISSUER
+            = "https://sts.windows.net/e52111c7-4048-4f34-aea9-6326afa44a8d/";
 
     /**
      * Override the incomingRequestPreProcessed method, which is called for each
@@ -77,16 +74,13 @@ public class RequestInterceptor extends InterceptorAdapter {
                 if (validateToken(tokenValue, requestURI)) {
                     return true;
                 } else {
-                    BuildResponse(theResponse, "Authorization header not validated");
-                    return false;
+                    throw new AuthenticationException("Authorization header not validated");
                 }
             } else {
-                BuildResponse(theResponse, "Authorization header doesn't begin with 'Bearer'");
-                return false;
+                throw new AuthenticationException("Authorization header doesn't begin with 'Bearer'");
             }
         } else {
-            BuildResponse(theResponse, "No 'Authorization' header received");
-            return false;
+            throw new AuthenticationException("No 'Authorization' header received");
         }
     }
 
@@ -107,36 +101,32 @@ public class RequestInterceptor extends InterceptorAdapter {
             // Here we know it was signed properly
 
             // Check it's current etc
-            if(!checkTimes(actualJWT)) {
-                LOG.severe("Times didn't check out properly.");
-                return false;
-            }
-            
+            checkTimes(actualJWT);
+
             // Check who issued it
-            if(!checkIssuer(actualJWT)) {
-                LOG.severe("Issuer of JWT was not trusted.");
-                return false;
-            }
-            
+            checkIssuer(actualJWT);
+
             // Check client is a mamber of the right Groups.
-            if(!checkGroups(actualJWT)) {
+            if (!checkGroups(actualJWT)) {
                 LOG.severe("Client was not a member of the required Groups.");
-                return false;
+                throw new ForbiddenOperationException("Client is not a member of the required Groups.");
             }
-            
+
             // Log the client's ID
             logAppID(actualJWT);;
 
             // Check the token is intended for this server
-            if(!checkAudience(actualJWT, reqURI)) {
+            if (!checkAudience(actualJWT, reqURI)) {
                 LOG.severe("Token was not intended for: " + reqURI);
                 return false;
             }
-            
-        } catch (JwkException ex) {
+
+        }
+        catch (JwkException ex) {
             Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
             throw new UnprocessableEntityException("JwkException: " + ex.getMessage());
-        } catch (MalformedURLException ex) {
+        }
+        catch (MalformedURLException ex) {
             Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
             throw new UnprocessableEntityException("MalformedURLException: " + ex.getMessage());
         }
@@ -144,55 +134,15 @@ public class RequestInterceptor extends InterceptorAdapter {
     }
 
     /**
-     * Method to build a suitable http response, and return it.
-     *
-     * We need to do this, as the intercept is so early, that we can't expect
-     * HAPI to generate a OperationOutcome etc if we throw an Exception here.
-     *
-     * @param response The HttpServletResponse object
-     * @param text The error text we want it to display
-     */
-    public final void BuildResponse(HttpServletResponse response, String text) {
-
-        PrintWriter out = null;
-        try {
-            response.setContentType("text/html;charset=UTF-8");
-            // Allocate a output writer to write the response message into the network socket
-            out = response.getWriter();
-            // Write the response message, in an HTML page
-            try {
-                out.println("<!DOCTYPE html>");
-                out.println("<html><head>");
-                out.println("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
-                out.println("<title>JWT Failure</title></head>");
-                out.println("<body>");
-                out.println("<h1>JWT Failure</h1>");  // says Hello
-                // Echo client's request information
-                out.println("<p>Cause: <strong>" + text + "</strong></p>");
-                out.println("</body>");
-                out.println("</html>");
-            } finally {
-                out.close();  // Always close the output writer
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            out.close();
-        }
-
-    }
-
-    /**
      * Method to check the various times; Not Before, Issued At and Expiry.
-     * 
+     *
      * @param theJWT The Decoded JWT as per:
      * https://static.javadoc.io/com.auth0/java-jwt/3.3.0/com/auth0/jwt/interfaces/DecodedJWT.html
-     * 
+     *
      * @return Whether or not this token is current.
-     * 
+     *
      */
-    private boolean checkTimes(DecodedJWT theJWT) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
+    private void checkTimes(DecodedJWT theJWT) {
 
         // Check it hasn't yet expired
         Calendar calendar = Calendar.getInstance();
@@ -200,7 +150,7 @@ public class RequestInterceptor extends InterceptorAdapter {
         if (theJWT.getExpiresAt().before(calendar.getTime())) {
             Calendar expiresAt = Calendar.getInstance();
             expiresAt.setTime(theJWT.getExpiresAt());
-            return false;
+            throw new AuthenticationException("Access Token has expired");
         }
 
         // Check it's ready to be used
@@ -209,66 +159,66 @@ public class RequestInterceptor extends InterceptorAdapter {
         if (theJWT.getNotBefore().after(calendar.getTime())) {
             Calendar notBefore = Calendar.getInstance();
             notBefore.setTime(theJWT.getNotBefore());
-            return false;
+            throw new AuthenticationException("Access Token is not yet valid");
         }
-        return true;
     }
-    
+
     /**
      * Method to check that the issuer claim (iss) in the supplied JWT matches
      * the expected value.
-     * 
+     *
      * @param theJWT A Decoded JWT
      * @return Indication of whether to trust or not.
      */
-    private boolean checkIssuer(DecodedJWT theJWT) {
+    private void checkIssuer(DecodedJWT theJWT) {
         String issuer = theJWT.getIssuer();
-        return issuer.equals(ISSUER);
+        if (!issuer.equals(ISSUER)) {
+            throw new AuthenticationException("JWT not issued by expected party");
+        }
     }
-    
+
     /**
      * Method to check whether the client is a member of the two required
      * groups.
-     * 
-     * TODO: This should differentiate between the ability to read Slots and
-     *       to book an appointment.
-     * 
+     *
+     * TODO: This should differentiate between the ability to read Slots and to
+     * book an appointment.
+     *
      * @param theJWT The incoming JWT
-     * @return 
+     * @return
      */
     private boolean checkGroups(DecodedJWT theJWT) {
-        
+
         boolean canReadSlots = false;
         boolean canBookAppts = false;
-        
+
         // urn:nhs:names:services:careconnect:fhir:rest:create:appointment
         String createAppointments = "dacb82c5-aea8-4509-887f-281324062dfd";
-        
+
         // urn:nhs:names:services:careconnect:fhir:rest:read:slot
         String readSlots = "ab412fe9-3f68-4368-9810-9dc24d1659b1";
-        
+
         String[] groups = theJWT.getClaim("groups").asArray(String.class);
-        if(groups == null) {
-            LOG.info("groups claim returned null !");
-            return false;
+        if (groups == null) {
+            throw new ForbiddenOperationException("The token's groups claim was null");
         }
-        for(int i = 0; i < groups.length; i++) {
+        for (int i = 0; i < groups.length; i++) {
             LOG.info("Found group: " + groups[i]);
-            if(groups[i].equals(createAppointments)) {
+            if (groups[i].equals(createAppointments)) {
                 canBookAppts = true;
             }
-            if(groups[i].equals(readSlots)) {
+            if (groups[i].equals(readSlots)) {
                 canReadSlots = true;
             }
         }
         return (canBookAppts && canReadSlots);
     }
-    
+
     /**
      * Method to check the token is intended for 'us'
-     * 
+     *
      * @param theJWT
-     * @return 
+     * @return
      */
     private boolean checkAudience(DecodedJWT theJWT, String URI) {
         List<String> audienceList = theJWT.getAudience();
@@ -278,25 +228,25 @@ public class RequestInterceptor extends InterceptorAdapter {
             if (URI.startsWith(audience)) {
                 correctAudience = true;
             }
-            
+
             /*
-            if (correctAudience) {
-                return true;
-            } else {
-                //throw new UnprocessableEntityException("The supplied JWT was not intended for: " + URI);
-            }
-            */
+             if (correctAudience) {
+             return true;
+             } else {
+             //throw new ForbiddenOperationException("The supplied JWT was not intended for: " + URI);
+             }
+             */
         }
         return true;
     }
-    
+
     /**
      * Method to simply log out which client made the request.
-     * 
+     *
      * TODO: This really SHOULd do a lookup into Azure AD and determine and log
      * the name as well as the GUID.
-     * 
-     * @param theJWT The incoming JWT 
+     *
+     * @param theJWT The incoming JWT
      */
     private void logAppID(DecodedJWT theJWT) {
         String clientID = theJWT.getClaim("appid").asString();

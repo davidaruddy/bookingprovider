@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 tim.coates@nhs.net.
+ * Copyright 2018 NHS Digital.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package uk.nhs.fhir.bookingprovider.checkers;
  * @author tim.coates@nhs.net
  */
 public enum Severity {
+
     /**
      * A Trivial problem, which might not even cause trouble, but is pointed out
      * for clarification.

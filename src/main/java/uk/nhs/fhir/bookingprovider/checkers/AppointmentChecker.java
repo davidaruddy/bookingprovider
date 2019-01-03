@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 dev.
+ * Copyright 2018 NHS Digital.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,10 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.UriType;
 
 /**
+ * Class that performs all of the business rule checks against an appointment
+ * object.
  *
- * @author dev
+ * @author tim.coates@nhs.net
  */
 public class AppointmentChecker {
 

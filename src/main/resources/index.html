@@ -1,0 +1,53 @@
+<html lang='en'>
+    <head>
+        <title>Booking POC</title>
+    </head>
+    <body style='font-family:verdana;'>
+        <h1>UEC Appointment Booking Provider Demonstrator</h1>
+        <h2>Internal links</h2>
+        <p>
+            <a href='/poc/Slot/'>Slots</a> - (Requires a JWT) This requests all Slots held in the internal data store.<br />
+            <a href='/poc/Slot?schedule.actor:healthcareservice=918999198999&_include:recurse=Slot:schedule&_include=Schedule:actor:Practitioner&_include=Schedule:actor:PractitionerRole&_include=Schedule:actor:healthcareservice&_format=json'>Slots</a> - (Requires a JWT) This requests Slots from a given HealthcareService (an example of the full query).<br /><a href='/poc/Appointment'>Appointments</a> - (Requires a JWT) This lists any Appointments in the internal data store.<br />
+            <a href='/poc/reset'>Reset</a> - This resets the internal data store to initial state.<br />
+        </p>
+        <h2>Useful external links</h2>
+        <p>
+            <a href='https://developer.nhs.uk/scheduling-specification-versions/' target='new'>Standard</a> - The Care Connect Scheduling service standard.<br />
+            <a href='https://nhsconnect.github.io/FHIR-A2SI-APPOINTMENTS-API/index.html' target='new'>Spec</a> - The FHIR specification.<br />
+        </p>
+        <h2>Data</h2>
+        <p>
+            {{SLOTS}} Slots of which {{FREESLOTS}} are Free.<br />
+            {{APPOINTMENTS}} Appointments<br />
+        </p>
+        <h2>Get Token</h2>
+        <p>
+            <form action='https://login.microsoftonline.com/e52111c7-4048-4f34-aea9-6326afa44a8d/oauth2/v2.0/token' method='post'>
+                <table>
+                    <tr>
+                        <td>grant_type:</td>
+                        <td><input type='text' size='22' name='grant_type' value='client_credentials' readonly='true'></td>
+                    </tr>
+                    <tr>
+                        <td>scope:</td><td><input type='text' size='55' name='scope' value='http://appointments.directoryofservices.nhs.uk:443/poc/.default'></td>
+                    </tr>
+                    <tr>
+                        <td>client_id:</td><td><input type='text' size='36' name='client_id' value='' placeholder='Value issued by NHS Digital'></td>
+                    </tr>
+                    <tr>
+                        <td>client_secret:</td><td><input type='text' size='50' name='client_secret' value='' placeholder='Value issued by NHS Digital'></td>
+                    </tr>
+                </table>
+                <input type='submit' />
+            </form>
+        </p>
+        <h2>Appointment sample POST Payloads</h2>
+        <p>
+            <a href='/poc/model'>View</a> JSON example<br />
+            <a href='/poc/modelXML'>View</a> Annotated XML Example<br />
+        </p>
+        <p>
+            {{VERSION}}
+        </p>
+    </body>
+</html>

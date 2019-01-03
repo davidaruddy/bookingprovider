@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 dev.
+ * Copyright 2018 NHS Digital.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import uk.nhs.fhir.bookingprovider.data.DataStore;
 
 /**
  *
- * @author dev
+ * @author tim.coates@nhs.net
  */
 /**
  * All resource providers must implement IResourceProvider
@@ -132,11 +132,11 @@ public class SlotResourceProvider implements IResourceProvider {
             @RequiredParam(name = "schedule.actor:healthcareservice") TokenParam theHealthcareService,
             @OptionalParam(name = "Slot.status") TokenParam statusToken,
             @IncludeParam(allow = {
-        "Slot:schedule",
-        "Schedule:actor:healthcareservice",
-        "Schedule:actor:Practitioner",
-        "Schedule:actor:PractitionerRole",
-        "HealthcareService.providedBy"}) Set<Include> theIncludes) {
+                "Slot:schedule",
+                "Schedule:actor:healthcareservice",
+                "Schedule:actor:Practitioner",
+                "Schedule:actor:PractitionerRole",
+                "HealthcareService.providedBy"}) Set<Include> theIncludes) {
 
         boolean incSchedule = false;
         boolean incHealthcareService = false;
@@ -144,7 +144,8 @@ public class SlotResourceProvider implements IResourceProvider {
         boolean incPractitioner = false;
         boolean incProvider = false;
 
-        LOG.info("Slot search being handled for provider: " + theHealthcareService.getValue().toString());
+        LOG.info("Slot search being handled for provider: " +
+                theHealthcareService.getValue().toString());
 
         Iterator<Include> itr = theIncludes.iterator();
         while (itr.hasNext()) {

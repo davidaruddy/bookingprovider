@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 dev.
+ * Copyright 2018 NHS Digital.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,21 +42,58 @@ import org.hl7.fhir.dstu3.model.Slot.SlotStatus;
 /**
  * Singleton instance of an in memory data store.
  *
- * @author tim.coates
+ * @author tim.coates@nhs.net
  */
 public class DataStore {
 
+    /**
+     * This is our Singleton instance.
+     */
     private static DataStore instance = null;
 
+    /**
+     * Logger we use throughout.
+     */
     private static final Logger LOG = Logger.getLogger(DataStore.class.getName());
 
+    /**
+     * A List of PractitionerRole resources.
+     */
     ArrayList<PractitionerRole> PractitionerRoles = null;
+    
+    /**
+     * A List of Practitioner resources.
+     */
     ArrayList<Practitioner> Practitioners = null;
+    
+    /**
+     * A List of Organization resources.
+     */
     ArrayList<Organization> Organizations = null;
+    
+    /**
+     * A List of Location resources.
+     */
     ArrayList<Object> Locations = null;
+    
+    /**
+     * A List of HealthcareService resources.
+     */
     ArrayList<HealthcareService> HealthcareServices = null;
+    
+    /**
+     * A List of Schedule resources.
+     */
     ArrayList<Schedule> Schedules = null;
+    
+    /**
+     * A List of Slot resources.
+     */
     ArrayList<Slot> Slots = null;
+    
+    /**
+     * And finally a List of Appointment resources.
+     */
     ArrayList<Appointment> Appointments = null;
 
     /**
@@ -394,6 +431,11 @@ public class DataStore {
         return Schedules;
     }
 
+    /**
+     * Method used to initially create a set of Slots for test use.
+     *
+     * @return An ArrayList of free Slots
+     */
     public ArrayList MakeSlots() {
         ArrayList<Object> Slots = new ArrayList();
 
@@ -517,15 +559,32 @@ public class DataStore {
         return;
     }
 
+    /**
+     * Method used to access the private ArrayList of Slots, called from the
+     * index page, to show current number of appointments.
+     *
+     * @return An ArrayList of the appointments that have been booked.
+     */
     public ArrayList<Appointment> getAppointments() {
-        //LOG.info("Returning a set of: " + Appointments.size() + " appointments.");
         return Appointments;
     }
 
+    /**
+     * Method to access the private ArrayList of Slots. Called from the index
+     * page to show the number of slots in the demonstrator.
+     *
+     * @return An ArrayList of all slots.
+     */
     public ArrayList<Slot> getSlots() {
         return Slots;
     }
 
+    /**
+     * Method to retrieve a given Schedule object by name.
+     *
+     * @param schedName The name of the requested Schedule
+     * @return The Schedule or null.
+     */
     public Schedule getSchedule(String schedName) {
         LOG.info("getSchedule() looking for: " + schedName);
         for (Schedule sched : Schedules) {
@@ -557,6 +616,11 @@ public class DataStore {
         return null;
     }
 
+    /**
+     * Method used to set all the internal data structures ready for testing.
+     * Sets all Slots to free and removes all Appointments.
+     *
+     */
     public void initialize() {
         PractitionerRoles = MakePractitionerRoles();
         Practitioners = MakePractitioners();
@@ -569,6 +633,12 @@ public class DataStore {
         LOG.info("Reinitiated with a set of: " + Appointments.size() + " appointments.");
     }
 
+    /**
+     * Method to get the ArrayList of free Slots. Called from the index page to
+     * show the current status.
+     *
+     * @return An ArrayList of only the free Slots.
+     */
     public ArrayList<Slot> getFreeSlots() {
         ArrayList<Slot> freeSlots = new ArrayList<>();
 
@@ -598,6 +668,11 @@ public class DataStore {
         return PractitionerRoles.get(0);
     }
 
+    /**
+     * Method to get our only Organisation resource.
+     *
+     * @return The Organisation or null.
+     */
     public Organization getOrganization() {
         return Organizations.get(0);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 dev.
+ * Copyright 2018 NHS Digital.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 
 /**
  *
- * @author dev
+ * @author tim.coates@nhs.net
  */
 public class ResourceMaker {
 
@@ -185,8 +185,7 @@ public class ResourceMaker {
         ArrayList<Resource> containedResources = new ArrayList();
         Patient patient = makePatient(PatientReferenceValue);
         containedResources.add(patient);
-        
-        
+
         String DocRefReferenceValue = "78a39984-298d-4015-b48a-585aa0650005";
         DocumentReference DocRef = makeDocRef(DocRefReferenceValue);
         //LOG.info("DocumentReference: " + ResourceToString(DocRef));
