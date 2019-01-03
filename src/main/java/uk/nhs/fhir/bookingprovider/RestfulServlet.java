@@ -16,6 +16,7 @@
 package uk.nhs.fhir.bookingprovider;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.io.File;
@@ -51,8 +52,8 @@ public class RestfulServlet extends RestfulServer {
      * Constructor, just sets the base URL (to a static fixed value for now)
      */
     public RestfulServlet() {
-        //String serverBaseUrl = "http://localhost:443/poc";
-        //setServerAddressStrategy(new HardcodedServerAddressStrategy(serverBaseUrl));
+        String serverBaseUrl = "http://appointments.directoryofservices.nhs.uk:443/poc";
+        setServerAddressStrategy(new HardcodedServerAddressStrategy(serverBaseUrl));
     }
 
     /**

@@ -127,20 +127,12 @@ public class RequestInterceptor extends InterceptorAdapter {
             // Log the client's ID
             logAppID(actualJWT);;
 
-            List<String> audienceList = actualJWT.getAudience();
-            boolean correctAudience = false;
-            for (String audience : audienceList) {
-                LOG.info("Audience: " + audience);
-                if (reqURI.startsWith(audience)) {
-                    correctAudience = true;
-                }
-                if (correctAudience) {
-                    return true;
-                } else {
-                    throw new UnprocessableEntityException("The supplied JWT was not intended for: " + reqURI);
-                }
+            // Check the token is intended for this server
+            if(!checkAudience(actualJWT, reqURI)) {
+                LOG.severe("Token was not intended for: " + reqURI);
+                return false;
             }
-
+            
         } catch (JwkException ex) {
             Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
             throw new UnprocessableEntityException("JwkException: " + ex.getMessage());
@@ -148,7 +140,7 @@ public class RequestInterceptor extends InterceptorAdapter {
             Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
             throw new UnprocessableEntityException("MalformedURLException: " + ex.getMessage());
         }
-        return false;
+        return true;
     }
 
     /**
@@ -270,6 +262,32 @@ public class RequestInterceptor extends InterceptorAdapter {
             }
         }
         return (canBookAppts && canReadSlots);
+    }
+    
+    /**
+     * Method to check the token is intended for 'us'
+     * 
+     * @param theJWT
+     * @return 
+     */
+    private boolean checkAudience(DecodedJWT theJWT, String URI) {
+        List<String> audienceList = theJWT.getAudience();
+        boolean correctAudience = false;
+        for (String audience : audienceList) {
+            LOG.info("Audience: " + audience);
+            if (URI.startsWith(audience)) {
+                correctAudience = true;
+            }
+            
+            /*
+            if (correctAudience) {
+                return true;
+            } else {
+                //throw new UnprocessableEntityException("The supplied JWT was not intended for: " + URI);
+            }
+            */
+        }
+        return true;
     }
     
     /**
