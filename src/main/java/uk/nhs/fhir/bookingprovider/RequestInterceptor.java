@@ -221,6 +221,7 @@ public class RequestInterceptor extends InterceptorAdapter {
      * @return
      */
     private boolean checkAudience(DecodedJWT theJWT, String URI) {
+        LOG.info("Checking JWT was intended for: " + URI);
         List<String> audienceList = theJWT.getAudience();
         boolean correctAudience = false;
         for (String audience : audienceList) {
@@ -228,15 +229,14 @@ public class RequestInterceptor extends InterceptorAdapter {
             if (URI.startsWith(audience)) {
                 correctAudience = true;
             }
-
-            /*
-             if (correctAudience) {
-             return true;
-             } else {
-             //throw new ForbiddenOperationException("The supplied JWT was not intended for: " + URI);
-             }
-             */
+            if (correctAudience) {
+                LOG.info("Allowing as correct audience");
+                return true;
+            }// else {
+            //throw new ForbiddenOperationException("The supplied JWT was not intended for: " + URI);
+            //}
         }
+        LOG.info("Allowing for now - INCORRECT audience");
         return true;
     }
 
