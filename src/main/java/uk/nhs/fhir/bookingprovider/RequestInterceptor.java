@@ -26,11 +26,16 @@ import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Properties;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -47,6 +52,16 @@ public class RequestInterceptor extends InterceptorAdapter {
             = "https://login.microsoftonline.com/common/discovery/keys";
     private static final String ISSUER
             = "https://sts.windows.net/e52111c7-4048-4f34-aea9-6326afa44a8d/";
+
+    Properties appIDList;
+
+    /**
+     * Constructor, just tells us to load the properties file holding all of the
+     * App IDs
+     */
+    public RequestInterceptor() {
+        LoadProperties();
+    }
 
     /**
      * Override the incomingRequestPreProcessed method, which is called for each
@@ -253,6 +268,37 @@ public class RequestInterceptor extends InterceptorAdapter {
      */
     private void logAppID(DecodedJWT theJWT) {
         String clientID = theJWT.getClaim("appid").asString();
-        LOG.log(Level.INFO, "JWT was for: {0}", clientID);
+        String appName = appIDList.getProperty(clientID);
+        LOG.info("\"JWT was issued to: " + appName + " (" + clientID + ")");
+    }
+
+    /**
+     * Method to load a properties file holding the list of appid values. This
+     * is purely to allow the demonstrator to log which users are using it.
+     *
+     */
+    private void LoadProperties() {
+        InputStream input = null;
+        try {
+            appIDList = new Properties();
+            ClassLoader classLoader = getClass().getClassLoader();
+            input = classLoader.getResource("appid.properties").openStream();
+            appIDList.load(input);
+
+        }
+        catch (IOException ex) {
+            Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally {
+            if (input != null) {
+                try {
+                    input.close();
+                }
+                catch (IOException e) {
+                    LOG.severe("Error closing config.properties file: " + e.getMessage());
+                }
+            }
+        }
+
     }
 }
