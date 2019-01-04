@@ -26,7 +26,6 @@ import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -35,11 +34,11 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import uk.nhs.fhir.bookingprovider.azure.AzureAD;
 
 /**
  *
@@ -48,15 +47,10 @@ import javax.servlet.http.HttpServletResponse;
 public class RequestInterceptor extends InterceptorAdapter {
 
     private static final Logger LOG = Logger.getLogger(RequestInterceptor.class.getName());
-    private String JWKURL;
-    private String ISSUER;
+    private final String JWKURL;
+    private final String ISSUER;
+    AzureAD adWrangler;
 
-    /**
-     * Properties file in which we hold a lookup between appid claim in the JWT
-     * and the App registration name in Azure AD. Allows for simpler logging.
-     * 
-     */
-    Properties appIDList;
     
     /**
      * Properties file in which we store the URLs used for checking tokens.
@@ -69,10 +63,10 @@ public class RequestInterceptor extends InterceptorAdapter {
      * 
      */
     public RequestInterceptor() {
-        loadAppIDs();
         loadJWTURLs();
         JWKURL = jwtURLs.getProperty("JWKURL");
         ISSUER = jwtURLs.getProperty("ISSUER");
+        adWrangler = new AzureAD();
     }
 
     /**
@@ -148,12 +142,10 @@ public class RequestInterceptor extends InterceptorAdapter {
                 return false;
             }
 
-        }
-        catch (JwkException ex) {
+        } catch (JwkException ex) {
             Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
             throw new UnprocessableEntityException("JwkException: " + ex.getMessage());
-        }
-        catch (MalformedURLException ex) {
+        } catch (MalformedURLException ex) {
             Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
             throw new UnprocessableEntityException("MalformedURLException: " + ex.getMessage());
         }
@@ -219,22 +211,20 @@ public class RequestInterceptor extends InterceptorAdapter {
         boolean canReadSlots = false;
         boolean canBookAppts = false;
 
-        // urn:nhs:names:services:careconnect:fhir:rest:create:appointment
-        String createAppointments = "dacb82c5-aea8-4509-887f-281324062dfd";
-
-        // urn:nhs:names:services:careconnect:fhir:rest:read:slot
-        String readSlots = "ab412fe9-3f68-4368-9810-9dc24d1659b1";
+        String createAppointments = "urn:nhs:names:services:careconnect:fhir:rest:create:appointment";
+        String readSlots = "urn:nhs:names:services:careconnect:fhir:rest:read:slot";
 
         String[] groups = theJWT.getClaim("groups").asArray(String.class);
         if (groups == null) {
             throw new ForbiddenOperationException("The token's groups claim was null");
         }
-        for (int i = 0; i < groups.length; i++) {
-            LOG.info("Found group: " + groups[i]);
-            if (groups[i].equals(createAppointments)) {
+        for (String group : groups) {
+            String groupName = adWrangler.getGroupName(group);
+            LOG.info("Found group: " + groupName);
+            if (groupName.equals(createAppointments)) {
                 canBookAppts = true;
             }
-            if (groups[i].equals(readSlots)) {
+            if (groupName.equals(readSlots)) {
                 canReadSlots = true;
             }
         }
@@ -245,7 +235,8 @@ public class RequestInterceptor extends InterceptorAdapter {
      * Method to check the token is intended for 'us'
      *
      * @param theJWT
-     * @return
+     * @return Validates that the URL called matches that of the audience in
+     * the supplied JWT.
      */
     private boolean checkAudience(DecodedJWT theJWT, String URI) {
         LOG.info("Checking JWT was intended for: " + URI);
@@ -280,36 +271,8 @@ public class RequestInterceptor extends InterceptorAdapter {
      */
     private void logAppID(DecodedJWT theJWT) {
         String clientID = theJWT.getClaim("appid").asString();
-        String appName = appIDList.getProperty(clientID);
+        String appName = adWrangler.getAppName(clientID);
         LOG.info("\"JWT was issued to: " + appName + " (" + clientID + ")");
-    }
-
-    /**
-     * Method to load a properties file holding the list of appid values. This
-     * is purely to allow the demonstrator to log which users are using it.
-     *
-     */
-    private void loadAppIDs() {
-        InputStream input = null;
-        try {
-            appIDList = new Properties();
-            ClassLoader classLoader = getClass().getClassLoader();
-            input = classLoader.getResource("appid.properties").openStream();
-            appIDList.load(input);
-        }
-        catch (IOException ex) {
-            LOG.severe("Error reading appid.properties file " + ex.getMessage());
-        }
-        finally {
-            if (input != null) {
-                try {
-                    input.close();
-                }
-                catch (IOException e) {
-                    LOG.severe("Error closing appid.properties file: " + e.getMessage());
-                }
-            }
-        }
     }
     
     /**
@@ -323,16 +286,13 @@ public class RequestInterceptor extends InterceptorAdapter {
             ClassLoader classLoader = getClass().getClassLoader();
             input = classLoader.getResource("jwt.properties").openStream();
             jwtURLs.load(input);
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             LOG.severe("Error reading appid.properties file " + ex.getMessage());
-        }
-        finally {
+        } finally {
             if (input != null) {
                 try {
                     input.close();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     LOG.severe("Error closing appid.properties file: " + e.getMessage());
                 }
             }

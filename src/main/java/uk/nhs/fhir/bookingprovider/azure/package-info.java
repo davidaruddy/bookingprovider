@@ -15,10 +15,7 @@
  */
 
 /**
- * This is the package to hold the ResourceProviders to handle different FHIR
- * Resources.
- *
- * We only need two, to handle Slots and Appointments.
+ * This is the package to look after any interactions with Azure AD.
  *
  */
-package uk.nhs.fhir.bookingprovider.ResourceProvider;
+package uk.nhs.fhir.bookingprovider.azure;

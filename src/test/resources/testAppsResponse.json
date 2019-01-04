@@ -1,0 +1,208 @@
+{
+    "odata.metadata": "https://graph.windows.net/e52111c7-4048-4f34-aea9-6326afa44a8d/$metadata#directoryObjects",
+    "value": [
+        {
+            "odata.type": "Microsoft.DirectoryServices.Application",
+            "objectType": "Application",
+            "objectId": "e5d19037-47f6-43bb-98b1-db754a80a3c4",
+            "deletionTimestamp": null,
+            "acceptMappedClaims": null,
+            "addIns": [],
+            "appId": "41987464-abe1-4826-80fc-ab99bdbcc0bf",
+            "appRoles": [],
+            "availableToOtherTenants": false,
+            "displayName": "ProviderDemo",
+            "errorUrl": null,
+            "groupMembershipClaims": "All",
+            "homepage": "http://obscure.nhs.uk/not/a/real/service",
+            "identifierUris": [
+                "http://obscure.nhs.uk/not/a/real/service"
+            ],
+            "informationalUrls": {
+                "termsOfService": null,
+                "support": null,
+                "privacy": null,
+                "marketing": null
+            },
+            "isDeviceOnlyAuthSupported": null,
+            "keyCredentials": [],
+            "knownClientApplications": [],
+            "logoutUrl": null,
+            "logo@odata.mediaEditLink": "directoryObjects/e5d19037-47f6-43bb-98b1-db754a80a3c4/Microsoft.DirectoryServices.Application/logo",
+            "logoUrl": null,
+            "mainLogo@odata.mediaEditLink": "directoryObjects/e5d19037-47f6-43bb-98b1-db754a80a3c4/Microsoft.DirectoryServices.Application/mainLogo",
+            "oauth2AllowIdTokenImplicitFlow": true,
+            "oauth2AllowImplicitFlow": false,
+            "oauth2AllowUrlPathMatching": false,
+            "oauth2Permissions": [
+                {
+                    "adminConsentDescription": "Allow the application to access ProviderDemo on behalf of the signed-in user.",
+                    "adminConsentDisplayName": "Access ProviderDemo",
+                    "id": "f6d34e1c-b764-4f71-8648-c0bd85b7b139",
+                    "isEnabled": true,
+                    "type": "User",
+                    "userConsentDescription": "Allow the application to access ProviderDemo on your behalf.",
+                    "userConsentDisplayName": "Access ProviderDemo",
+                    "value": "user_impersonation"
+                }
+            ],
+            "oauth2RequirePostResponse": false,
+            "optionalClaims": null,
+            "orgRestrictions": [],
+            "parentalControlSettings": {
+                "countriesBlockedForMinors": [],
+                "legalAgeGroupRule": "Allow"
+            },
+            "passwordCredentials": [],
+            "publicClient": false,
+            "publisherDomain": "timcoatesgmail.onmicrosoft.com",
+            "recordConsentConditions": null,
+            "replyUrls": [
+                "http://obscure.nhs.uk/not/a/real/service"
+            ],
+            "requiredResourceAccess": [
+                {
+                    "resourceAppId": "00000002-0000-0000-c000-000000000000",
+                    "resourceAccess": [
+                        {
+                            "id": "311a71cc-e848-46a1-bdf8-97ff7156d8e6",
+                            "type": "Scope"
+                        }
+                    ]
+                }
+            ],
+            "samlMetadataUrl": null,
+            "signInAudience": "AzureADMyOrg",
+            "tokenEncryptionKeyId": null
+        },
+        {
+            "odata.type": "Microsoft.DirectoryServices.Application",
+            "objectType": "Application",
+            "objectId": "0892ae7c-aaaa-bbbb-cccc-0f6a6851bc17",
+            "deletionTimestamp": null,
+            "acceptMappedClaims": true,
+            "addIns": [],
+            "appId": "0892ae7c-7add-4d9e-bed1-0f6a6851bc17e",
+            "appRoles": [],
+            "availableToOtherTenants": false,
+            "displayName": "First Test App",
+            "errorUrl": null,
+            "groupMembershipClaims": null,
+            "homepage": "http://blank/",
+            "identifierUris": [
+                "http://consumer/"
+            ],
+            "informationalUrls": {
+                "termsOfService": null,
+                "support": null,
+                "privacy": null,
+                "marketing": null
+            },
+            "isDeviceOnlyAuthSupported": null,
+            "keyCredentials": [],
+            "knownClientApplications": [],
+            "logoutUrl": null,
+            "logo@odata.mediaEditLink": "directoryObjects/0892ae7c-7add-4d9e-bed1-0f6a6851bc17/Microsoft.DirectoryServices.Application/logo",
+            "logoUrl": null,
+            "mainLogo@odata.mediaEditLink": "directoryObjects/0892ae7c-7add-4d9e-bed1-0f6a6851bc17/Microsoft.DirectoryServices.Application/mainLogo",
+            "oauth2AllowIdTokenImplicitFlow": true,
+            "oauth2AllowImplicitFlow": false,
+            "oauth2AllowUrlPathMatching": false,
+            "oauth2Permissions": [
+                {
+                    "adminConsentDescription": "Allow the application to do stuff.",
+                    "adminConsentDisplayName": "Access stuff",
+                    "id": "0892ae7c-7add-4d9e-bed1-0f6a6851bc17",
+                    "isEnabled": true,
+                    "type": "User",
+                    "userConsentDescription": "Allow the application to do stuff.",
+                    "userConsentDisplayName": "Access stuff",
+                    "value": "user_impersonation"
+                }
+            ],
+            "oauth2RequirePostResponse": false,
+            "optionalClaims": {
+                "idToken": [],
+                "accessToken": [
+                    {
+                        "name": "displayname",
+                        "source": null,
+                        "essential": false,
+                        "additionalProperties": []
+                    }
+                ],
+                "saml2Token": []
+            },
+            "orgRestrictions": [],
+            "parentalControlSettings": {
+                "countriesBlockedForMinors": [],
+                "legalAgeGroupRule": "Allow"
+            },
+            "passwordCredentials": [
+                {
+                    "customKeyIdentifier": "bgBlAHcAbwBuAGUA",
+                    "endDate": "2020-01-03T21:57:48.662Z",
+                    "keyId": "a231322c-1111-2222-3333-8690c8be195f",
+                    "startDate": "2019-01-03T21:58:06.8651098Z",
+                    "value": null
+                },
+                {
+                    "customKeyIdentifier": "cwBlAGMAcgBlAHQA",
+                    "endDate": "2299-12-31T00:00:00Z",
+                    "keyId": "a8f3bf7c-1111-2222-3333-a008e1b67e25",
+                    "startDate": "2018-12-23T09:08:26.2816943Z",
+                    "value": null
+                }
+            ],
+            "publicClient": false,
+            "publisherDomain": "timcoatesgmail.onmicrosoft.com",
+            "recordConsentConditions": null,
+            "replyUrls": [
+                "http://blank/"
+            ],
+            "requiredResourceAccess": [
+                {
+                    "resourceAppId": "00000003-0000-0000-c000-000000000000",
+                    "resourceAccess": [
+                        {
+                            "id": "0892ae7c-7add-4d9e-bed1-0f6a6851bc17",
+                            "type": "Role"
+                        },
+                        {
+                            "id": "0892ae7c-7add-4d9e-bed1-0f6a6851bc17",
+                            "type": "Scope"
+                        },
+                        {
+                            "id": "0892ae7c-7add-4d9e-bed1-0f6a6851bc17",
+                            "type": "Role"
+                        }
+                    ]
+                },
+                {
+                    "resourceAppId": "00000002-0000-0000-c000-000000000000",
+                    "resourceAccess": [
+                        {
+                            "id": "0892ae7c-7add-4d9e-bed1-0f6a6851bc17",
+                            "type": "Scope"
+                        },
+                        {
+                            "id": "0892ae7c-7add-4d9e-bed1-0f6a6851bc17",
+                            "type": "Scope"
+                        },
+                        {
+                            "id": "0892ae7c-7add-4d9e-bed1-0f6a6851bc17",
+                            "type": "Role"
+                        },
+                        {
+                            "id": "0892ae7c-7add-4d9e-bed1-0f6a6851bc17",
+                            "type": "Scope"
+                        }
+                    ]
+                }
+            ],
+            "samlMetadataUrl": null,
+            "signInAudience": "AzureADMyOrg",
+            "tokenEncryptionKeyId": null
+        }
+    ]
+}

@@ -183,14 +183,14 @@ public class SlotResourceProvider implements IResourceProvider {
         }
         if (incSchedule) {
             // Now iterate through the Slots and get a list of Schedules...
-            ArrayList<String> schedNames = new ArrayList<String>();
+            ArrayList<String> schedNames = new ArrayList<>();
             for (Object sl : slots) {
                 Slot thisSlot = (Slot) sl;
                 String reference = thisSlot.getSchedule().getReference();
-                LOG.info("Will add Schedule: " + reference);
-
-                // TODO: Don't add the resource if we've already got it!!
+                
+                // Don't add the resource if we've already got it!!
                 if (!schedNames.contains(reference)) {
+                    LOG.info("Will add Schedule: " + reference);
                     schedNames.add(reference);
                 }
             }

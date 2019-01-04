@@ -1,0 +1,45 @@
+{
+    "odata.metadata": "https://graph.windows.net/e52111c7-4048-4f34-aea9-6326afa44a8d/$metadata#directoryObjects",
+    "value": [
+        {
+            "odata.type": "Microsoft.DirectoryServices.Group",
+            "objectType": "Group",
+            "objectId": "6f2ab894-dde8-43a4-b243-4c5e6d1f0093",
+            "deletionTimestamp": null,
+            "description": "First test group.",
+            "dirSyncEnabled": null,
+            "displayName": "urn:nhs:names:services:test:first:test:group:name",
+            "lastDirSyncTime": null,
+            "mail": null,
+            "mailNickname": "6f2ab894-aaaa-bbbb-cccc-4c5e6d1f0093",
+            "mailEnabled": false,
+            "onPremisesDomainName": null,
+            "onPremisesNetBiosName": null,
+            "onPremisesSamAccountName": null,
+            "onPremisesSecurityIdentifier": null,
+            "provisioningErrors": [],
+            "proxyAddresses": [],
+            "securityEnabled": true
+        },
+        {
+            "odata.type": "Microsoft.DirectoryServices.Group",
+            "objectType": "Group",
+            "objectId": "2b5c867b-f1bf-4a90-8b72-bc1a044131bc",
+            "deletionTimestamp": null,
+            "description": "Second test group",
+            "dirSyncEnabled": null,
+            "displayName": "urn:nhs:names:services:test:second:test:group:name",
+            "lastDirSyncTime": null,
+            "mail": null,
+            "mailNickname": "6c6427e2-aaaa-bbbb-cccc-5fe352b537fc",
+            "mailEnabled": false,
+            "onPremisesDomainName": null,
+            "onPremisesNetBiosName": null,
+            "onPremisesSamAccountName": null,
+            "onPremisesSecurityIdentifier": null,
+            "provisioningErrors": [],
+            "proxyAddresses": [],
+            "securityEnabled": true
+        }
+    ]
+}

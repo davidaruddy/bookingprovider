@@ -120,8 +120,8 @@ public class DataStore {
     /**
      * Method to get a single Slot by ID
      *
-     * @param id
-     * @return
+     * @param id the id of the requested Slot (eg slot001)
+     * @return The Slot resource
      */
     public Slot getSlotByID(String id) {
         // First we extract just the ID part from any id we've been sent...
@@ -141,10 +141,11 @@ public class DataStore {
     /**
      * Method to get a set of Slots that have a given HealthcareService
      *
-     * @param HCS
-     * @return
+     * @param hcsID The HealthcareService id
+     * @return A List of Slots which are provided by the specified
+     *         HealthcareService
      */
-    public ArrayList getSlotsByHealthcareService(String HCS) {
+    public ArrayList getSlotsByHealthcareService(String hcsID) {
 
         ArrayList<Slot> result = new ArrayList();
 
@@ -156,7 +157,7 @@ public class DataStore {
             List<Reference> actors = sch.getActor();
             for (int j = 0; j < actors.size(); j++) {
                 String actor = actors.get(j).getReference();
-                if (actor.equals("/HealthcareService/" + HCS)) {
+                if (actor.equals("/HealthcareService/" + hcsID)) {
                     scheds.add("/Schedule/" + schedID);
                 }
             }
@@ -176,12 +177,15 @@ public class DataStore {
     }
 
     /**
-     * Method to get a set of FREE Slots that have a given HealthcareService
+     * Method to get a set of Slots with a given status (free/busy) that are
+     * provided by a given HealthcareService.
      *
-     * @param HCS
-     * @return
+     * @param hcsID The Id of a HealthcareService
+     * @param status The status being searched for
+     * @return A List of FREE Slot resources which are provided by the specified
+     *         HealthcareService.
      */
-    public ArrayList getFreeSlotsByHealthcareService(String HCS, String status) {
+    public ArrayList getFreeSlotsByHealthcareService(String hcsID, String status) {
 
         SlotStatus stat;
         switch (status) {
@@ -206,7 +210,7 @@ public class DataStore {
             List<Reference> actors = sch.getActor();
             for (Reference actor1 : actors) {
                 String actor = actor1.getReference();
-                if (actor.equals("/HealthcareService/" + HCS)) {
+                if (actor.equals("/HealthcareService/" + hcsID)) {
                     scheds.add("/Schedule/" + schedID);
                 }
             }
@@ -516,22 +520,21 @@ public class DataStore {
     /**
      * Method to save a POSTed appointment into our memory backed data store
      *
-     * @param newAppt
-     * @return
+     * @param newAppt The new Appointment to save.
+     * @return The ID (a random UUID) assigned to the new appointment.
      */
     public String addAppointment(Appointment newAppt) {
         String newID = UUID.randomUUID().toString();
         newAppt.setId(newID);
         Appointments.add(newAppt);
-        //LOG.info("Appointment: " + newID + " added");
         return newID;
     }
 
     /**
      * Method to get a specific Appointment by Id
      *
-     * @param identifier
-     * @return
+     * @param identifier of the appointment being requested.
+     * @return The Appointment resource if found or null;
      */
     public Appointment getAppointment(String identifier) {
         LOG.info("Request for appointment: " + identifier);
