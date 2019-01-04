@@ -48,17 +48,18 @@ import uk.nhs.fhir.bookingprovider.data.DataStore;
 public class RestfulServlet extends RestfulServer {
 
     /**
-     * Constructor, just sets the base URL (to a static fixed value for now)
+     * Constructor, just sets the base URL (to a static fixed value for now).
      */
     public RestfulServlet() {
-        String serverBaseUrl = "http://appointments.directoryofservices.nhs.uk:443/poc";
-        setServerAddressStrategy(new HardcodedServerAddressStrategy(serverBaseUrl));
+        String base = "http://appointments.directoryofservices.nhs.uk:443/poc";
+        setServerAddressStrategy(new HardcodedServerAddressStrategy(base));
     }
 
     /**
      * The logger we use across this class. *
      */
-    private static final Logger LOG = Logger.getLogger(RestfulServlet.class.getName());
+    private static final Logger LOG
+            = Logger.getLogger(RestfulServlet.class.getName());
 
     /**
      * The Class that holds all of our resources...
@@ -72,14 +73,14 @@ public class RestfulServlet extends RestfulServer {
 
     /**
      * An AppointmentChecker object that we'll use to validate any incoming
-     * appointments
+     * appointments.
      */
     private AppointmentChecker checker;
 
     /**
-     * This handles requests to URL: http://localhost:443/poc/reset where it
-     * resets the in-memory data store, so creates all new Slots as free and
-     * removes any booked appointments.
+     * This handles requests to URL: /poc/reset where it resets the in-memory
+     * data store, so creates all new Slots as free and removes any booked
+     * appointments.
      *
      * @param request
      * @param response
@@ -87,7 +88,8 @@ public class RestfulServlet extends RestfulServer {
      * @throws IOException
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected final void doGet(final HttpServletRequest request,
+            final HttpServletResponse response)
             throws ServletException, IOException {
         //LOG.info("Requested URI: " + request.getRequestURI());
 
@@ -95,10 +97,11 @@ public class RestfulServlet extends RestfulServer {
         if (request.getRequestURI().equals("/poc/reset")) {
             LOG.info("Resetting the data store...");
             data.initialize();
-            response.setStatus(200);
+            response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("text/html");
             PrintWriter outputStream = response.getWriter();
-            outputStream.append("<html lang='en'><head><meta http-equiv='refresh' content='2; url=/poc/index'><title>Reset done</title></head><body><h1>Data reset to initial state, going back to index page...</h1></body></html>");
+            String page = getFileContents("reset.html");
+            outputStream.append(page);
             return;
         }
 
@@ -111,20 +114,20 @@ public class RestfulServlet extends RestfulServer {
                 || request.getRequestURI().equals("/index.html")
                 || request.getRequestURI().equals("/index.htm")) {
             //LOG.info("Index page requested");
-            int apptCount = data.getAppointments().size();
-            int slotCount = data.getSlots().size();
-            int freeSlotCount = data.getFreeSlots().size();
-            response.setStatus(200);
+            int appts = data.getAppointments().size();
+            int slots = data.getSlots().size();
+            int freeSlots = data.getFreeSlots().size();
+            response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("text/html");
             PrintWriter outputStream = response.getWriter();
-            outputStream.append(getIndexPage(slotCount, freeSlotCount, apptCount));
+            outputStream.append(getIndexPage(slots, freeSlots, appts));
             return;
         }
 
         // Special case processing for the 'home' page
         if (request.getRequestURI().equals("/poc/model")) {
             LOG.info("Model POST request requested");
-            response.setStatus(200);
+            response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("application/json");
             PrintWriter outputStream = response.getWriter();
             outputStream.append(getRequest());
@@ -134,7 +137,7 @@ public class RestfulServlet extends RestfulServer {
         // Special case processing for the 'home' page
         if (request.getRequestURI().equals("/poc/modelXML")) {
             LOG.info("Model POST request requested");
-            response.setStatus(200);
+            response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("application/xml");
             PrintWriter outputStream = response.getWriter();
             outputStream.append(getRequestXML());
@@ -197,11 +200,16 @@ public class RestfulServlet extends RestfulServer {
      * @param apptCount The number of booked appointments.
      * @return A String representing the entire html page.
      */
-    public final String getIndexPage(final int slotCount, final int freeSlotCount, final int apptCount) {
+    public final String getIndexPage(final int slotCount,
+            final int freeSlotCount,
+            final int apptCount) {
         String indexFile = getFileContents("index.html");
-        indexFile = indexFile.replace("{{SLOTS}}", Integer.toString(slotCount));
-        indexFile = indexFile.replace("{{FREESLOTS}}", Integer.toString(freeSlotCount));
-        indexFile = indexFile.replace("{{APPOINTMENTS}}", Integer.toString(apptCount));
+        String slots = Integer.toString(slotCount);
+        String freeSLots = Integer.toString(freeSlotCount);
+        String appts = Integer.toString(apptCount);
+        indexFile = indexFile.replace("{{SLOTS}}", slots);
+        indexFile = indexFile.replace("{{FREESLOTS}}", freeSLots);
+        indexFile = indexFile.replace("{{APPOINTMENTS}}", appts);
 
         String versionInfo = getFileContents("version.txt");
         versionInfo = versionInfo.replace("\n", "<br />");
@@ -239,7 +247,7 @@ public class RestfulServlet extends RestfulServer {
      * @param filename The name of the file requested to be read.
      * @return The contents of the file, or an empty String.
      */
-    public final String getFileContents(String filename) {
+    public final String getFileContents(final String filename) {
         StringBuilder result = new StringBuilder("");
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(filename).getFile());

@@ -44,60 +44,65 @@ import org.hl7.fhir.dstu3.model.Slot.SlotStatus;
  *
  * @author tim.coates@nhs.net
  */
-public class DataStore {
+public final class DataStore {
 
     /**
      * This is our Singleton instance.
      */
     private static DataStore instance = null;
+    
+    private static String profileRoot =
+            "https://fhir.hl7.org.uk/STU3/StructureDefinition/";
 
     /**
      * Logger we use throughout.
      */
-    private static final Logger LOG = Logger.getLogger(DataStore.class.getName());
+    private static final Logger LOG
+            = Logger.getLogger(DataStore.class.getName());
 
     /**
      * A List of PractitionerRole resources.
      */
-    ArrayList<PractitionerRole> PractitionerRoles = null;
-    
+    private ArrayList<PractitionerRole> practitionerRoles = null;
+
     /**
      * A List of Practitioner resources.
      */
-    ArrayList<Practitioner> Practitioners = null;
-    
+    private ArrayList<Practitioner> practitioners = null;
+
     /**
      * A List of Organization resources.
      */
-    ArrayList<Organization> Organizations = null;
-    
+    private ArrayList<Organization> organizations = null;
+
     /**
      * A List of Location resources.
      */
-    ArrayList<Object> Locations = null;
-    
+    private ArrayList<Object> locations = null;
+
     /**
      * A List of HealthcareService resources.
      */
-    ArrayList<HealthcareService> HealthcareServices = null;
-    
+    private ArrayList<HealthcareService> healthcareServices = null;
+
     /**
      * A List of Schedule resources.
      */
-    ArrayList<Schedule> Schedules = null;
-    
+    private ArrayList<Schedule> schedules = null;
+
     /**
      * A List of Slot resources.
      */
-    ArrayList<Slot> Slots = null;
-    
+    private ArrayList<Slot> slots = null;
+
     /**
      * And finally a List of Appointment resources.
      */
-    ArrayList<Appointment> Appointments = null;
+    private ArrayList<Appointment> appointments = null;
 
     /**
-     * Private Constructor
+     * Private Constructor to prevent unexpected instantiation (forces
+     * singleton pattern).
      *
      */
     private DataStore() {
@@ -107,7 +112,7 @@ public class DataStore {
     /**
      * Method to get the singleton instance.
      *
-     * @return
+     * @return Gets the only instance of our Singleton class.
      */
     public static DataStore getInstance() {
         if (instance == null) {
@@ -118,20 +123,20 @@ public class DataStore {
     }
 
     /**
-     * Method to get a single Slot by ID
+     * Method to get a single Slot by ID.
      *
-     * @param id the id of the requested Slot (eg slot001)
-     * @return The Slot resource
+     * @param id The id of the requested Slot (eg slot001).
+     * @return The Slot resource.
      */
-    public Slot getSlotByID(String id) {
+    public Slot getSlotByID(final String id) {
         // First we extract just the ID part from any id we've been sent...
         String[] words = id.split("/");
-        id = words[words.length - 1];
+        String idPart = words[words.length - 1];
 
-        for (int x = 0; x < Slots.size(); x++) {
-            Slot sl = (Slot) Slots.get(x);
+        for (Slot slot : slots) {
+            Slot sl = (Slot) slot;
             String slotId = sl.getId();
-            if (slotId.equals(id)) {
+            if (slotId.equals(idPart)) {
                 return sl;
             }
         }
@@ -143,29 +148,29 @@ public class DataStore {
      *
      * @param hcsID The HealthcareService id
      * @return A List of Slots which are provided by the specified
-     *         HealthcareService
+     * HealthcareService
      */
     public ArrayList getSlotsByHealthcareService(String hcsID) {
 
         ArrayList<Slot> result = new ArrayList();
 
-        // First find out which schedules are run by the selected HealthcareService...
+        // First find out which schedules are run by this HealthcareService.
         ArrayList<String> scheds = new ArrayList();
-        for (int i = 0; i < Schedules.size(); i++) {
-            Schedule sch = (Schedule) Schedules.get(i);
+        for (int i = 0; i < schedules.size(); i++) {
+            Schedule sch = (Schedule) schedules.get(i);
             String schedID = sch.getId();
             List<Reference> actors = sch.getActor();
-            for (int j = 0; j < actors.size(); j++) {
-                String actor = actors.get(j).getReference();
+            for (Reference actor1 : actors) {
+                String actor = actor1.getReference();
                 if (actor.equals("/HealthcareService/" + hcsID)) {
                     scheds.add("/Schedule/" + schedID);
                 }
             }
         }
 
-        // Now we step through all Slots, and see whether they have a matching Schedule...
-        for (int x = 0; x < Slots.size(); x++) {
-            Slot sl = (Slot) Slots.get(x);
+        // Now step through Slots, and see whether they have that Schedule.
+        for (Slot slot : slots) {
+            Slot sl = (Slot) slot;
             String schedule = sl.getSchedule().getReference();
             for (String sched : scheds) {
                 if (sched.equals(schedule)) {
@@ -180,12 +185,12 @@ public class DataStore {
      * Method to get a set of Slots with a given status (free/busy) that are
      * provided by a given HealthcareService.
      *
-     * @param hcsID The Id of a HealthcareService
-     * @param status The status being searched for
+     * @param hcsID The Id of a HealthcareService.
+     * @param status The status being searched for.
      * @return A List of FREE Slot resources which are provided by the specified
-     *         HealthcareService.
+     * HealthcareService.
      */
-    public ArrayList getFreeSlotsByHealthcareService(String hcsID, String status) {
+    public ArrayList getFreeSlotsByHCS(String hcsID, String status) {
 
         SlotStatus stat;
         switch (status) {
@@ -202,9 +207,9 @@ public class DataStore {
         }
         ArrayList<Slot> result = new ArrayList();
 
-        // First find out which schedules are run by the selected HealthcareService...
+        // First find out which schedules are run by this HealthcareService.
         ArrayList<String> scheds = new ArrayList();
-        for (Schedule Schedule : Schedules) {
+        for (Schedule Schedule : schedules) {
             Schedule sch = (Schedule) Schedule;
             String schedID = sch.getId();
             List<Reference> actors = sch.getActor();
@@ -216,8 +221,8 @@ public class DataStore {
             }
         }
 
-        // Now we step through all Slots, and see whether they have a matching Schedule...
-        for (Slot Slot : Slots) {
+        // Now step through all Slots, and see whether they have that Schedule.
+        for (Slot Slot : slots) {
             Slot sl = (Slot) Slot;
             String schedule = sl.getSchedule().getReference();
             for (String sched : scheds) {
@@ -232,16 +237,17 @@ public class DataStore {
     }
 
     /**
-     * Method to create a list of one PractitionerRole resources: - R0260
+     * Method to create a list of one PractitionerRole resources: - R0260.
      *
-     * @return
+     * @return A List of (one) PractitionerRole resources.
      */
     public ArrayList MakePractitionerRoles() {
         ArrayList<Object> PractitionerRoles = new ArrayList();
 
         PractitionerRole PR = new PractitionerRole();
         Meta met = new Meta();
-        met.addProfile("https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-PractitionerRole-1");
+        String profileName = profileRoot + "CareConnect-PractitionerRole-1";
+        met.addProfile(profileName);
         PR.setMeta(met);
         PR.setId(new IdDt("R0260"));
         CodeableConcept code = new CodeableConcept();
@@ -259,9 +265,9 @@ public class DataStore {
 
     /**
      * Method to create a list of one Practitioner resources: - Dr Libbie Webber
-     * - ABCD123456 - SDS User ID ABCD123456 - SDS Role ID R0260
+     * - ABCD123456 - SDS User ID ABCD123456 - SDS Role ID R0260.
      *
-     * @return
+     * @return A List of (one) Practitioners.
      */
     public ArrayList MakePractitioners() {
         ArrayList<Object> Practitioners = new ArrayList();
@@ -269,7 +275,8 @@ public class DataStore {
         Practitioner pract = new Practitioner();
 
         Meta met = new Meta();
-        met.addProfile("https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Practitioner-1");
+        String profileName = profileRoot + "CareConnect-Practitioner-1";
+        met.addProfile(profileName);
         pract.setMeta(met);
         pract.setId(new IdDt("ABCD123456"));
 
@@ -278,10 +285,10 @@ public class DataStore {
         newSDSUserIdentifier.setValue("ABCD123456");
         pract.addIdentifier(newSDSUserIdentifier);
 
-        Identifier newSDSRoleIdentifier = new Identifier();
-        newSDSRoleIdentifier.setSystem("https://fhir.nhs.uk/Id/sds-role-profile-id");
-        newSDSRoleIdentifier.setValue("R0260");
-        pract.addIdentifier(newSDSRoleIdentifier);
+        Identifier newSDSRoleId = new Identifier();
+        newSDSRoleId.setSystem("https://fhir.nhs.uk/Id/sds-role-profile-id");
+        newSDSRoleId.setValue("R0260");
+        pract.addIdentifier(newSDSRoleId);
 
         HumanName name = new HumanName();
         name.addPrefix("Dr");
@@ -296,9 +303,9 @@ public class DataStore {
 
     /**
      * Method to create a list of one Organisation resources: - A91545 - Name:
-     * Our Provider Organisation - ODS Code: A91545
+     * Our Provider Organisation - ODS Code: A91545.
      *
-     * @return
+     * @return A List of Organisations.
      */
     public ArrayList MakeOrganisations() {
         ArrayList<Object> Organisations = new ArrayList();
@@ -306,7 +313,8 @@ public class DataStore {
         Organization org = new Organization();
 
         Meta met = new Meta();
-        met.addProfile("https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Organization-1");
+        String profileName = profileRoot + "CareConnect-Organization-1";
+        met.addProfile(profileName);
         org.setMeta(met);
         org.setId(new IdDt("A91545"));
 
@@ -322,12 +330,11 @@ public class DataStore {
     }
 
     /**
-     * Method to create a list of two Location resources: - Location One -
-     * loc1111
+     * Method to create a list of two Location resources:
+     * - Location One - loc1111.
+     * - Location Two - loc2222.
      *
-     * - Location Two - loc2222
-     *
-     * @return
+     * @return A List of Locations.
      */
     public ArrayList MakeLocations() {
         ArrayList<Object> Locations = new ArrayList();
@@ -335,7 +342,8 @@ public class DataStore {
         Location locn1 = new Location();
         Location locn2 = new Location();
         Meta met = new Meta();
-        met.addProfile("https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Location-1");
+        String profileName = profileRoot + "CareConnect-Location-1";
+        met.addProfile(profileName);
         locn1.setMeta(met);
         locn2.setMeta(met);
 
@@ -351,21 +359,24 @@ public class DataStore {
     }
 
     /**
-     * Method to create a list of two HealthcareService resources: - Service One
-     * - 918999198999 - Location: /Location/loc1111 - Organisation:
-     * /Organization/A91545
+     * Method to create a list of two HealthcareService resources:
+     * Service One - 918999198999
+     * - Location: /Location/loc1111
+     * - Organisation: /Organization/A91545
      *
-     * - Service Two - 118111118111 - Location: /Location/loc2222 -
-     * Organisation: /Organization/A91545
+     * Service Two - 118111118111
+     * - Location: /Location/loc2222
+     * - Organisation: /Organization/A91545
      *
-     * @return
+     * @return A List of two HealthcareService resources.
      */
     public ArrayList MakeHealthcareServices() {
         ArrayList<Object> HealthcareServices = new ArrayList();
         HealthcareService hcs1 = new HealthcareService();
         HealthcareService hcs2 = new HealthcareService();
         Meta met = new Meta();
-        met.addProfile("https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-HealthcareService-1");
+        String profileName = profileRoot + "CareConnect-HealthcareService-1";
+        met.addProfile(profileName);
 
         Reference providerRef = new Reference();
         providerRef.setReference("/Organization/A91545");
@@ -378,14 +389,14 @@ public class DataStore {
         hcs1.setProvidedBy(providerRef);
         locRef.setReference("/Location/loc1111");
         hcs1.addLocation(locRef);
-        
+
         Identifier newId1 = new Identifier();
         newId1.setSystem("https://system.supplier.co.uk/My/Services");
         newId1.setValue("357");
         hcs1.addIdentifier(newId1);
 
         HealthcareServices.add(hcs1);
-        
+
         hcs2.setMeta(met);
         hcs2.setId(new IdDt("118111118111"));
         hcs2.setName("Service Two");
@@ -419,7 +430,8 @@ public class DataStore {
         Schedule sched1 = new Schedule();
         Schedule sched2 = new Schedule();
         Meta met = new Meta();
-        met.addProfile("https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Schedule-1");
+        String profileName = profileRoot + "CareConnect-Schedule-1";
+        met.addProfile(profileName);
         sched1.setMeta(met);
         sched2.setMeta(met);
 
@@ -431,7 +443,7 @@ public class DataStore {
         hcsRef.setReference("/HealthcareService/918999198999");
         sched1.addActor(hcsRef);
         sched1.addActor(practRef);
-        
+
         Identifier newId1 = new Identifier();
         newId1.setSystem("https://system.supplier.co.uk/MyDiary/Numbering");
         newId1.setValue("1015432");
@@ -464,7 +476,8 @@ public class DataStore {
         Slot slot;
 
         Meta met = new Meta();
-        met.addProfile("https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Slot-1");
+        String profileName = profileRoot + "CareConnect-Slot-1";
+        met.addProfile(profileName);
 
         Reference schedRef = new Reference();
 
@@ -526,7 +539,7 @@ public class DataStore {
     public String addAppointment(Appointment newAppt) {
         String newID = UUID.randomUUID().toString();
         newAppt.setId(newID);
-        Appointments.add(newAppt);
+        appointments.add(newAppt);
         return newID;
     }
 
@@ -539,8 +552,8 @@ public class DataStore {
     public Appointment getAppointment(String identifier) {
         LOG.info("Request for appointment: " + identifier);
         Appointment appt;
-        for (int i = 0; i < Appointments.size(); i++) {
-            appt = (Appointment) Appointments.get(i);
+        for (int i = 0; i < appointments.size(); i++) {
+            appt = (Appointment) appointments.get(i);
             String thisone = "Appointment/" + appt.getId();
             //LOG.info("Trying appointment: [" + thisone + "] comparing to [" + identifier + "]");
             if (thisone.equals(identifier)) {
@@ -564,15 +577,15 @@ public class DataStore {
 
         LOG.info("Setting Slot " + id + " to 'BUSY'");
 
-        for (int x = 0; x < Slots.size(); x++) {
-            Slot sl = (Slot) Slots.get(x);
+        for (int x = 0; x < slots.size(); x++) {
+            Slot sl = (Slot) slots.get(x);
             String slotId = sl.getId();
             if (slotId.equals(id)) {
                 LOG.info("Slot found: " + sl.toString());
                 sl.setStatus(Slot.SlotStatus.BUSY);
-                Slots.remove(x);
+                slots.remove(x);
                 LOG.info("Slot removed: " + sl.toString());
-                Slots.add(sl);
+                slots.add(sl);
                 LOG.info("Slot added: " + sl.toString());
                 return;
             }
@@ -587,7 +600,7 @@ public class DataStore {
      * @return An ArrayList of the appointments that have been booked.
      */
     public ArrayList<Appointment> getAppointments() {
-        return Appointments;
+        return appointments;
     }
 
     /**
@@ -597,7 +610,7 @@ public class DataStore {
      * @return An ArrayList of all slots.
      */
     public ArrayList<Slot> getSlots() {
-        return Slots;
+        return slots;
     }
 
     /**
@@ -608,7 +621,7 @@ public class DataStore {
      */
     public Schedule getSchedule(String schedName) {
         LOG.info("getSchedule() looking for: " + schedName);
-        for (Schedule sched : Schedules) {
+        for (Schedule sched : schedules) {
             String thisID = "/Schedule/" + sched.getId();
             LOG.info("How about: " + thisID);
             if (thisID.equals(schedName)) {
@@ -627,7 +640,7 @@ public class DataStore {
      */
     public HealthcareService getHealthcareService(String identifier) {
         LOG.info("Looking for: " + identifier);
-        for (HealthcareService healthcareService : HealthcareServices) {
+        for (HealthcareService healthcareService : healthcareServices) {
             if (healthcareService.getId().equals(identifier)) {
                 return healthcareService;
             } else {
@@ -643,15 +656,15 @@ public class DataStore {
      *
      */
     public void initialize() {
-        PractitionerRoles = MakePractitionerRoles();
-        Practitioners = MakePractitioners();
-        Organizations = MakeOrganisations();
-        Locations = MakeLocations();
-        HealthcareServices = MakeHealthcareServices();
-        Schedules = MakeSchedules();
-        Slots = MakeSlots();
-        Appointments = new ArrayList();
-        LOG.info("Reinitiated with a set of: " + Appointments.size() + " appointments.");
+        practitionerRoles = MakePractitionerRoles();
+        practitioners = MakePractitioners();
+        organizations = MakeOrganisations();
+        locations = MakeLocations();
+        healthcareServices = MakeHealthcareServices();
+        schedules = MakeSchedules();
+        slots = MakeSlots();
+        appointments = new ArrayList();
+        LOG.info("Reinitiated with a set of: " + appointments.size() + " appointments.");
     }
 
     /**
@@ -663,7 +676,7 @@ public class DataStore {
     public ArrayList<Slot> getFreeSlots() {
         ArrayList<Slot> freeSlots = new ArrayList<>();
 
-        for (Slot n : Slots) {
+        for (Slot n : slots) {
             if (n.getStatus() == SlotStatus.FREE) {
                 freeSlots.add(n);
             }
@@ -677,7 +690,7 @@ public class DataStore {
      * @return
      */
     public Practitioner getPractitioner() {
-        return Practitioners.get(0);
+        return practitioners.get(0);
     }
 
     /**
@@ -686,7 +699,7 @@ public class DataStore {
      * @return
      */
     public PractitionerRole getPractitionerRole() {
-        return PractitionerRoles.get(0);
+        return practitionerRoles.get(0);
     }
 
     /**
@@ -695,7 +708,7 @@ public class DataStore {
      * @return The Organisation or null.
      */
     public Organization getOrganization() {
-        return Organizations.get(0);
+        return organizations.get(0);
     }
 
 }

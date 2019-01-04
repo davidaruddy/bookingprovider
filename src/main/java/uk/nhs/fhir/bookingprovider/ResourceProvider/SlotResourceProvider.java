@@ -176,7 +176,7 @@ public class SlotResourceProvider implements IResourceProvider {
             slots = data.getSlotsByHealthcareService(theHealthcareService.getValue());
         } else {
             if (statusToken.getValue().equals("free") || statusToken.getValue().equals("busy")) {
-                slots = data.getFreeSlotsByHealthcareService(theHealthcareService.getValue(), statusToken.getValue());
+                slots = data.getFreeSlotsByHCS(theHealthcareService.getValue(), statusToken.getValue());
             } else {
                 throw new UnprocessableEntityException("Slot.status only supported with values of 'free' or 'busy'.");
             }
