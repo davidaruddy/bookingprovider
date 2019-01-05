@@ -51,7 +51,7 @@ public class AzureAD {
      * @param groupID The GUID (objectId) of a group.
      * @return The name (displayName) of that Group
      */
-    public String getGroupName(String groupID) {
+    public final String getGroupName(final String groupID) {
 
         String groupName = null;
         StringBuilder makeURL = new StringBuilder();
@@ -77,7 +77,8 @@ public class AzureAD {
                 Response response = client.newCall(request).execute();
                 String responseStr = response.body().string();
                 groupName = groupNameFromJSON(groupID, responseStr);
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 LOG.severe(ex.getMessage());
             }
         }
@@ -90,7 +91,7 @@ public class AzureAD {
      * @param groupID The GUID (objectId) of a group.
      * @return The name (description) of that Group
      */
-    public String getGroupDesc(String groupID) {
+    public final String getGroupDesc(final String groupID) {
 
         String groupDescription = null;
         StringBuilder makeURL = new StringBuilder();
@@ -98,8 +99,6 @@ public class AzureAD {
         makeURL.append(tenant);
         makeURL.append("/groups?api-version=1.6");
         String url = makeURL.toString();
-        //String url = "https://graph.windows.net/e52111c7-4048-4f34-aea9-6326afa44a8d/groups?api-version=1.6";
-
         String token = getToken();
 
         if (token != null) {
@@ -117,7 +116,8 @@ public class AzureAD {
                 Response response = client.newCall(request).execute();
                 String responseStr = response.body().string();
                 groupDescription = groupDescFromJSON(groupID, responseStr);
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 LOG.severe(ex.getMessage());
             }
         }
@@ -130,7 +130,7 @@ public class AzureAD {
      * @param appID The GUID (appID) of a registered application.
      * @return The displayName of the application if found.
      */
-    public String getAppName(String appID) {
+    public final String getAppName(final String appID) {
         String groupName = null;
         StringBuilder makeURL = new StringBuilder();
         makeURL.append(rootURL);
@@ -155,7 +155,8 @@ public class AzureAD {
                 Response response = client.newCall(request).execute();
                 String responseStr = response.body().string();
                 groupName = appNameFromJSON(appID, responseStr);
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 LOG.severe(ex.getMessage());
             }
         }
@@ -167,13 +168,13 @@ public class AzureAD {
      *
      * @return The access_token as a String
      */
-    public String getToken() {
+    public final String getToken() {
 
         String token = null;
 
-        String client_id = "92d85f9d-0666-49bc-a31c-12b45b04a7de";
-        String client_secret = "d/pj5x2kQsCnAZQTEDJ5tE4upeN6hLR1EE+aVnraAJg=";
-        client_secret = "y7rCysA8anvYshLckwwFNs8qnC6JPyCerE7CUAAnGgo=";
+        String clientId = "92d85f9d-0666-49bc-a31c-12b45b04a7de";
+        String clientSecret = "d/pj5x2kQsCnAZQTEDJ5tE4upeN6hLR1EE+aVnraAJg=";
+        clientSecret = "y7rCysA8anvYshLckwwFNs8qnC6JPyCerE7CUAAnGgo=";
         String resource = "https%3A%2F%2Fgraph.windows.net";
         String mediatype = "application/x-www-form-urlencoded";
         String tenantName = "timcoatesgmail";
@@ -187,9 +188,9 @@ public class AzureAD {
             StringBuilder fields = new StringBuilder();
             fields.append("grant_type=client_credentials");
             fields.append("&client_id=");
-            fields.append(client_id);
+            fields.append(clientId);
             fields.append("&client_secret=");
-            fields.append(client_secret);
+            fields.append(clientSecret);
             fields.append("&resource=");
             fields.append(resource);
 
@@ -210,7 +211,8 @@ public class AzureAD {
             token = responseObject.getAccess_token();
             //LOG.info(token);
             return token;
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             LOG.severe(ex.getMessage());
         }
         return token;
@@ -224,7 +226,7 @@ public class AzureAD {
      * @param json The entire JSON Response from Azure.
      * @return The object's displayName
      */
-    public String groupNameFromJSON(String groupID, String json) {
+    public final String groupNameFromJSON(final String groupID, final String json) {
         String name = null;
         Gson gson = new Gson();
         GroupResponse responseObject;
@@ -245,7 +247,7 @@ public class AzureAD {
      * @param json The entire JSON Response from Azure.
      * @return The object's description
      */
-    public String groupDescFromJSON(String groupID, String json) {
+    public final String groupDescFromJSON(final String groupID, final String json) {
         String description = null;
         Gson gson = new Gson();
         GroupResponse responseObject;
@@ -267,7 +269,7 @@ public class AzureAD {
      * @param json The entire JSON Response from Azure.
      * @return The object's displayName
      */
-    public String appNameFromJSON(String appID, String json) {
+    public final String appNameFromJSON(final String appID, final String json) {
         String name = null;
         Gson gson = new Gson();
         AppsResponse responseObject;

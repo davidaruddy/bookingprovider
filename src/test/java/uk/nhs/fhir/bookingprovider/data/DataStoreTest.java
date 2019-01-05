@@ -166,7 +166,7 @@ public class DataStoreTest {
         System.out.println("MakePractitionerRoles");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakePractitionerRoles();
+        ArrayList result = instance.makePractitionerRoles();
         assertEquals(result.size(), 1);
         PractitionerRole pr = (PractitionerRole) result.get(0);
         assertEquals(pr.getId(), "R0260");
@@ -180,7 +180,7 @@ public class DataStoreTest {
         System.out.println("MakePractitioners");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakePractitioners();
+        ArrayList result = instance.makePractitioners();
         assertEquals(result.size(), 1);
     }
 
@@ -192,7 +192,7 @@ public class DataStoreTest {
         System.out.println("MakePractitioners");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakePractitioners();
+        ArrayList result = instance.makePractitioners();
         Practitioner pr = (Practitioner) result.get(0);
         assertEquals(pr.getNameFirstRep().getFamily(), "Webber");
     }
@@ -205,7 +205,7 @@ public class DataStoreTest {
         System.out.println("MakeOrganisations");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakeOrganisations();
+        ArrayList result = instance.makeOrganisations();
         assertEquals(result.size(), 1);
     }
 
@@ -217,7 +217,7 @@ public class DataStoreTest {
         System.out.println("MakeLocations");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakeLocations();
+        ArrayList result = instance.makeLocations();
         assertEquals(result.size(), 2);
     }
 
@@ -229,7 +229,7 @@ public class DataStoreTest {
         System.out.println("MakeLocations");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakeLocations();
+        ArrayList result = instance.makeLocations();
         Location loc = (Location) result.get(0);
         assertEquals(loc.getName(), "Location One");
     }
@@ -242,7 +242,7 @@ public class DataStoreTest {
         System.out.println("MakeLocations");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakeLocations();
+        ArrayList result = instance.makeLocations();
         Location loc = (Location) result.get(1);
         assertEquals(loc.getName(), "Location Two");
     }
@@ -255,7 +255,7 @@ public class DataStoreTest {
         System.out.println("MakeHealthcareServices");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakeHealthcareServices();
+        ArrayList result = instance.makeHealthcareServices();
         assertEquals(2, result.size());
     }
 
@@ -267,7 +267,7 @@ public class DataStoreTest {
         System.out.println("MakeHealthcareServices");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakeHealthcareServices();
+        ArrayList result = instance.makeHealthcareServices();
         HealthcareService hs1 = (HealthcareService) result.get(0);
         assertEquals("Service One", hs1.getName());
     }
@@ -280,7 +280,7 @@ public class DataStoreTest {
         System.out.println("MakeHealthcareServices");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakeHealthcareServices();
+        ArrayList result = instance.makeHealthcareServices();
         HealthcareService hs2 = (HealthcareService) result.get(1);
         assertEquals("Service Two", hs2.getName());
     }
@@ -293,7 +293,7 @@ public class DataStoreTest {
         System.out.println("MakeSchedules");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakeSchedules();
+        ArrayList result = instance.makeSchedules();
         assertEquals(2, result.size());
     }
 
@@ -305,7 +305,7 @@ public class DataStoreTest {
         System.out.println("MakeSchedules");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakeSchedules();
+        ArrayList result = instance.makeSchedules();
         Schedule sch1 = (Schedule) result.get(0);
         assertEquals("/HealthcareService/918999198999", sch1.getActorFirstRep().getReference());
     }
@@ -318,7 +318,7 @@ public class DataStoreTest {
         System.out.println("MakeSchedules");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        ArrayList result = instance.MakeSchedules();
+        ArrayList result = instance.makeSchedules();
         Schedule sch2 = (Schedule) result.get(1);
         assertEquals("/HealthcareService/118111118111", sch2.getActorFirstRep().getReference());
     }
@@ -332,7 +332,7 @@ public class DataStoreTest {
         DataStore instance = DataStore.getInstance();
         instance.initialize();
         int expResult = 40;
-        ArrayList result = instance.MakeSlots();
+        ArrayList result = instance.makeSlots();
         assertEquals(expResult, result.size());
     }
 
