@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Appointment;
+import org.hl7.fhir.dstu3.model.Appointment.AppointmentParticipantComponent;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -106,6 +107,58 @@ public class ResourceMaker {
     }
 
     /**
+     * Method to create a valid Patient resource.
+     *
+     * TODO: Maybe add Meta details?
+     *
+     * @param refValue
+     * @return
+     */
+    public Patient makePatient() {
+        // Now we add a contained Patient
+        Patient pat = new Patient();
+        pat.setMeta(new Meta().addProfile("https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Patient-1"));
+        Identifier patNHSNumber = new Identifier();
+
+        Coding verStatusCoding = new Coding("https://fhir.hl7.org.uk/STU3/ValueSet/CareConnect-NHSNumberVerificationStatus-1", "01", "Number present and verified");
+        CodeableConcept verStatus = new CodeableConcept();
+        verStatus.addCoding(verStatusCoding);
+        Extension verifiedExtension = new Extension("https://fhir.hl7.org.uk/STU3/StructureDefinition/Extension-CareConnect-NHSNumberVerificationStatus-1");
+        verifiedExtension.setValue(verStatus);
+        patNHSNumber.addExtension(verifiedExtension);
+
+        patNHSNumber.setUse(Identifier.IdentifierUse.OFFICIAL);
+        patNHSNumber.setSystem("https://fhir.nhs.uk/Id/nhs-number");
+        patNHSNumber.setValue("1231231234");
+        pat.addIdentifier(patNHSNumber);
+        HumanName name = new HumanName();
+        name.setText("Mr Fred Smith");
+        name.addPrefix("Mr");
+        name.addGiven("Fred");
+        name.setFamily("Smith");
+        name.setUse(HumanName.NameUse.OFFICIAL);
+        pat.addName(name);
+        ContactPoint telecom = new ContactPoint();
+        telecom.setUse(ContactPoint.ContactPointUse.HOME);
+        telecom.setSystem(ContactPoint.ContactPointSystem.PHONE);
+        telecom.setValue("01234 567 890");
+        telecom.setRank(0);
+        pat.addTelecom(telecom);
+        pat.setGender(Enumerations.AdministrativeGender.MALE);
+        pat.setBirthDate(new Date(65, 4, 21));
+        Address addr = new Address();
+        addr.setUse(Address.AddressUse.HOME);
+        addr.addLine("123 High Street");
+        addr.addLine("Leeds");
+        addr.setCity("Leeds");
+        addr.setPostalCode("LS1 4HR");
+        pat.addAddress(addr);
+        // We log out the contained Patient resource
+        //LOG.info("Here's the Patient we'll contain: " + ResourceToString(pat));
+        return pat;
+    }
+    
+    /**
      * Method to break a valid Patient to run more tests on him.
      *
      * @param good
@@ -175,15 +228,21 @@ public class ResourceMaker {
         slotRef.setReference("/Slot/76abb688-01cd-4985-bf11-425d051fb4a6");
         appt.addSlot(slotRef);
         appt.setCreated(new Date());
-        String PatientReferenceValue = "P1";
+        //String PatientReferenceValue = "P1";
+        
+        Patient patient = makePatient();
+        
+        AppointmentParticipantComponent thePatParticipant = new AppointmentParticipantComponent();
+        
         Reference patRef = new Reference();
+        patRef.setResource(patient);
         patRef.setIdentifier(new Identifier().setSystem("https://fhir.nhs.uk/Id/nhs-number").setValue("1234512345").setUse(Identifier.IdentifierUse.OFFICIAL));
-        patRef.setReference("#" + PatientReferenceValue);
-        Appointment.AppointmentParticipantComponent thePatParticipant = new Appointment.AppointmentParticipantComponent();
         thePatParticipant.setActor(patRef);
         appt.addParticipant(thePatParticipant);
+        //appt.addContained(patient);
+        
         ArrayList<Resource> containedResources = new ArrayList();
-        Patient patient = makePatient(PatientReferenceValue);
+
         containedResources.add(patient);
 
         String DocRefReferenceValue = "78a39984-298d-4015-b48a-585aa0650005";

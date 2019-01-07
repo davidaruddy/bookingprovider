@@ -15,6 +15,9 @@
  */
 package uk.nhs.fhir.bookingprovider.checkers;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.JsonParser;
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -65,38 +68,65 @@ public class AppointmentChecker {
     /**
      * Error strings live here.
      */
-    private static final String NULLPROFILE = "Appointment has a null profile.";
-    private static final String OTHERPROFILES = "Appointment has OTHER profile(s).";
-    private static final String WRONGPROFILE = "Appointment does NOT have correct profile.";
-    private static final String NULLLANG = "Appointment has a language of 'null'";
-    private static final String BADLANG = "Appointment language not 'en' / 'en-GB'";
-    private static final String BADSTATUS = "Appointment must have a status of Booked";
-    private static final String NOSTATUS = "Appointment does not have a 'Status'";
-    private static final String MULTISLOTERR = "Appointment references multiple Slots";
-    private static final String NULLSLOTERR = "Slot reference is null";
-    private static final String SLOTREFNULLERR = "Reference value of Slot is null";
-    private static final String BADSLOTREFERR = "Slot reference doesn't contain 'Slot/' so invalid.";
-    private static final String NOSLOTERR = "Appointment does not reference a Slot";
-    private static final String CREATENULLERR = "Appointment created date is set to null";
-    private static final String CREATEFUTUREERR = "Appointment created date is in the future";
-    private static final String CREATEPASTERR = "Appointment created date appears to be in the past.";
-    private static final String NOCREATEERR = "Appointment has no 'created' date";
-    private static final String NOPARTSERR =
-        "Appointment has no participants, therefore no Patient?";
-    private static final String MULTIPARTSERR =
-        "Appointment has multiple participants, may be confusing?";
+    private static final String NULLPROFILE
+            = "Appointment has a null profile.";
+    private static final String OTHERPROFILES
+            = "Appointment has OTHER profile(s).";
+    private static final String WRONGPROFILE
+            = "Appointment does NOT have correct profile.";
+    private static final String NULLLANG
+            = "Appointment has a language of 'null'";
+    private static final String BADLANG
+            = "Appointment language not 'en' / 'en-GB'";
+    private static final String BADSTATUS
+            = "Appointment must have a status of Booked";
+    private static final String NOSTATUS
+            = "Appointment does not have a 'Status'";
+    private static final String MULTISLOTERR
+            = "Appointment references multiple Slots";
+    private static final String NULLSLOTERR
+            = "Slot reference is null";
+    private static final String SLOTREFNULLERR
+            = "Reference value of Slot is null";
+    private static final String BADSLOTREFERR
+            = "Slot reference doesn't contain 'Slot/' so invalid.";
+    private static final String NOSLOTERR
+            = "Appointment does not reference a Slot";
+    private static final String CREATENULLERR
+            = "Appointment created date is set to null";
+    private static final String CREATEFUTUREERR
+            = "Appointment created date is in the future";
+    private static final String CREATEPASTERR
+            = "Appointment created date appears to be in the past.";
+    private static final String NOCREATEERR
+            = "Appointment has no 'created' date";
+    private static final String NOPARTSERR
+            = "Appointment has no participants, therefore no Patient?";
+    private static final String MULTIPARTSERR
+            = "Appointment has multiple participants, may be confusing?";
     private static final String PARTACTORNULLERR = "Participant actor is null";
-    private static final String NOTNHSNUMERR =
-        "Participant identifier does not seem to be an NHS Number?";
-    private final String PARTSYSERR = "Appointment has a participant | actor | Identifier "
-        + "with System other than " + NHSNUMSYSTEM;
-    private static final String PARTOFFICIALERR =
-        "Appointment has a participant | actor | Identifier with Use "
-        + "other than OFFICIAL";
-    private static final String NOPARTERR = "Appointment has no Participant (Patient!).";
-    private static final String INVALIDSUPINFOERR = "supportingInformation is invalid.";
-    private static final String MULTISUPINFOERR = "Multiple supportingInformation references, causing confusion.";
-    private static final String NOSUPINFOERR = "Appointment doesn't have a supportingInformation (pointing to a contained DocumentReference resource).";
+    private static final String NOTNHSNUMERR
+            = "Participant identifier does not seem to be an NHS Number?";
+    private final String PARTSYSERR
+            = "Appointment has a participant | actor | Identifier "
+            + "with System other than " + NHSNUMSYSTEM;
+    private static final String PARTOFFICIALERR
+            = "Appointment has a participant | actor | Identifier with Use "
+            + "other than OFFICIAL";
+    private static final String NOPARTERR
+            = "Appointment has no Participant (Patient!).";
+    private static final String INVALIDSUPINFOERR
+            = "supportingInformation is invalid.";
+    private static final String BADSUPINFOREF =
+            "SupportingInformation does not point to contained DocumentReference resource";
+    private static final String MULTISUPINFOERR
+            = "Multiple supportingInformation references, causing confusion.";
+    private static final String NOSUPINFOERR
+            = "Appointment doesn't have a supportingInformation (pointing to a"
+            + " contained DocumentReference resource).";
+
+    private static final String PATMISMATCHERR
+            = "No linked Participant Patient in Contained resources.";
 
     String localDocRefReference;
 
@@ -144,13 +174,15 @@ public class AppointmentChecker {
         // Check created
         results.addAll(checkCreated(appointment));
 
-
         // Check participant
         results.addAll(checkParticipant(appointment));
 
         // Check supportingInformation is a valid Reference...
         localDocRefReference = null;
         results.addAll(checksupportingInfo(appointment));
+
+        // Check that participant actor links to a contained resource.
+        results.addAll(checkPatientLink(appointment));
 
         // Finally check contained resources...
         boolean hasDocRef = false;
@@ -391,10 +423,10 @@ public class AppointmentChecker {
                 case BOOKED:
                     break;
                 default:
-                    results.add( new Fault(BADSTATUS, Severity.MAJOR));
+                    results.add(new Fault(BADSTATUS, Severity.MAJOR));
             }
         } else {
-            results.add( new Fault(NOSTATUS, Severity.MAJOR));
+            results.add(new Fault(NOSTATUS, Severity.MAJOR));
         }
         return results;
     }
@@ -407,7 +439,6 @@ public class AppointmentChecker {
      */
     public ArrayList<Fault> checkSlot(final Appointment appointment) {
         ArrayList<Fault> results = new ArrayList<>();
-
 
         if (appointment.hasSlot()) {
             List<Reference> slotList = appointment.getSlot();
@@ -477,11 +508,8 @@ public class AppointmentChecker {
      * @return A List of (ideally zero) Faults found.
      */
     public ArrayList<Fault> checkParticipant(final Appointment appointment) {
-        ArrayList<Fault>results = new ArrayList<>();
+        ArrayList<Fault> results = new ArrayList<>();
         String localPatientReference = null;
-
-
-
 
         if (appointment.hasParticipant()) {
             List<AppointmentParticipantComponent> participantList = appointment.getParticipant();
@@ -534,7 +562,7 @@ public class AppointmentChecker {
             );
         }
 
-        if(localPatientReference == null) {
+        if (localPatientReference == null) {
             results.add(
                     new Fault(NOPARTERR, Severity.CRITICAL)
             );
@@ -551,7 +579,7 @@ public class AppointmentChecker {
     public ArrayList<Fault> checksupportingInfo(final Appointment appointment) {
         ArrayList<Fault> results = new ArrayList<>();
 
-                if (appointment.hasSupportingInformation()) {
+        if (appointment.hasSupportingInformation()) {
             ArrayList<Reference> supportingInformationList = (ArrayList<Reference>) appointment.getSupportingInformation();
             if (supportingInformationList.isEmpty()) {
                 results.add(
@@ -560,14 +588,60 @@ public class AppointmentChecker {
             } else {
                 if (supportingInformationList.size() == 1) {
                     localDocRefReference = supportingInformationList.get(0).getReference();
+                    List<Resource> containedList = appointment.getContained();
+                    boolean matched = false;
+                    for(Resource res : containedList) {
+                        if(res.getId().equals(localDocRefReference)) {
+                            matched = true;
+                        }
+                    }
+                    if(matched == false) {
+                        results.add(new Fault(BADSUPINFOREF, Severity.MINOR));
+                    }
                 } else {
-                    results.add(
-                            new Fault(MULTISUPINFOERR, Severity.MINOR)
-                    );
+                    results.add(new Fault(MULTISUPINFOERR, Severity.MINOR));
                 }
             }
         } else {
-            results.add(new Fault(NOSUPINFOERR,Severity.MAJOR));
+            results.add(new Fault(NOSUPINFOERR, Severity.MAJOR));
+        }
+        return results;
+    }
+
+    /**
+     *
+     * @param appointment
+     * @return
+     */
+    public ArrayList<Fault> checkPatientLink(final Appointment appointment) {
+        ArrayList<Fault> results = new ArrayList<>();
+        boolean matched = false;
+
+        JsonParser jp = (JsonParser) FhirContext.forDstu3().newJsonParser();
+
+        //System.out.println("Appointment\n" + jp.encodeResourceToString(appointment) + "\n");
+        List<AppointmentParticipantComponent> participants
+                = appointment.getParticipant();
+        //System.out.println("Found: " + participants.size() + " participants.");
+
+        List<Resource> containList = appointment.getContained();
+
+        for (AppointmentParticipantComponent participant : participants) {
+            String participantRef = participant.getActor().getReference();
+            LOG.info("Info " + participantRef);
+
+            for (Resource res : containList) {
+                String containedID = res.getId();
+                LOG.info("Contained ID: " + containedID);
+                if (participantRef.equals(containedID)) {
+                    matched = true;
+                }
+            }
+
+        }
+
+        if (!matched) {
+            results.add(new Fault(PATMISMATCHERR, Severity.MAJOR));
         }
         return results;
     }

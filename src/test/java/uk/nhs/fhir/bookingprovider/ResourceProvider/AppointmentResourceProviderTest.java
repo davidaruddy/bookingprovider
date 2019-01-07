@@ -19,6 +19,10 @@ import uk.nhs.fhir.bookingprovider.ResourceProvider.AppointmentResourceProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import java.io.File;
+import java.io.IOException;
+import java.util.Scanner;
 import java.util.logging.Logger;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -40,6 +44,7 @@ import uk.nhs.fhir.bookingprovider.data.DataStore;
 public class AppointmentResourceProviderTest {
 
     FhirContext ctx;
+    JsonParser parser;
     DataStore newData;
     AppointmentChecker checker;
 
@@ -60,6 +65,7 @@ public class AppointmentResourceProviderTest {
     public void setUp() {
         ctx = FhirContext.forDstu3();
         newData = DataStore.getInstance();
+        parser = (JsonParser) ctx.newJsonParser();
     }
 
     @After
@@ -85,13 +91,15 @@ public class AppointmentResourceProviderTest {
     @Test
     public void testCreateAppointment() {
         System.out.println("createAppointment");
-        ResourceMaker maker = new ResourceMaker();
-        Appointment newAppointment = maker.makeAppointment();
-        newAppointment = maker.setAppointmentSlot(newAppointment, "/Slot/slot003");
+        
+        String apptString = getFileContents("goodAppt_1.json");
+        Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
+        
         checker = new AppointmentChecker();
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker);
         Class<Appointment> expResult = Appointment.class;
-        IBaseResource result = instance.createAppointment(newAppointment).getResource();
+        MethodOutcome appt = instance.createAppointment(newAppointment);
+        IBaseResource result = appt.getResource();
         assertEquals(expResult, result.getClass());
     }
 
@@ -242,4 +250,34 @@ public class AppointmentResourceProviderTest {
         FhirContext ctx = FhirContext.forDstu3();
         return ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
     }
+    
+    
+    /**
+     * Method to get the contents of files in src/test/resources
+     *
+     * Used to get sample JSON responses.
+     *
+     * @param filename The name of the file requested to be read.
+     * @return The contents of the file, or an empty String.
+     */
+    public final String getFileContents(String filename) {
+        StringBuilder result = new StringBuilder("");
+        
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource(filename).getFile());
+        try (Scanner scanner = new Scanner(file)) {
+
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                result.append(line).append("\n");
+            }
+            scanner.close();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result.toString();
+    }
+
 }
