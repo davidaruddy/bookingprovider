@@ -84,7 +84,7 @@ public class AzureADTest {
         String groupID = "6f2ab894-dde8-43a4-b243-4c5e6d1f0093";
         AzureAD instance = new AzureAD();
         String expResult = "urn:nhs:names:services:test:first:test:group:name";
-        String result = instance.groupNameFromJSON(groupID, json);
+        String result = instance.groupNameFrmJSON(groupID, json);
         assertEquals(expResult, result);
     }
 
@@ -98,7 +98,7 @@ public class AzureADTest {
         String groupID = "2b5c867b-f1bf-4a90-8b72-bc1a044131bc";
         AzureAD instance = new AzureAD();
         String expResult = "Second test group";
-        String result = instance.groupDescFromJSON(groupID, json);
+        String result = instance.groupDescFrmJSON(groupID, json);
         assertEquals(expResult, result);
     }
     

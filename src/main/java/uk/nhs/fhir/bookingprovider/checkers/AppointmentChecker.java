@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 import org.hl7.fhir.dstu3.model.Appointment;
+import org.hl7.fhir.dstu3.model.Appointment.AppointmentParticipantComponent;
 import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Meta;
@@ -57,6 +58,49 @@ public class AppointmentChecker {
             = PROFILEROOT + "CareConnect-Appointment-1";
 
     /**
+     * The system used to indicate an identifier is an NHS Number.
+     */
+    String NHSNUMSYSTEM = "https://fhir.nhs.uk/Id/nhs-number";
+
+    /**
+     * Error strings live here.
+     */
+    private static final String NULLPROFILE = "Appointment has a null profile.";
+    private static final String OTHERPROFILES = "Appointment has OTHER profile(s).";
+    private static final String WRONGPROFILE = "Appointment does NOT have correct profile.";
+    private static final String NULLLANG = "Appointment has a language of 'null'";
+    private static final String BADLANG = "Appointment language not 'en' / 'en-GB'";
+    private static final String BADSTATUS = "Appointment must have a status of Booked";
+    private static final String NOSTATUS = "Appointment does not have a 'Status'";
+    private static final String MULTISLOTERR = "Appointment references multiple Slots";
+    private static final String NULLSLOTERR = "Slot reference is null";
+    private static final String SLOTREFNULLERR = "Reference value of Slot is null";
+    private static final String BADSLOTREFERR = "Slot reference doesn't contain 'Slot/' so invalid.";
+    private static final String NOSLOTERR = "Appointment does not reference a Slot";
+    private static final String CREATENULLERR = "Appointment created date is set to null";
+    private static final String CREATEFUTUREERR = "Appointment created date is in the future";
+    private static final String CREATEPASTERR = "Appointment created date appears to be in the past.";
+    private static final String NOCREATEERR = "Appointment has no 'created' date";
+    private static final String NOPARTSERR =
+        "Appointment has no participants, therefore no Patient?";
+    private static final String MULTIPARTSERR =
+        "Appointment has multiple participants, may be confusing?";
+    private static final String PARTACTORNULLERR = "Participant actor is null";
+    private static final String NOTNHSNUMERR =
+        "Participant identifier does not seem to be an NHS Number?";
+    private final String PARTSYSERR = "Appointment has a participant | actor | Identifier "
+        + "with System other than " + NHSNUMSYSTEM;
+    private static final String PARTOFFICIALERR =
+        "Appointment has a participant | actor | Identifier with Use "
+        + "other than OFFICIAL";
+    private static final String NOPARTERR = "Appointment has no Participant (Patient!).";
+    private static final String INVALIDSUPINFOERR = "supportingInformation is invalid.";
+    private static final String MULTISUPINFOERR = "Multiple supportingInformation references, causing confusion.";
+    private static final String NOSUPINFOERR = "Appointment doesn't have a supportingInformation (pointing to a contained DocumentReference resource).";
+
+    String localDocRefReference;
+
+    /**
      * Checks an Appointment object passed in for conformance to a number of
      * business rules.
      *
@@ -85,208 +129,28 @@ public class AppointmentChecker {
             );
         } else {
             results.addAll(
-                    followsProfile(meta,
-                            PROFILENAME));
+                    followsProfile(meta, PROFILENAME));
         }
 
-        // Check Language
-        if (appointment.hasLanguage()) {
-            String language = appointment.getLanguage();
-            if (language == null) {
-                results.add(
-                        new Fault("Appointment has a language of 'null'",
-                                Severity.MAJOR)
-                );
-            } else {
-                if (!language.equals("en") && !language.equals("en-GB")) {
-                    results.add(
-                            new Fault("Appointment language not 'en' or 'en-GB'",
-                                    Severity.MAJOR)
-                    );
-                }
-            }
-        }
+        // Check for the correct language.
+        results.addAll(checkLanguage(appointment));
 
         // Check status
-        if (appointment.hasStatus()) {
-            Appointment.AppointmentStatus status = appointment.getStatus();
-            switch (status) {
-                case BOOKED:
-                    break;
-                default:
-                    results.add(
-                            new Fault("Appointment must have a status of Booked",
-                                    Severity.MAJOR)
-                    );
-            }
-
-        } else {
-            results.add(
-                    new Fault("Appointment does not have a 'Status'",
-                            Severity.MAJOR)
-            );
-        }
+        results.addAll(checkStatus(appointment));
 
         // Check Slot
-        if (appointment.hasSlot()) {
-            List<Reference> slotList = appointment.getSlot();
-            if (slotList.size() != 1) {
-                results.add(
-                        new Fault("Appointment references multiple Slots",
-                                Severity.MAJOR)
-                );
-            } else {
-                Reference slot = slotList.get(0);
-                if (slot == null) {
-                    results.add(
-                            new Fault("Slot reference is null",
-                                    Severity.MAJOR)
-                    );
-                } else {
-                    String slotRef = slot.getReference();
-                    if (slotRef == null) {
-                        results.add(
-                                new Fault("Reference value of Slot is null",
-                                        Severity.MAJOR)
-                        );
-                    } else {
-                        if (!slotRef.contains("Slot/")) {
-                            results.add(
-                                    new Fault("Slot reference does not contain 'Slot/' therefore is not valid.",
-                                            Severity.CRITICAL)
-                            );
-                        }
-                    }
-                }
-            }
-        } else {
-            results.add(
-                    new Fault("Appointment does not reference a Slot",
-                            Severity.CRITICAL)
-            );
-        }
+        results.addAll(checkSlot(appointment));
 
         // Check created
-        if (appointment.hasCreated()) {
-            Date created = appointment.getCreated();
-            if (created == null) {
-                results.add(
-                        new Fault("Appointment created date is set to null",
-                                Severity.MAJOR)
-                );
-            } else {
-                if (created.after(new Date())) {
-                    results.add(
-                            new Fault("Appointment created date is in the future",
-                                    Severity.MAJOR)
-                    );
-                } else {
-                    if (created.before(new Date(118, 11, 9))) {
-                        results.add(
-                                new Fault("Appointment created date appears to be in the past.",
-                                        Severity.MAJOR)
-                        );
-                    }
-                }
-            }
-        } else {
-            results.add(
-                    new Fault("Appointment has no 'created' date",
-                            Severity.MAJOR)
-            );
-        }
+        results.addAll(checkCreated(appointment));
+
 
         // Check participant
-        // We store the reference for when we check contained patient...
-        String localPatientReference = null;
-        if (appointment.hasParticipant()) {
-            List<Appointment.AppointmentParticipantComponent> participantList = appointment.getParticipant();
-            if (participantList.size() == 0) {
-                results.add(
-                        new Fault("Appointment has no participants, therefore no Patient?",
-                                Severity.MINOR)
-                );
-            } else {
-                if (participantList.size() > 1) {
-                    results.add(
-                            new Fault("Appointment has multiple participants, may be confusing?",
-                                    Severity.MINOR)
-                    );
-                }
-                for (Appointment.AppointmentParticipantComponent participant : participantList) {
-                    Reference actor = participant.getActor();
-                    if (actor == null) {
-                        results.add(
-                                new Fault("Participant actor is null",
-                                        Severity.MAJOR)
-                        );
-                    } else {
-                        localPatientReference = actor.getReference();
-                        Identifier identifier = actor.getIdentifier();
-                        if (identifier.getUse() == Identifier.IdentifierUse.OFFICIAL) {
-                            if (identifier.getSystem().equals("https://fhir.nhs.uk/Id/nhs-number")) {
-                                String value = identifier.getValue();
-                                if (!value.matches("\\d{10}")) {
-                                    results.add(
-                                            new Fault("Participant identifier does not seem to be an NHS Number?",
-                                                    Severity.MAJOR)
-                                    );
-                                } else {
-                                    // TODO: Add more checks in here?
-                                }
-                            } else {
-                                results.add(
-                                        new Fault("Appointment has a participant | actor | Identifier with System other than https://fhir.nhs.uk/Id/nhs-number",
-                                                Severity.MAJOR)
-                                );
-                            }
-                        } else {
-                            results.add(
-                                    new Fault("Appointment has a participant | actor | Identifier with Use other than OFFICIAL",
-                                            Severity.MAJOR)
-                            );
-                        }
-                    }
-                }
-            }
-        } else {
-            results.add(
-                    new Fault("Appointment has no Participant (Patient!).",
-                            Severity.MAJOR)
-            );
-        }
-        if (localPatientReference == null) {
-            results.add(
-                    new Fault("Participants doesn't point to a contained Patient resource.",
-                            Severity.CRITICAL)
-            );
-        }
+        results.addAll(checkParticipant(appointment));
 
         // Check supportingInformation is a valid Reference...
-        String localDocRefReference = null;
-        if (appointment.hasSupportingInformation()) {
-            ArrayList<Reference> supportingInformationList = (ArrayList<Reference>) appointment.getSupportingInformation();
-            if (supportingInformationList.isEmpty()) {
-                results.add(
-                        new Fault("supportingInformation is invalid.",
-                                Severity.MAJOR)
-                );
-            } else {
-                if (supportingInformationList.size() == 1) {
-                    localDocRefReference = supportingInformationList.get(0).getReference();
-                } else {
-                    results.add(
-                            new Fault("Multiple supportingInformation references, causing confusion.",
-                                    Severity.MINOR)
-                    );
-                }
-            }
-        } else {
-            results.add(
-                    new Fault("Appointment doesn't have a supportingInformation (pointing to a contained DocumentReference resource).",
-                            Severity.MAJOR)
-            );
-        }
+        localDocRefReference = null;
+        results.addAll(checksupportingInfo(appointment));
 
         // Finally check contained resources...
         boolean hasDocRef = false;
@@ -463,33 +327,247 @@ public class AppointmentChecker {
      * @return Boolean response.
      */
     private ArrayList<Fault> followsProfile(final Meta meta, final String profileName) {
-        boolean profileFound = false;
         ArrayList<Fault> results = new ArrayList<>();
+        boolean profileFound = false;
+
         List<UriType> profileList = meta.getProfile();
         if (profileList != null) {
             for (UriType profile : profileList) {
                 if (profile == null) {
-                    results.add(
-                            new Fault("Appointment has a null profile.",
-                                    Severity.MAJOR)
-                    );
+                    results.add(new Fault(NULLPROFILE, Severity.MAJOR));
                 } else {
                     if (!profile.equals(profileName)) {
-                        results.add(
-                                new Fault("Appointment has OTHER profile(s).",
-                                        Severity.TRIVIAL)
-                        );
+                        results.add(new Fault(OTHERPROFILES, Severity.TRIVIAL));
                     } else {
                         profileFound = true;
                     }
                 }
             }
             if (profileFound == false) {
-                results.add(
-                        new Fault("Appointment does NOT have correct profile.",
-                                Severity.CRITICAL)
-                );
+                results.add(new Fault(WRONGPROFILE, Severity.CRITICAL));
             }
+        }
+        return results;
+    }
+
+    /**
+     * Method to check the resource has the expected Language set.
+     *
+     * @param appointment Appointment resource to be checked.
+     * @return An ArrayList of problems found.
+     */
+    public ArrayList<Fault> checkLanguage(final Appointment appointment) {
+        ArrayList<Fault> results = new ArrayList<>();
+
+        if (appointment.hasLanguage()) {
+            String language = appointment.getLanguage();
+            if (language == null) {
+                results.add(
+                        new Fault(NULLLANG, Severity.MAJOR)
+                );
+            } else {
+                if (!language.equals("en") && !language.equals("en-GB")) {
+                    results.add(
+                            new Fault(BADLANG, Severity.MAJOR)
+                    );
+                }
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Method to verify that the Appointment being posted in is set to Booked.
+     *
+     * @param appointment The Appointment being tested.
+     * @return A List of problems found, ideally of zero length.
+     */
+    public ArrayList<Fault> checkStatus(final Appointment appointment) {
+        ArrayList<Fault> results = new ArrayList<>();
+
+        if (appointment.hasStatus()) {
+            Appointment.AppointmentStatus status = appointment.getStatus();
+            switch (status) {
+                case BOOKED:
+                    break;
+                default:
+                    results.add( new Fault(BADSTATUS, Severity.MAJOR));
+            }
+        } else {
+            results.add( new Fault(NOSTATUS, Severity.MAJOR));
+        }
+        return results;
+    }
+
+    /**
+     * Method to check the Slot referenced in the posted appointment.
+     *
+     * @param appointment The appointment resource being checked.
+     * @return A List of the problems found.
+     */
+    public ArrayList<Fault> checkSlot(final Appointment appointment) {
+        ArrayList<Fault> results = new ArrayList<>();
+
+
+        if (appointment.hasSlot()) {
+            List<Reference> slotList = appointment.getSlot();
+            if (slotList.size() != 1) {
+                results.add(
+                        new Fault(MULTISLOTERR, Severity.MAJOR)
+                );
+            } else {
+                Reference slot = slotList.get(0);
+                if (slot == null) {
+                    results.add(
+                            new Fault(NULLSLOTERR, Severity.MAJOR)
+                    );
+                } else {
+                    String slotRef = slot.getReference();
+                    if (slotRef == null) {
+                        results.add(
+                                new Fault(SLOTREFNULLERR, Severity.MAJOR)
+                        );
+                    } else {
+                        if (!slotRef.contains("Slot/")) {
+                            results.add(
+                                    new Fault(BADSLOTREFERR, Severity.CRITICAL)
+                            );
+                        }
+                    }
+                }
+            }
+        } else {
+            results.add(new Fault(NOSLOTERR, Severity.CRITICAL));
+        }
+        return results;
+    }
+
+    /**
+     * Check a few aspects of the Created value.
+     *
+     * @param appointment The appointment resource being checked.
+     * @return a List of Faults found.
+     */
+    public ArrayList<Fault> checkCreated(final Appointment appointment) {
+        ArrayList<Fault> results = new ArrayList<>();
+        if (appointment.hasCreated()) {
+            Date created = appointment.getCreated();
+            if (created == null) {
+                results.add(new Fault(CREATENULLERR, Severity.MAJOR));
+            } else {
+                if (created.after(new Date())) {
+                    results.add(new Fault(CREATEFUTUREERR, Severity.MAJOR));
+                } else {
+                    if (created.before(new Date(118, 11, 9))) {
+                        results.add(new Fault(CREATEPASTERR, Severity.MAJOR));
+                    }
+                }
+            }
+        } else {
+            results.add(new Fault(NOCREATEERR, Severity.MAJOR));
+        }
+        return results;
+    }
+
+    /**
+     * Method to check the participant section of the Appointment resource we've
+     * been asked to book.
+     *
+     * @param appointment The resource being tested.
+     * @return A List of (ideally zero) Faults found.
+     */
+    public ArrayList<Fault> checkParticipant(final Appointment appointment) {
+        ArrayList<Fault>results = new ArrayList<>();
+        String localPatientReference = null;
+
+
+
+
+        if (appointment.hasParticipant()) {
+            List<AppointmentParticipantComponent> participantList = appointment.getParticipant();
+            if (participantList.size() == 0) {
+                results.add(
+                        new Fault(NOPARTSERR, Severity.MINOR)
+                );
+            } else {
+                if (participantList.size() > 1) {
+                    results.add(
+                            new Fault(MULTIPARTSERR, Severity.MINOR)
+                    );
+                }
+                for (AppointmentParticipantComponent participant : participantList) {
+                    Reference actor = participant.getActor();
+                    if (actor == null) {
+                        results.add(
+                                new Fault(PARTACTORNULLERR, Severity.MAJOR)
+                        );
+                    } else {
+                        localPatientReference = actor.getReference();
+                        Identifier identifier = actor.getIdentifier();
+                        if (identifier.getUse() == Identifier.IdentifierUse.OFFICIAL) {
+                            if (identifier.getSystem().equals(NHSNUMSYSTEM)) {
+                                String value = identifier.getValue();
+                                if (!value.matches("\\d{10}")) {
+                                    results.add(
+                                            new Fault(NOTNHSNUMERR,
+                                                    Severity.MAJOR)
+                                    );
+                                } else {
+                                    // TODO: Add more checks in here?
+                                }
+                            } else {
+                                results.add(
+                                        new Fault(PARTSYSERR, Severity.MAJOR)
+                                );
+                            }
+                        } else {
+                            results.add(
+                                    new Fault(PARTOFFICIALERR, Severity.MAJOR)
+                            );
+                        }
+                    }
+                }
+            }
+        } else {
+            results.add(
+                    new Fault(NOPARTERR, Severity.MAJOR)
+            );
+        }
+
+        if(localPatientReference == null) {
+            results.add(
+                    new Fault(NOPARTERR, Severity.CRITICAL)
+            );
+        }
+        return results;
+    }
+
+    /**
+     * Method to check the supportingInformation is valid.
+     *
+     * @param appointment The appointment resource we've been asked to save.
+     * @return A List of faults found.
+     */
+    public ArrayList<Fault> checksupportingInfo(final Appointment appointment) {
+        ArrayList<Fault> results = new ArrayList<>();
+
+                if (appointment.hasSupportingInformation()) {
+            ArrayList<Reference> supportingInformationList = (ArrayList<Reference>) appointment.getSupportingInformation();
+            if (supportingInformationList.isEmpty()) {
+                results.add(
+                        new Fault(INVALIDSUPINFOERR, Severity.MAJOR)
+                );
+            } else {
+                if (supportingInformationList.size() == 1) {
+                    localDocRefReference = supportingInformationList.get(0).getReference();
+                } else {
+                    results.add(
+                            new Fault(MULTISUPINFOERR, Severity.MINOR)
+                    );
+                }
+            }
+        } else {
+            results.add(new Fault(NOSUPINFOERR,Severity.MAJOR));
         }
         return results;
     }

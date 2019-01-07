@@ -40,20 +40,25 @@ import uk.nhs.fhir.bookingprovider.data.DataStore;
  *
  * @author tim.coates@nhs.net
  */
+
 /**
- * All resource providers must implement IResourceProvider
+ * Resource provider which handles any requests for objects of type Appointment
+ * resource.
+ *
+ * All resource providers must implement IResourceProvider.
  */
 public class AppointmentResourceProvider implements IResourceProvider {
 
     /**
      * The logger we'll use throughout this Class.
      */
-    private static final Logger LOG = Logger.getLogger(AppointmentResourceProvider.class.getName());
+    private static final Logger LOG =
+            Logger.getLogger(AppointmentResourceProvider.class.getName());
 
     /**
-     * FHIR Context we're operating within
+     * FHIR Context we're operating within.
      */
-    FhirContext myContext;
+    private FhirContext myContext;
 
     /**
      * DataStore where we hold all resources in memory.
@@ -61,22 +66,37 @@ public class AppointmentResourceProvider implements IResourceProvider {
     private DataStore myData;
 
     /**
-     * Object we're going to use to validate Appointment Objects
+     * Object we're going to use to validate Appointment Objects.
      */
-    AppointmentChecker myChecker;
+    private AppointmentChecker myChecker;
 
     /**
      * Constructor that we pass in any shared objects to.
      *
      * @param ctx The overall FHIR context we're using.
      * @param newData Our DataStore, the in memory object we use to cache Slots
-     * and other objects.
+     *                and other objects.
      * @param newChecker The object we'll use to check Appointments conform.
      */
-    public AppointmentResourceProvider(FhirContext ctx, DataStore newData, AppointmentChecker newChecker) {
+    public AppointmentResourceProvider(final FhirContext ctx,
+            final DataStore newData,
+            final AppointmentChecker newChecker) {
+
+        /**
+         * Local handle to a FHIR Context.
+         */
         myContext = ctx;
+
+        /**
+         * Local handle to the DataStore.
+         */
         myData = newData;
+
+        /**
+         * Checker object we'll use.
+         */
         myChecker = newChecker;
+
         LOG.info("New AppointmentResourceProvider created");
     }
 
@@ -92,15 +112,15 @@ public class AppointmentResourceProvider implements IResourceProvider {
     /**
      * Method to book (create a new) Appointment resource.
      *
-     * @param newAppointment
-     * @return
+     * @param newAppt The new Appointment resource.
+     * @return Returns the results of trying to create a new Appointment object.
      */
     @Create
-    public MethodOutcome createAppointment(@ResourceParam Appointment newAppointment) {
+    public MethodOutcome createAppointment(@ResourceParam Appointment newAppt) {
         LOG.info("createAppointment() called");
 
-        ArrayList<Fault> faults = myChecker.checkThis(newAppointment);
-        if (faults.size() != 0) {
+        ArrayList<Fault> faults = myChecker.checkThis(newAppt);
+        if (!faults.isEmpty()) {
             for (Fault item : faults) {
                 LOG.severe(item.toString());
             }
@@ -111,44 +131,52 @@ public class AppointmentResourceProvider implements IResourceProvider {
                 }
                 faultMsg = faultMsg + faults.get(0).toString() + "\n";
             }
-            throw new UnprocessableEntityException("Validation found: " + faults.size() + " problems (max 10 described here):\n" + faultMsg);
+            throw new UnprocessableEntityException("Validation found: "
+                    + faults.size()
+                    + " problems (max 10 described here):\n"
+                    + faultMsg);
         }
 
-        if (newAppointment == null) {
+        if (newAppt == null) {
             throw new UnprocessableEntityException("No Appointment");
         } else {
             LOG.info("Appointment was not null");
         }
         /*
-         * First we might want to do business validation. The UnprocessableEntityException
-         * results in an HTTP 422, which is appropriate for business rule failure
+         * First we might want to do business validation. The
+         * UnprocessableEntityException results in an HTTP 422, which is
+         * appropriate for a business rule failure.
          */
-        ArrayList<Reference> slots = (ArrayList) newAppointment.getSlot();
+        ArrayList<Reference> slots = (ArrayList) newAppt.getSlot();
         Reference slotReference = slots.get(0);
         String slotRef = slotReference.getReference();
 
         Slot theSlot = myData.getSlotByID(slotRef);
         if (theSlot == null) {
-            throw new UnprocessableEntityException("Specified slot was not found on this server");
+            String notFoundErr = "Specified slot was not found on this server";
+            throw new UnprocessableEntityException(notFoundErr);
         } else {
             LOG.info("Got a Slot back from DataStore");
         }
 
         if (theSlot.getStatus() != Slot.SlotStatus.FREE) {
-            LOG.info("Slot " + slotRef + " isn't free");
-            throw new UnprocessableEntityException("The specified Slot: " + slotRef + " is not currently free.");
+            String notFreeErr = "The specified Slot: "
+                    + slotRef
+                    + " is not currently free.";
+            LOG.info(notFreeErr);
+            throw new UnprocessableEntityException(notFreeErr);
         } else {
             LOG.info("Slot " + slotRef + " is currently free");
         }
 
         // Save this Appointment to the database...
-        String result = myData.addAppointment(newAppointment);
+        String result = myData.addAppointment(newAppt);
         if (result == null) {
-            throw new UnprocessableEntityException("Failed to save Appointment");
+            throw new UnprocessableEntityException("Couldn't save Appointment");
         } else {
             LOG.info("Setting Slot " + slotRef + " to BUSY");
             myData.setSlotBooked(slotRef);
-            newAppointment.setId(result);
+            newAppt.setId(result);
         }
 
         // This method returns a MethodOutcome object which contains
@@ -157,7 +185,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
         MethodOutcome retVal = new MethodOutcome();
         retVal.setId(new IdType("Appointment", result));
 
-        retVal.setResource(newAppointment);
+        retVal.setResource(newAppt);
         retVal.setId(new IdDt(result));
 
         return retVal;

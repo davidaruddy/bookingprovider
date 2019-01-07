@@ -43,20 +43,24 @@ import uk.nhs.fhir.bookingprovider.data.DataStore;
  *
  * @author tim.coates@nhs.net
  */
+
 /**
- * All resource providers must implement IResourceProvider
+ * Handles all RESTful FHIR requests for Slot resources.
+ *
+ * All resource providers must implement IResourceProvider.
  */
 public class SlotResourceProvider implements IResourceProvider {
 
     /**
      * The logger we'll use throughout this class.
      */
-    private static final Logger LOG = Logger.getLogger(SlotResourceProvider.class.getName());
+    private static final Logger LOG =
+            Logger.getLogger(SlotResourceProvider.class.getName());
 
     /**
-     * FHIR Context
+     * FHIR Context.
      */
-    FhirContext myContext;
+    private FhirContext myContext;
 
     /**
      * The in memory data store where we cache Slots and other objects.
@@ -69,7 +73,8 @@ public class SlotResourceProvider implements IResourceProvider {
      * @param ctx The overall FHIR Context we're using.
      * @param newData The shared in memory data store we're using.
      */
-    public SlotResourceProvider(FhirContext ctx, DataStore newData) {
+    public SlotResourceProvider(final FhirContext ctx,
+            final DataStore newData) {
         myContext = ctx;
         data = newData;
     }
@@ -117,20 +122,25 @@ public class SlotResourceProvider implements IResourceProvider {
 
     /**
      * The "@Search" annotation indicates that this method supports the search
-     * operation. You may have many different method annotated with this
+     * operation.You may have many different method annotated with this
      * annotation, to support many different search criteria. This example
      * searches by family name.
      *
      * @param theHealthcareService The Service that Slots are being filtered to.
+     * @param statusToken The status filter we are requested for.
      * @param theIncludes Set of Resource types to be included in the response.
      * @return This method returns a list of Slots. This list may contain
      * multiple matching resources, or it may also be empty.
      */
     @Search()
     public List<IResource> searchSlots(
-            @Description(shortDefinition = "This is the HealthcareService for which Slots are being requested - set this to the ASID of the Provider service")
-            @RequiredParam(name = "schedule.actor:healthcareservice") TokenParam theHealthcareService,
-            @OptionalParam(name = "Slot.status") TokenParam statusToken,
+            @Description(shortDefinition = "This is the HealthcareService for "
+                    + "which Slots are being requested - set this to the ASID "
+                    + "of the Provider service")
+            @RequiredParam(name = "schedule.actor:healthcareservice")
+                    TokenParam theHealthcareService,
+            @OptionalParam(name = "Slot.status")
+                    TokenParam statusToken,
             @IncludeParam(allow = {
                 "Slot:schedule",
                 "Schedule:actor:healthcareservice",
@@ -144,8 +154,8 @@ public class SlotResourceProvider implements IResourceProvider {
         boolean incPractitioner = false;
         boolean incProvider = false;
 
-        LOG.info("Slot search being handled for provider: " +
-                theHealthcareService.getValue().toString());
+        LOG.info("Slot search being handled for provider: "
+                + theHealthcareService.getValue().toString());
 
         Iterator<Include> itr = theIncludes.iterator();
         while (itr.hasNext()) {
@@ -173,12 +183,18 @@ public class SlotResourceProvider implements IResourceProvider {
         ArrayList slots;
         // Here we filter for free or busy if requested (ignoring other statuses)
         if (statusToken == null) {
-            slots = data.getSlotsByHealthcareService(theHealthcareService.getValue());
+            slots = data.getSlotsByHealthcareService(
+                    theHealthcareService.getValue()
+            );
         } else {
-            if (statusToken.getValue().equals("free") || statusToken.getValue().equals("busy")) {
-                slots = data.getFreeSlotsByHCS(theHealthcareService.getValue(), statusToken.getValue());
+            if (statusToken.getValue().equals("free") ||
+                    statusToken.getValue().equals("busy")) {
+                slots = data.getFreeSlotsByHCS(theHealthcareService.getValue(),
+                        statusToken.getValue());
             } else {
-                throw new UnprocessableEntityException("Slot.status only supported with values of 'free' or 'busy'.");
+                String statusErr =
+                        "Slot.status values only 'free' or 'busy' supported.";
+                throw new UnprocessableEntityException(statusErr);
             }
         }
         if (incSchedule) {
@@ -187,7 +203,7 @@ public class SlotResourceProvider implements IResourceProvider {
             for (Object sl : slots) {
                 Slot thisSlot = (Slot) sl;
                 String reference = thisSlot.getSchedule().getReference();
-                
+
                 // Don't add the resource if we've already got it!!
                 if (!schedNames.contains(reference)) {
                     LOG.info("Will add Schedule: " + reference);
@@ -209,7 +225,9 @@ public class SlotResourceProvider implements IResourceProvider {
         if (incHealthcareService) {
             if (slots.size() > 0) {
                 LOG.info("Asked to add HealthcareService");
-                HealthcareService healthcareService = data.getHealthcareService(theHealthcareService.getValue());
+                HealthcareService healthcareService =
+                        data.getHealthcareService(
+                                theHealthcareService.getValue());
                 if (healthcareService != null) {
                     LOG.info("Adding HealthcareService");
                     slots.add(healthcareService);

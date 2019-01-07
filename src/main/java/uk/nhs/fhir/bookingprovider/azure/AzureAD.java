@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 public class AzureAD {
 
     /**
-     * The Logger object we use acros this class.
+     * The Logger object we use across this class.
      */
     private static final Logger LOG = Logger.getLogger(AzureAD.class.getName());
 
@@ -76,9 +76,8 @@ public class AzureAD {
 
                 Response response = client.newCall(request).execute();
                 String responseStr = response.body().string();
-                groupName = groupNameFromJSON(groupID, responseStr);
-            }
-            catch (IOException ex) {
+                groupName = groupNameFrmJSON(groupID, responseStr);
+            } catch (IOException ex) {
                 LOG.severe(ex.getMessage());
             }
         }
@@ -115,9 +114,8 @@ public class AzureAD {
 
                 Response response = client.newCall(request).execute();
                 String responseStr = response.body().string();
-                groupDescription = groupDescFromJSON(groupID, responseStr);
-            }
-            catch (IOException ex) {
+                groupDescription = groupDescFrmJSON(groupID, responseStr);
+            } catch (IOException ex) {
                 LOG.severe(ex.getMessage());
             }
         }
@@ -155,8 +153,7 @@ public class AzureAD {
                 Response response = client.newCall(request).execute();
                 String responseStr = response.body().string();
                 groupName = appNameFromJSON(appID, responseStr);
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 LOG.severe(ex.getMessage());
             }
         }
@@ -211,8 +208,7 @@ public class AzureAD {
             token = responseObject.getAccess_token();
             //LOG.info(token);
             return token;
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             LOG.severe(ex.getMessage());
         }
         return token;
@@ -222,17 +218,17 @@ public class AzureAD {
      * Pulls out the matching displayName field for a Group found based on the
      * supplied objectID value.
      *
-     * @param groupID The objectID of a Group in a response from Azure.
+     * @param grID The objectID of a Group in a response from Azure.
      * @param json The entire JSON Response from Azure.
      * @return The object's displayName
      */
-    public final String groupNameFromJSON(final String groupID, final String json) {
+    public final String groupNameFrmJSON(final String grID, final String json) {
         String name = null;
         Gson gson = new Gson();
         GroupResponse responseObject;
         responseObject = gson.fromJson(json, GroupResponse.class);
         for (GroupResponse.GroupResponseValue value : responseObject.value) {
-            if (value.objectId.equals(groupID)) {
+            if (value.objectId.equals(grID)) {
                 name = value.displayName;
             }
         }
@@ -243,17 +239,17 @@ public class AzureAD {
      * Pulls out the matching description field for a Group found based on the
      * supplied objectID value.
      *
-     * @param groupID The objectID of a Group in a response from Azure.
+     * @param grID The objectID of a Group in a response from Azure.
      * @param json The entire JSON Response from Azure.
      * @return The object's description
      */
-    public final String groupDescFromJSON(final String groupID, final String json) {
+    public final String groupDescFrmJSON(final String grID, final String json) {
         String description = null;
         Gson gson = new Gson();
         GroupResponse responseObject;
         responseObject = gson.fromJson(json, GroupResponse.class);
         for (GroupResponse.GroupResponseValue value : responseObject.value) {
-            if (value.objectId.equals(groupID)) {
+            if (value.objectId.equals(grID)) {
                 description = value.description;
             }
         }
@@ -265,7 +261,7 @@ public class AzureAD {
      * Pulls out the matching displayName field for an App found based on the
      * supplied objectID value.
      *
-     * @param groupID The objectID of an App registered in AzureAD.
+     * @param appID The objectID of an App registered in AzureAD.
      * @param json The entire JSON Response from Azure.
      * @return The object's displayName
      */
@@ -288,71 +284,49 @@ public class AzureAD {
      */
     private class TokenResponse {
 
+        /**
+         * The type of token we've got back.
+         */
         private String token_type;
 
+        /**
+         * How long this token will last.
+         */
         private long expires_in;
+
+        /**
+         * Not sure --- Ignore?
+         */
         private long ext_expires_in;
+
+        /**
+         * When this token expires.
+         */
         private long expires_on;
+
+        /**
+         * Not to be used before this timestamp.
+         */
         private long not_before;
+
+        /**
+         * Resource being granted access to.
+         */
         private String resource;
+
+        /**
+         * The actual access token.
+         */
         private String access_token;
 
-        public String getToken_type() {
-            return token_type;
-        }
-
-        public void setToken_type(String token_type) {
-            this.token_type = token_type;
-        }
-
-        public long getExpires_in() {
-            return expires_in;
-        }
-
-        public void setExpires_in(long expires_in) {
-            this.expires_in = expires_in;
-        }
-
-        public long getExt_expires_in() {
-            return ext_expires_in;
-        }
-
-        public void setExt_expires_in(long ext_expires_in) {
-            this.ext_expires_in = ext_expires_in;
-        }
-
-        public long getExpires_on() {
-            return expires_on;
-        }
-
-        public void setExpires_on(long expires_on) {
-            this.expires_on = expires_on;
-        }
-
-        public long getNot_before() {
-            return not_before;
-        }
-
-        public void setNot_before(long not_before) {
-            this.not_before = not_before;
-        }
-
-        public String getResource() {
-            return resource;
-        }
-
-        public void setResource(String resource) {
-            this.resource = resource;
-        }
-
+        /**
+         * Method to pull out the access_token, which is all we want for now.
+         *
+         * @return The access_token of the object.
+         */
         public String getAccess_token() {
             return access_token;
         }
-
-        public void setAccess_token(String access_token) {
-            this.access_token = access_token;
-        }
-
     }
 
     /**
@@ -360,8 +334,15 @@ public class AzureAD {
      */
     private class GroupResponse {
 
-        String odata_metadata;
-        GroupResponseValue[] value;
+        /**
+         * The metadata of the response we get back having asked for Groups.
+         */
+        private String odata_metadata;
+
+        /**
+         * The array of groups in the response.
+         */
+        private GroupResponseValue[] value;
 
         /**
          * Nested inner class to represent the groups returned in an array.
