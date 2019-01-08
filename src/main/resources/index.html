@@ -2,7 +2,7 @@
     <head>
         <title>Booking POC</title>
     </head>
-    <body style='font-family:verdana;'>
+    <body style='font-family: verdana;'>
         <h1>UEC Appointment Booking Provider Demonstrator</h1>
         <h2>Internal links</h2>
         <p>
@@ -21,6 +21,16 @@
             {{APPOINTMENTS}} Appointments<br />
         </p>
         <h2>Get Token</h2>
+        <p>This request will retrieve a JSON object with the following fields:<ul>
+            <li><i>token_type</i> - Will always be Bearer.  This tells us that the access_token provided below is of type <a href="https://oauth.net/2/bearer-tokens/">Bearer</a>.</li>
+            <li><i>expires_in</i> - Will always be 3600. This tells us that the access_token provided below will expire in 3600 seconds (an hour).</li>
+            <li><i>ext_expires_in</i> - Will always be 3600. This is used by Azure to provide some resiliency, it can be ignored.</li>
+            <li><i>access_token</i> - A long 'random' looking string. This is the access token we need to pass to the Provider system as shown below:</li>                
+        </ul>
+        The Authorization header to send to the Provider system will therefore have a value of the format: "Bearer "+[access_token], for example:<br />
+        "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dC...... Etc"<br />
+        The access_token can be decoded to view the contents at <a href="https://jwt.ms/">jwt.ms</a> or <a href="https://jwt.io/">jwt.io</a> to allow checking of (for example) the Groups the Consumer system is a member of.
+    </p>
         <p>
             <form action='https://login.microsoftonline.com/e52111c7-4048-4f34-aea9-6326afa44a8d/oauth2/v2.0/token' method='post'>
                 <table>

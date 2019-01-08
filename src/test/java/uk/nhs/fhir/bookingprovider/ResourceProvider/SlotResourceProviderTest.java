@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 dev.
+ * Copyright 2019 NHS Digital.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import uk.nhs.fhir.bookingprovider.data.DataStore;
 
 /**
  *
- * @author dev
+ * @author tim.coates@nhs.net
  */
 public class SlotResourceProviderTest {
 
@@ -139,7 +139,7 @@ public class SlotResourceProviderTest {
      * 'tighter' time constraint applied.
      */
     @Test
-    public void testSearchSlots_4argsFiltered() {
+    public void testSearchSlots_4argsFiltered1() {
         System.out.println("searchSlots");
         TokenParam theHealthcareService = new TokenParam("918999198999");
         TokenParam statusToken = new TokenParam("free");
@@ -160,6 +160,39 @@ public class SlotResourceProviderTest {
         DataStore newData = DataStore.getInstance();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
         int expResult = 6;
+        List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
+        assertEquals(expResult, result.size());
+    }
+
+    /**
+     * Test of searchSlots method, of class SlotResourceProvider. This one has
+     * even 'tighter' time constraint applied, but also asks for the
+     * HealthcareService to be included in the resulting Bundle.
+     */
+    @Test
+    public void testSearchSlots_4argsFiltered2() {
+        System.out.println("searchSlots");
+        TokenParam theHealthcareService = new TokenParam("918999198999");
+        TokenParam statusToken = new TokenParam("free");
+        // Set start time to 09:00 tomorrow...
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.add(Calendar.DATE, 1);
+        Date theLowerBound = cal.getTime();
+        cal.set(Calendar.HOUR_OF_DAY, 9);
+        cal.set(Calendar.MINUTE, 15);
+        Date theUpperBound = cal.getTime();
+        DateRangeParam startRange = new DateRangeParam(theLowerBound, theUpperBound);
+        Set<Include> theIncludes = new HashSet<Include>();
+        theIncludes.add(new Include("Slot:schedule"));
+        theIncludes.add(new Include("Schedule:actor:healthcareservice"));
+        ctx = FhirContext.forDstu3();
+        DataStore newData = DataStore.getInstance();
+        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
+        int expResult = 4;
         List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
         assertEquals(expResult, result.size());
     }
