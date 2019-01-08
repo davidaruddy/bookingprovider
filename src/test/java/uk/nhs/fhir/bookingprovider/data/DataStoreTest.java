@@ -468,12 +468,12 @@ public class DataStoreTest {
         newAppt.addContained(cdaRef);
 
         ArrayList containedResourceList = (ArrayList) newAppt.getContained();
-        LOG.info("Appointment has: " + containedResourceList.size() + " contained Resources");
-        for (int x = 0; x < containedResourceList.size(); x++) {
-            LOG.info(ResourceToString((Resource) containedResourceList.get(x)));
-        }
+        //LOG.info("Appointment has: " + containedResourceList.size() + " contained Resources");
+        //for (int x = 0; x < containedResourceList.size(); x++) {
+            //LOG.info(ResourceToString((Resource) containedResourceList.get(x)));
+        //}
 
-        LOG.info("Here's the complete Appointment: " + ResourceToString(newAppt));
+        //LOG.info("Here's the complete Appointment: " + ResourceToString(newAppt));
 
         return newAppt;
     }
@@ -530,9 +530,9 @@ public class DataStoreTest {
         DataStore instance = DataStore.getInstance();
         instance.initialize();
         String result = instance.addAppointment(newAppt);
-        LOG.info("Created Appointment: " + result);
+        //LOG.info("Created Appointment: " + result);
         Appointment appointment = instance.getAppointment("Appointment/" + result);
-        LOG.info("Retrieved Appointment: " + appointment.getText());
+        //LOG.info("Retrieved Appointment: " + appointment.getText());
         assertEquals(result, appointment.getId());
     }
 
@@ -546,9 +546,9 @@ public class DataStoreTest {
         DataStore instance = DataStore.getInstance();
         instance.initialize();
         String result = instance.addAppointment(newAppt);
-        LOG.info("Created Appointment: " + result);
+        //LOG.info("Created Appointment: " + result);
         Appointment appointment = instance.getAppointment("Appointment/" + result);
-        LOG.info("Retrieved Appointment: " + appointment.getText());
+        //LOG.info("Retrieved Appointment: " + appointment.getText());
         List<UriType> profile = appointment.getMeta().getProfile();
         UriType prof1 = profile.get(0);
         String correctProfile = "https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Appointment-1";

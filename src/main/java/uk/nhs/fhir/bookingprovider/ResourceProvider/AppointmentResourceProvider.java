@@ -140,7 +140,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
         if (newAppt == null) {
             throw new UnprocessableEntityException("No Appointment");
         } else {
-            LOG.info("Appointment was not null");
+            //LOG.info("Appointment was not null");
         }
         /*
          * First we might want to do business validation. The

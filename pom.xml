@@ -103,6 +103,7 @@
         </resources>
         <plugins>
             <!-- Plugin that means mvn:package will build the docker image for us -->
+            <!-- Comment out for now as it breaks the default build goal...
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>dockerfile-maven-plugin</artifactId>
@@ -112,7 +113,6 @@
                         <id>default</id>
                         <goals>
                             <goal>build</goal>
-                            <!-- <goal>push</goal> -->
                         </goals>
                     </execution>
                 </executions>
@@ -124,6 +124,7 @@
                     </buildArgs>
                 </configuration>
             </plugin>
+            -->
             
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

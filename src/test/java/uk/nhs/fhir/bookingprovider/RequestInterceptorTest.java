@@ -114,7 +114,7 @@ public class RequestInterceptorTest {
             Gson gson = new Gson();
             TokenResponse responseObject = gson.fromJson(responseStr, TokenResponse.class);
             token = responseObject.access_token;
-            LOG.info(responseObject.access_token);
+            //LOG.info(responseObject.access_token);
 
             return token;
         }
