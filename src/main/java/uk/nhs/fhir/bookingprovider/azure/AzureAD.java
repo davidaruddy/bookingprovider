@@ -22,6 +22,8 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -36,6 +38,9 @@ public class AzureAD {
     private static final Logger LOG = Logger.getLogger(AzureAD.class.getName());
     private static String groupResponse = null;
     private static String appResponse = null;
+    private static Map groupNames;
+    private static Map groupDescs;
+    private static Map appNames;
 
     /**
      * Allow the caches to be reset.
@@ -44,6 +49,9 @@ public class AzureAD {
         if(groupResponse != null || appResponse != null) {
             groupResponse = null;
             appResponse = null;
+            groupNames = null;
+            groupDescs = null;
+            appNames = null;
             return true;
         }
         return false;
@@ -68,6 +76,15 @@ public class AzureAD {
     public final String getGroupName(final String groupID) {
 
         String groupName = null;
+        
+        if(groupNames == null) {
+            groupNames = new HashMap<String, String>();
+        }
+        
+        if(groupNames.containsKey(groupID)) {
+            LOG.info("Result was in HashMap");
+            return (String) groupNames.get(groupID);
+        }
 
         if (groupResponse == null) {
             StringBuilder makeURL = new StringBuilder();
@@ -103,6 +120,7 @@ public class AzureAD {
             LOG.info("Using cached Groups");
         }
         groupName = groupNameFrmJSON(groupID, groupResponse);
+        groupNames.put(groupID, groupName);
         return groupName;
     }
 
@@ -115,6 +133,14 @@ public class AzureAD {
     public final String getGroupDesc(final String groupID) {
 
         String groupDescription = null;
+        if(groupDescs == null) {
+            groupDescs = new HashMap<String, String>();
+        }
+        
+        if(groupDescs.containsKey(groupID)) {
+            LOG.info("Result was in HashMap");
+            return (String) groupDescs.get(groupID);
+        }
 
         if (groupResponse == null) {
             StringBuilder makeURL = new StringBuilder();
@@ -149,6 +175,7 @@ public class AzureAD {
             LOG.info("Using cached Groups");
         }
         groupDescription = groupDescFrmJSON(groupID, groupResponse);
+        groupDescs.put(groupID, groupDescription);
         return groupDescription;
     }
 
@@ -159,7 +186,16 @@ public class AzureAD {
      * @return The displayName of the application if found.
      */
     public final String getAppName(final String appID) {
-        String groupName = null;
+        String appName = null;
+        
+        if(appNames == null) {
+            appNames = new HashMap<String, String>();
+        }
+        
+        if(appNames.containsKey(appID)) {
+            LOG.info("Result was in HashMap");
+            return (String) appNames.get(appID);
+        }
 
         if (appResponse == null) {
             StringBuilder makeURL = new StringBuilder();
@@ -194,8 +230,9 @@ public class AzureAD {
         } else {
             LOG.info("Using cached Applications");
         }
-        groupName = appNameFromJSON(appID, appResponse);
-        return groupName;
+        appName = appNameFromJSON(appID, appResponse);
+        appNames.put(appID,appName);
+        return appName;
     }
 
     /**
