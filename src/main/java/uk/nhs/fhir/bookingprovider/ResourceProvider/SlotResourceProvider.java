@@ -138,9 +138,12 @@ public class SlotResourceProvider implements IResourceProvider {
             @Description(shortDefinition = "This is the HealthcareService for "
                     + "which Slots are being requested - set this to the ASID "
                     + "of the Provider service")
-            @RequiredParam(name = "schedule.actor:healthcareservice") TokenParam theHealthcareService,
-            @OptionalParam(name = Slot.SP_STATUS) TokenParam statusToken,
-            @OptionalParam(name = Slot.SP_START) DateRangeParam startRange,
+            @RequiredParam(name = "schedule.actor:healthcareservice")
+                    TokenParam theHealthcareService,
+            @OptionalParam(name = Slot.SP_STATUS)
+                    TokenParam statusToken,
+            @OptionalParam(name = Slot.SP_START)
+                    DateRangeParam startRange,
             @IncludeParam(allow = {
         "Slot:schedule",
         "Schedule:actor:healthcareservice",
@@ -159,7 +162,7 @@ public class SlotResourceProvider implements IResourceProvider {
         LOG.info("Slot search being handled for provider: "
                 + theHealthcareService.getValue().toString());
 
-        if (startRange != null) {
+        if(startRange != null) {
             lowerBound = startRange.getLowerBound();
             upperBound = startRange.getUpperBound();
 
@@ -212,31 +215,26 @@ public class SlotResourceProvider implements IResourceProvider {
         // Now we copy items that fit the start date filter into filteredSlots.
         ArrayList filteredSlots = new ArrayList();
 
-        if (startRange != null) {
-            for (Object sl : slots) {
+        if(startRange != null) {
+            for(Object sl : slots) {
                 boolean lowerOkay = false;
                 boolean upperOkay = false;
                 Slot thisSlot = (Slot) sl;
-                if (lowerBound != null) {
-                    switch (lowerBound.getPrefix()) {
-                        // See: http://hapifhir.io/apidocs/ca/uhn/fhir/rest/param/ParamPrefixEnum.html
-                        case NOT_EQUAL:
-                        case STARTS_AFTER:
-                        case ENDS_BEFORE:
-                            String endsBeforeErrMsg = "ENDS_BEFORE, NOT_EQUAL and STARTS_AFTER not currently supported";
-                            throw new UnprocessableEntityException(endsBeforeErrMsg);
-
+                if(lowerBound != null) {
+                    switch(lowerBound.getPrefix()) {
                         case APPROXIMATE:
                         case EQUAL:
-                            if (thisSlot.getStart().equals(lowerBound.getValue())) {
+                            if(thisSlot.getStart().equals(lowerBound.getValue()))
                                 lowerOkay = true;
-                            }
                             break;
-
+                        case ENDS_BEFORE:
+                            String endsBeforeErrMsg = "ENDS_BEFORE not currently supported";
+                            throw new UnprocessableEntityException(endsBeforeErrMsg);
+                            
                         case GREATERTHAN:
-                            switch (lowerBound.getPrecision()) {
+                            switch(lowerBound.getPrecision()) {
                                 case MILLI:
-                                    if (thisSlot.getStart().after(lowerBound.getValue())) {
+                                    if(true) {
                                         lowerOkay = true;
                                     }
                                     break;
@@ -249,76 +247,30 @@ public class SlotResourceProvider implements IResourceProvider {
                                     throw new UnprocessableEntityException(notMillisErrMsg);
                             }
                             break;
-
                         case GREATERTHAN_OR_EQUALS:
-                            switch (lowerBound.getPrecision()) {
-                                case MILLI:
-                                    if (thisSlot.getStart().after(lowerBound.getValue())
-                                            || thisSlot.getStart().equals(lowerBound.getValue())) {
-                                        lowerOkay = true;
-                                    }
-                                    break;
-                                case YEAR:
-                                case MONTH:
-                                case DAY:
-                                case MINUTE:
-                                case SECOND:
-                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
-                                    throw new UnprocessableEntityException(notMillisErrMsg);
-                            }
                             break;
-
                         case LESSTHAN:
-                            switch (lowerBound.getPrecision()) {
-                                case MILLI:
-                                    if (thisSlot.getStart().before(lowerBound.getValue())) {
-                                        lowerOkay = true;
-                                    }
-                                    break;
-                                case YEAR:
-                                case MONTH:
-                                case DAY:
-                                case MINUTE:
-                                case SECOND:
-                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
-                                    throw new UnprocessableEntityException(notMillisErrMsg);
-                            }
                             break;
-
                         case LESSTHAN_OR_EQUALS:
-                            switch (lowerBound.getPrecision()) {
-                                case MILLI:
-                                    if (thisSlot.getStart().before(lowerBound.getValue())
-                                            || thisSlot.getStart().equals(lowerBound.getValue())) {
-                                        lowerOkay = true;
-                                    }
-                                    break;
-                                case YEAR:
-                                case MONTH:
-                                case DAY:
-                                case MINUTE:
-                                case SECOND:
-                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
-                                    throw new UnprocessableEntityException(notMillisErrMsg);
-                            }
                             break;
-
+                        case NOT_EQUAL:
+                            break;
+                        case STARTS_AFTER:
+                            break;
                     }
                 } else {
                     lowerOkay = true;
                 }
-                if (upperBound != null) {
-                    // TODO: Replicate the lowerBound process here
-                } else {
-                    upperOkay = true;
+                if(upperBound != null) {
                 }
-                if (upperOkay && lowerOkay) {
+                if(upperOkay && lowerOkay) {
                     filteredSlots.add(thisSlot);
                 }
             }
         } else {
             filteredSlots.addAll(slots);
         }
+
 
         if (incSchedule) {
             // Now iterate through the Slots and get a list of Schedules...
