@@ -138,12 +138,9 @@ public class SlotResourceProvider implements IResourceProvider {
             @Description(shortDefinition = "This is the HealthcareService for "
                     + "which Slots are being requested - set this to the ASID "
                     + "of the Provider service")
-            @RequiredParam(name = "schedule.actor:healthcareservice")
-                    TokenParam theHealthcareService,
-            @OptionalParam(name = Slot.SP_STATUS)
-                    TokenParam statusToken,
-            @OptionalParam(name = Slot.SP_START)
-                    DateRangeParam startRange,
+            @RequiredParam(name = "schedule.actor:healthcareservice") TokenParam theHealthcareService,
+            @OptionalParam(name = Slot.SP_STATUS) TokenParam statusToken,
+            @OptionalParam(name = Slot.SP_START) DateRangeParam startRange,
             @IncludeParam(allow = {
         "Slot:schedule",
         "Schedule:actor:healthcareservice",
@@ -162,7 +159,7 @@ public class SlotResourceProvider implements IResourceProvider {
         LOG.info("Slot search being handled for provider: "
                 + theHealthcareService.getValue().toString());
 
-        if(startRange != null) {
+        if (startRange != null) {
             lowerBound = startRange.getLowerBound();
             upperBound = startRange.getUpperBound();
 
@@ -215,26 +212,29 @@ public class SlotResourceProvider implements IResourceProvider {
         // Now we copy items that fit the start date filter into filteredSlots.
         ArrayList filteredSlots = new ArrayList();
 
-        if(startRange != null) {
-            for(Object sl : slots) {
+        if (startRange != null) {
+            for (Object sl : slots) {
                 boolean lowerOkay = false;
                 boolean upperOkay = false;
                 Slot thisSlot = (Slot) sl;
-                if(lowerBound != null) {
-                    switch(lowerBound.getPrefix()) {
+                if (lowerBound != null) {
+                    switch (lowerBound.getPrefix()) {
                         case APPROXIMATE:
                         case EQUAL:
-                            if(thisSlot.getStart().equals(lowerBound.getValue()))
+                            if (thisSlot.getStart().equals(lowerBound.getValue())) {
                                 lowerOkay = true;
+                            }
                             break;
                         case ENDS_BEFORE:
-                            String endsBeforeErrMsg = "ENDS_BEFORE not currently supported";
+                        case NOT_EQUAL:
+                        case STARTS_AFTER:
+                            String endsBeforeErrMsg = "ENDS_BEFORE, NOT_EQUAL, STARTS_AFTER not currently supported";
                             throw new UnprocessableEntityException(endsBeforeErrMsg);
-                            
+
                         case GREATERTHAN:
-                            switch(lowerBound.getPrecision()) {
+                            switch (lowerBound.getPrecision()) {
                                 case MILLI:
-                                    if(true) {
+                                    if (thisSlot.getStart().after(lowerBound.getValue())) {
                                         lowerOkay = true;
                                     }
                                     break;
@@ -248,30 +248,150 @@ public class SlotResourceProvider implements IResourceProvider {
                             }
                             break;
                         case GREATERTHAN_OR_EQUALS:
+                            switch (lowerBound.getPrecision()) {
+                                case MILLI:
+                                    if (thisSlot.getStart().after(lowerBound.getValue())
+                                            || thisSlot.getStart().equals(lowerBound.getValue())) {
+                                        lowerOkay = true;
+                                    }
+                                    break;
+                                case YEAR:
+                                case MONTH:
+                                case DAY:
+                                case MINUTE:
+                                case SECOND:
+                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
+                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                            }
                             break;
                         case LESSTHAN:
+                            switch (lowerBound.getPrecision()) {
+                                case MILLI:
+                                    if (thisSlot.getStart().before(lowerBound.getValue())) {
+                                        lowerOkay = true;
+                                    }
+                                    break;
+                                case YEAR:
+                                case MONTH:
+                                case DAY:
+                                case MINUTE:
+                                case SECOND:
+                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
+                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                            }
                             break;
                         case LESSTHAN_OR_EQUALS:
-                            break;
-                        case NOT_EQUAL:
-                            break;
-                        case STARTS_AFTER:
+                            switch (lowerBound.getPrecision()) {
+                                case MILLI:
+                                    if (thisSlot.getStart().before(lowerBound.getValue())
+                                            || thisSlot.getStart().equals(lowerBound.getValue())) {
+                                        lowerOkay = true;
+                                    }
+                                    break;
+                                case YEAR:
+                                case MONTH:
+                                case DAY:
+                                case MINUTE:
+                                case SECOND:
+                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
+                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                            }
                             break;
                     }
                 } else {
                     lowerOkay = true;
                 }
-                if(upperBound != null) {
-                    // Need to replicate the above into here.
+                if (upperBound != null) {
+                    switch (upperBound.getPrefix()) {
+                        case APPROXIMATE:
+                        case EQUAL:
+                            if (thisSlot.getStart().equals(upperBound.getValue())) {
+                                upperOkay = true;
+                            }
+                            break;
+                        case ENDS_BEFORE:
+                        case NOT_EQUAL:
+                        case STARTS_AFTER:
+                            String endsBeforeErrMsg = "ENDS_BEFORE, NOT_EQUAL, STARTS_AFTER not currently supported";
+                            throw new UnprocessableEntityException(endsBeforeErrMsg);
+
+                        case GREATERTHAN:
+                            switch (upperBound.getPrecision()) {
+                                case MILLI:
+                                    if (thisSlot.getStart().after(upperBound.getValue())) {
+                                        upperOkay = true;
+                                    }
+                                    break;
+                                case YEAR:
+                                case MONTH:
+                                case DAY:
+                                case MINUTE:
+                                case SECOND:
+                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
+                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                            }
+                            break;
+                        case GREATERTHAN_OR_EQUALS:
+                            switch (upperBound.getPrecision()) {
+                                case MILLI:
+                                    if (thisSlot.getStart().after(upperBound.getValue())
+                                            || thisSlot.getStart().equals(upperBound.getValue())) {
+                                        upperOkay = true;
+                                    }
+                                    break;
+                                case YEAR:
+                                case MONTH:
+                                case DAY:
+                                case MINUTE:
+                                case SECOND:
+                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
+                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                            }
+                            break;
+                        case LESSTHAN:
+                            switch (lowerBound.getPrecision()) {
+                                case MILLI:
+                                    if (thisSlot.getStart().before(upperBound.getValue())) {
+                                        upperOkay = true;
+                                    }
+                                    break;
+                                case YEAR:
+                                case MONTH:
+                                case DAY:
+                                case MINUTE:
+                                case SECOND:
+                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
+                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                            }
+                            break;
+                        case LESSTHAN_OR_EQUALS:
+                            switch (upperBound.getPrecision()) {
+                                case MILLI:
+                                    if (thisSlot.getStart().before(upperBound.getValue())
+                                            || thisSlot.getStart().equals(upperBound.getValue())) {
+                                        upperOkay = true;
+                                    }
+                                    break;
+                                case YEAR:
+                                case MONTH:
+                                case DAY:
+                                case MINUTE:
+                                case SECOND:
+                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
+                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                            }
+                            break;
+                    }
+                } else {
+                    upperOkay = true;
                 }
-                if(upperOkay && lowerOkay) {
+                if (upperOkay && lowerOkay) {
                     filteredSlots.add(thisSlot);
                 }
             }
         } else {
             filteredSlots.addAll(slots);
         }
-
 
         if (incSchedule) {
             // Now iterate through the Slots and get a list of Schedules...
