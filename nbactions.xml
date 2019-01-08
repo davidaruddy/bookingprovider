@@ -7,4 +7,11 @@
                 <goal>checkstyle::check</goal>
             </goals>
         </action>
+        <action>
+            <actionName>CUSTOM-Package</actionName>
+            <displayName>Package</displayName>
+            <goals>
+                <goal>package</goal>
+            </goals>
+        </action>
     </actions>
