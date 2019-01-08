@@ -303,4 +303,11 @@ public class RequestInterceptor extends InterceptorAdapter {
             }
         }
     }
+    
+    /**
+     * TElls our resident Azure handler to flush any cached results it has.
+     */
+    public void flushAzureCache() {
+        adWrangler.flushCaches();
+    }
 }

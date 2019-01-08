@@ -1,0 +1,46 @@
+
+{
+    "odata.metadata": "https://graph.windows.net/e52111c7-4048-4f34-aea9-6326afa44a8d/$metadata#directoryObjects",
+    "value": [
+        {
+            "odata.type": "Microsoft.DirectoryServices.Group",
+            "objectType": "Group",
+            "objectId": "ab412fe9-3f68-4368-9810-9dc24d1659b1",
+            "deletionTimestamp": null,
+            "description": "Those users (Apps) allowed to read and search for Slots.",
+            "dirSyncEnabled": null,
+            "displayName": "urn:nhs:names:services:careconnect:fhir:rest:read:slot",
+            "lastDirSyncTime": null,
+            "mail": null,
+            "mailNickname": "b665545b-17de-45c4-b2a2-7ba2dde5f74f",
+            "mailEnabled": false,
+            "onPremisesDomainName": null,
+            "onPremisesNetBiosName": null,
+            "onPremisesSamAccountName": null,
+            "onPremisesSecurityIdentifier": null,
+            "provisioningErrors": [],
+            "proxyAddresses": [],
+            "securityEnabled": true
+        },
+        {
+            "odata.type": "Microsoft.DirectoryServices.Group",
+            "objectType": "Group",
+            "objectId": "dacb82c5-aea8-4509-887f-281324062dfd",
+            "deletionTimestamp": null,
+            "description": "Group of applications that are permitted to book Appointments in CareConnect FHIR servers",
+            "dirSyncEnabled": null,
+            "displayName": "urn:nhs:names:services:careconnect:fhir:rest:create:appointment",
+            "lastDirSyncTime": null,
+            "mail": null,
+            "mailNickname": "6c6427e2-6fa1-4430-942c-5fe352b537fc",
+            "mailEnabled": false,
+            "onPremisesDomainName": null,
+            "onPremisesNetBiosName": null,
+            "onPremisesSamAccountName": null,
+            "onPremisesSecurityIdentifier": null,
+            "provisioningErrors": [],
+            "proxyAddresses": [],
+            "securityEnabled": true
+        }
+    ]
+}

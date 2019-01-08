@@ -34,6 +34,20 @@ public class AzureAD {
      * The Logger object we use across this class.
      */
     private static final Logger LOG = Logger.getLogger(AzureAD.class.getName());
+    private static String groupResponse = null;
+    private static String appResponse = null;
+
+    /**
+     * Allow the caches to be reset.
+     */
+    public boolean flushCaches() {
+        if(groupResponse != null || appResponse != null) {
+            groupResponse = null;
+            appResponse = null;
+            return true;
+        }
+        return false;
+    }
 
     /**
      * The root URL for making queries to Azure.
@@ -54,33 +68,41 @@ public class AzureAD {
     public final String getGroupName(final String groupID) {
 
         String groupName = null;
-        StringBuilder makeURL = new StringBuilder();
-        makeURL.append(rootURL);
-        makeURL.append(tenant);
-        makeURL.append("/groups?api-version=1.6");
-        String url = makeURL.toString();
 
-        String token = getToken();
+        if (groupResponse == null) {
+            StringBuilder makeURL = new StringBuilder();
+            makeURL.append(rootURL);
+            makeURL.append(tenant);
+            makeURL.append("/groups?api-version=1.6");
+            String url = makeURL.toString();
+            LOG.info("Calling Azure: " + url);
 
-        if (token != null) {
+            String token = getToken();
 
-            try {
-                OkHttpClient client = new OkHttpClient();
+            if (token != null) {
 
-                Request request = new Request.Builder()
-                        .url(url)
-                        .get()
-                        .addHeader("cache-control", "no-cache")
-                        .addHeader("Authorization", "Bearer " + token)
-                        .build();
+                try {
+                    OkHttpClient client = new OkHttpClient();
 
-                Response response = client.newCall(request).execute();
-                String responseStr = response.body().string();
-                groupName = groupNameFrmJSON(groupID, responseStr);
-            } catch (IOException ex) {
-                LOG.severe(ex.getMessage());
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .get()
+                            .addHeader("cache-control", "no-cache")
+                            .addHeader("Authorization", "Bearer " + token)
+                            .build();
+
+                    Response response = client.newCall(request).execute();
+                    groupResponse = response.body().string();
+                    //groupResponse = responseStr;
+                }
+                catch (IOException ex) {
+                    LOG.severe(ex.getMessage());
+                }
             }
+        } else {
+            LOG.info("Using cached Groups");
         }
+        groupName = groupNameFrmJSON(groupID, groupResponse);
         return groupName;
     }
 
@@ -93,32 +115,40 @@ public class AzureAD {
     public final String getGroupDesc(final String groupID) {
 
         String groupDescription = null;
-        StringBuilder makeURL = new StringBuilder();
-        makeURL.append(rootURL);
-        makeURL.append(tenant);
-        makeURL.append("/groups?api-version=1.6");
-        String url = makeURL.toString();
-        String token = getToken();
 
-        if (token != null) {
+        if (groupResponse == null) {
+            StringBuilder makeURL = new StringBuilder();
+            makeURL.append(rootURL);
+            makeURL.append(tenant);
+            makeURL.append("/groups?api-version=1.6");
+            String url = makeURL.toString();
+            LOG.info("Calling Azure: " + url);
+            String token = getToken();
 
-            try {
-                OkHttpClient client = new OkHttpClient();
+            if (token != null) {
 
-                Request request = new Request.Builder()
-                        .url(url)
-                        .get()
-                        .addHeader("cache-control", "no-cache")
-                        .addHeader("Authorization", "Bearer " + token)
-                        .build();
+                try {
+                    OkHttpClient client = new OkHttpClient();
 
-                Response response = client.newCall(request).execute();
-                String responseStr = response.body().string();
-                groupDescription = groupDescFrmJSON(groupID, responseStr);
-            } catch (IOException ex) {
-                LOG.severe(ex.getMessage());
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .get()
+                            .addHeader("cache-control", "no-cache")
+                            .addHeader("Authorization", "Bearer " + token)
+                            .build();
+
+                    Response response = client.newCall(request).execute();
+                    groupResponse = response.body().string();
+
+                }
+                catch (IOException ex) {
+                    LOG.severe(ex.getMessage());
+                }
             }
+        } else {
+            LOG.info("Using cached Groups");
         }
+        groupDescription = groupDescFrmJSON(groupID, groupResponse);
         return groupDescription;
     }
 
@@ -130,33 +160,41 @@ public class AzureAD {
      */
     public final String getAppName(final String appID) {
         String groupName = null;
-        StringBuilder makeURL = new StringBuilder();
-        makeURL.append(rootURL);
-        makeURL.append(tenant);
-        makeURL.append("/applications?api-version=1.6");
-        String url = makeURL.toString();
 
-        String token = getToken();
+        if (appResponse == null) {
+            StringBuilder makeURL = new StringBuilder();
+            makeURL.append(rootURL);
+            makeURL.append(tenant);
+            makeURL.append("/applications?api-version=1.6");
+            String url = makeURL.toString();
+            LOG.info("Calling Azure: " + url);
 
-        if (token != null) {
+            String token = getToken();
 
-            try {
-                OkHttpClient client = new OkHttpClient();
+            if (token != null) {
 
-                Request request = new Request.Builder()
-                        .url(url)
-                        .get()
-                        .addHeader("cache-control", "no-cache")
-                        .addHeader("Authorization", "Bearer " + token)
-                        .build();
+                try {
+                    OkHttpClient client = new OkHttpClient();
 
-                Response response = client.newCall(request).execute();
-                String responseStr = response.body().string();
-                groupName = appNameFromJSON(appID, responseStr);
-            } catch (IOException ex) {
-                LOG.severe(ex.getMessage());
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .get()
+                            .addHeader("cache-control", "no-cache")
+                            .addHeader("Authorization", "Bearer " + token)
+                            .build();
+
+                    Response response = client.newCall(request).execute();
+                    appResponse = response.body().string();
+                    
+                }
+                catch (IOException ex) {
+                    LOG.severe(ex.getMessage());
+                }
             }
+        } else {
+            LOG.info("Using cached Applications");
         }
+        groupName = appNameFromJSON(appID, appResponse);
         return groupName;
     }
 
@@ -208,7 +246,8 @@ public class AzureAD {
             token = responseObject.getAccess_token();
             //LOG.info(token);
             return token;
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             LOG.severe(ex.getMessage());
         }
         return token;

@@ -141,10 +141,6 @@ public class AzureADTest {
         String result = instance.appNameFromJSON(appID, json);
         assertEquals(expResult, result);
     }
-
-    
-    
-    
     
     /**
      * Method to get the contents of files in src/test/resources
@@ -174,5 +170,76 @@ public class AzureADTest {
         return result.toString();
     }
 
+    /**
+     * Test of flushCaches method, of class AzureAD.
+     */
+    @Test
+    public void testFlushCaches() {
+        System.out.println("flushCaches");
+        AzureAD instance = new AzureAD();
+        boolean flushCaches = instance.flushCaches();
+        assertFalse(flushCaches);
+        String groupid = "ab412fe9-3f68-4368-9810-9dc24d1659b1";
+        instance.getGroupName(groupid);
+        flushCaches = instance.flushCaches();
+        assertTrue(flushCaches);
+        
+    }
+
+    /**
+     * Test of groupNameFrmJSON method, of class AzureAD.
+     */
+    @Test
+    public void testGroupNameFrmJSON() {
+        System.out.println("groupNameFrmJSON");
+        String grID = "ab412fe9-3f68-4368-9810-9dc24d1659b1";
+        String json = getFileContents("groups.json");
+        AzureAD instance = new AzureAD();
+        String expResult = "urn:nhs:names:services:careconnect:fhir:rest:read:slot";
+        String result = instance.groupNameFrmJSON(grID, json);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of groupNameFrmJSON method, of class AzureAD.
+     */
+    @Test
+    public void testGroupNameFrmJSONBAD() {
+        System.out.println("groupNameFrmJSON");
+        String grID = "ab412fe9-aaaa-bbbb-cccc-9dc24d1659b1";
+        String json = getFileContents("groups.json");
+        AzureAD instance = new AzureAD();
+        String expResult = null;
+        String result = instance.groupNameFrmJSON(grID, json);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of groupDescFrmJSON method, of class AzureAD.
+     */
+    @Test
+    public void testGroupDescFrmJSON() {
+        System.out.println("groupDescFrmJSON");
+        String grID = "ab412fe9-3f68-4368-9810-9dc24d1659b1";
+        String json = getFileContents("groups.json");
+        AzureAD instance = new AzureAD();
+        String expResult = "Those users (Apps) allowed to read and search for Slots.";
+        String result = instance.groupDescFrmJSON(grID, json);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of groupDescFrmJSON method, of class AzureAD.
+     */
+    @Test
+    public void testGroupDescFrmJSONBAD() {
+        System.out.println("groupDescFrmJSON");
+        String grID = "ab412fe9-aaaa-bbbb-cccc-9dc24d1659b1";
+        String json = getFileContents("groups.json");
+        AzureAD instance = new AzureAD();
+        String expResult = null;
+        String result = instance.groupDescFrmJSON(grID, json);
+        assertEquals(expResult, result);
+    }
 
 }

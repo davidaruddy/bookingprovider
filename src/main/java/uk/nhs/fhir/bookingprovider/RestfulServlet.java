@@ -46,6 +46,8 @@ import uk.nhs.fhir.bookingprovider.data.DataStore;
  */
 @WebServlet(urlPatterns = {"/poc/*"}, displayName = "FHIR Booking POC")
 public class RestfulServlet extends RestfulServer {
+    
+    RequestInterceptor requestInterceptor = null;
 
     /**
      * Constructor, just sets the base URL (to a static fixed value for now).
@@ -97,6 +99,9 @@ public class RestfulServlet extends RestfulServer {
         if (request.getRequestURI().equals("/poc/reset")) {
             LOG.info("Resetting the data store...");
             data.initialize();
+            LOG.info("Flushing cached Groups and Applications from Azure");
+            requestInterceptor.flushAzureCache();
+            
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("text/html");
             PrintWriter outputStream = response.getWriter();
@@ -161,7 +166,7 @@ public class RestfulServlet extends RestfulServer {
         data = DataStore.getInstance();
 
         // Create an interceptor to validate incoming requests
-        RequestInterceptor requestInterceptor = new RequestInterceptor();
+        requestInterceptor = new RequestInterceptor();
         // Now register the validating interceptor
         registerInterceptor(requestInterceptor);
         List<IResourceProvider> rpList = new ArrayList<>();
