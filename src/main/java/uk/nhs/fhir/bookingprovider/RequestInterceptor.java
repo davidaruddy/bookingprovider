@@ -228,6 +228,11 @@ public class RequestInterceptor extends InterceptorAdapter {
                 canReadSlots = true;
             }
         }
+        if(canBookAppts && canReadSlots) {
+            LOG.info("Both Groups found, this request should be permitted.");
+        } else {
+            LOG.info("Groups not found, this request should be BLOCKED.");
+        }
         return (canBookAppts && canReadSlots);
     }
 
