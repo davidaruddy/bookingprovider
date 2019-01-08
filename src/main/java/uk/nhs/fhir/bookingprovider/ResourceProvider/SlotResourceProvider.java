@@ -262,6 +262,7 @@ public class SlotResourceProvider implements IResourceProvider {
                     lowerOkay = true;
                 }
                 if(upperBound != null) {
+                    // Need to replicate the above into here.
                 }
                 if(upperOkay && lowerOkay) {
                     filteredSlots.add(thisSlot);
