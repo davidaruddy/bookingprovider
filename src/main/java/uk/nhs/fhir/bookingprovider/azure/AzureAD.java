@@ -38,20 +38,24 @@ public class AzureAD {
     private static final Logger LOG = Logger.getLogger(AzureAD.class.getName());
     private static String groupResponse = null;
     private static String appResponse = null;
-    private static Map groupNames;
-    private static Map groupDescs;
-    private static Map appNames;
+    private static Map groupNameMap;
+    private static Map groupDescMap;
+    private static Map appNameMap;
 
     /**
      * Allow the caches to be reset.
      */
     public boolean flushCaches() {
-        if(groupResponse != null || appResponse != null) {
+        if (groupResponse != null
+                || appResponse != null
+                || groupNameMap != null
+                || groupDescMap != null
+                || appNameMap != null) {
             groupResponse = null;
             appResponse = null;
-            groupNames = null;
-            groupDescs = null;
-            appNames = null;
+            groupNameMap = null;
+            groupDescMap = null;
+            appNameMap = null;
             return true;
         }
         return false;
@@ -76,14 +80,14 @@ public class AzureAD {
     public final String getGroupName(final String groupID) {
 
         String groupName = null;
-        
-        if(groupNames == null) {
-            groupNames = new HashMap<String, String>();
+
+        if (groupNameMap == null) {
+            groupNameMap = new HashMap<String, String>();
         }
-        
-        if(groupNames.containsKey(groupID)) {
+
+        if (groupNameMap.containsKey(groupID)) {
             LOG.info("Result was in HashMap");
-            return (String) groupNames.get(groupID);
+            return (String) groupNameMap.get(groupID);
         }
 
         if (groupResponse == null) {
@@ -120,7 +124,7 @@ public class AzureAD {
             LOG.info("Using cached Groups");
         }
         groupName = groupNameFrmJSON(groupID, groupResponse);
-        groupNames.put(groupID, groupName);
+        groupNameMap.put(groupID, groupName);
         return groupName;
     }
 
@@ -133,13 +137,13 @@ public class AzureAD {
     public final String getGroupDesc(final String groupID) {
 
         String groupDescription = null;
-        if(groupDescs == null) {
-            groupDescs = new HashMap<String, String>();
+        if (groupDescMap == null) {
+            groupDescMap = new HashMap<String, String>();
         }
-        
-        if(groupDescs.containsKey(groupID)) {
+
+        if (groupDescMap.containsKey(groupID)) {
             LOG.info("Result was in HashMap");
-            return (String) groupDescs.get(groupID);
+            return (String) groupDescMap.get(groupID);
         }
 
         if (groupResponse == null) {
@@ -175,7 +179,7 @@ public class AzureAD {
             LOG.info("Using cached Groups");
         }
         groupDescription = groupDescFrmJSON(groupID, groupResponse);
-        groupDescs.put(groupID, groupDescription);
+        groupDescMap.put(groupID, groupDescription);
         return groupDescription;
     }
 
@@ -187,14 +191,14 @@ public class AzureAD {
      */
     public final String getAppName(final String appID) {
         String appName = null;
-        
-        if(appNames == null) {
-            appNames = new HashMap<String, String>();
+
+        if (appNameMap == null) {
+            appNameMap = new HashMap<String, String>();
         }
-        
-        if(appNames.containsKey(appID)) {
+
+        if (appNameMap.containsKey(appID)) {
             LOG.info("Result was in HashMap");
-            return (String) appNames.get(appID);
+            return (String) appNameMap.get(appID);
         }
 
         if (appResponse == null) {
@@ -221,7 +225,7 @@ public class AzureAD {
 
                     Response response = client.newCall(request).execute();
                     appResponse = response.body().string();
-                    
+
                 }
                 catch (IOException ex) {
                     LOG.severe(ex.getMessage());
@@ -231,7 +235,7 @@ public class AzureAD {
             LOG.info("Using cached Applications");
         }
         appName = appNameFromJSON(appID, appResponse);
-        appNames.put(appID,appName);
+        appNameMap.put(appID, appName);
         return appName;
     }
 
