@@ -25,7 +25,9 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
@@ -124,7 +126,7 @@ public class SlotResourceProvider implements IResourceProvider {
      * The "@Search" annotation indicates that this method supports the search
      * operation.You may have many different method annotated with this
      * annotation, to support many different search criteria. This example
-     * searches by family name.
+     * searches by HealthcareService and Status.
      *
      * @param theHealthcareService The Service that Slots are being filtered to.
      * @param statusToken The status filter we are requested for.
@@ -139,8 +141,10 @@ public class SlotResourceProvider implements IResourceProvider {
                     + "of the Provider service")
             @RequiredParam(name = "schedule.actor:healthcareservice")
                     TokenParam theHealthcareService,
-            @OptionalParam(name = "Slot.status")
+            @OptionalParam(name = Slot.SP_STATUS)
                     TokenParam statusToken,
+            @OptionalParam(name = Slot.SP_START)
+                    DateRangeParam startRange,
             @IncludeParam(allow = {
                 "Slot:schedule",
                 "Schedule:actor:healthcareservice",
@@ -153,9 +157,20 @@ public class SlotResourceProvider implements IResourceProvider {
         boolean incPractitionerRole = false;
         boolean incPractitioner = false;
         boolean incProvider = false;
+        DateParam lowerBound = null;
+        DateParam upperBound = null;
 
         LOG.info("Slot search being handled for provider: "
                 + theHealthcareService.getValue().toString());
+
+        if(startRange != null) {
+            lowerBound = startRange.getLowerBound();
+            upperBound = startRange.getUpperBound();
+
+            LOG.info("Date range is from: " + startRange.getLowerBoundAsInstant());
+            LOG.info("to: " + startRange.getUpperBoundAsInstant());
+
+        }
 
         Iterator<Include> itr = theIncludes.iterator();
         while (itr.hasNext()) {
@@ -197,10 +212,71 @@ public class SlotResourceProvider implements IResourceProvider {
                 throw new UnprocessableEntityException(statusErr);
             }
         }
+
+        // Now we copy items that fit the start date filter into filteredSlots.
+        ArrayList filteredSlots = new ArrayList();
+
+        if(startRange != null) {
+            for(Object sl : slots) {
+                boolean lowerOkay = false;
+                boolean upperOkay = false;
+                Slot thisSlot = (Slot) sl;
+                if(lowerBound != null) {
+                    switch(lowerBound.getPrefix()) {
+                        case APPROXIMATE:
+                        case EQUAL:
+                            if(thisSlot.getStart().equals(lowerBound.getValue()))
+                                lowerOkay = true;
+                            break;
+                        case ENDS_BEFORE:
+                            String endsBeforeErrMsg = "ENDS_BEFORE not currently supported";
+                            throw new UnprocessableEntityException(endsBeforeErrMsg);
+                            
+                        case GREATERTHAN:
+                            switch(lowerBound.getPrecision()) {
+                                case MILLI:
+                                    if(true) {
+                                        lowerOkay = true;
+                                    }
+                                    break;
+                                case YEAR:
+                                case MONTH:
+                                case DAY:
+                                case MINUTE:
+                                case SECOND:
+                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
+                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                            }
+                            break;
+                        case GREATERTHAN_OR_EQUALS:
+                            break;
+                        case LESSTHAN:
+                            break;
+                        case LESSTHAN_OR_EQUALS:
+                            break;
+                        case NOT_EQUAL:
+                            break;
+                        case STARTS_AFTER:
+                            break;
+                    }
+                } else {
+                    lowerOkay = true;
+                }
+                if(upperBound != null) {
+                }
+                if(upperOkay && lowerOkay) {
+                    filteredSlots.add(thisSlot);
+                }
+            }
+        } else {
+            filteredSlots.addAll(slots);
+        }
+
+
         if (incSchedule) {
             // Now iterate through the Slots and get a list of Schedules...
             ArrayList<String> schedNames = new ArrayList<>();
-            for (Object sl : slots) {
+            for (Object sl : filteredSlots) {
                 Slot thisSlot = (Slot) sl;
                 String reference = thisSlot.getSchedule().getReference();
 
@@ -216,21 +292,21 @@ public class SlotResourceProvider implements IResourceProvider {
                     LOG.info("Null returned when getting: " + schedName);
                 } else {
                     LOG.info("Got schedule: " + schedName);
-                    slots.add(sch);
+                    filteredSlots.add(sch);
                 }
             }
         }
 
         // Check whether they've asked for the HealthcareService to be included
         if (incHealthcareService) {
-            if (slots.size() > 0) {
+            if (filteredSlots.size() > 0) {
                 LOG.info("Asked to add HealthcareService");
                 HealthcareService healthcareService =
                         data.getHealthcareService(
                                 theHealthcareService.getValue());
                 if (healthcareService != null) {
                     LOG.info("Adding HealthcareService");
-                    slots.add(healthcareService);
+                    filteredSlots.add(healthcareService);
                 }
             }
         }
@@ -238,31 +314,31 @@ public class SlotResourceProvider implements IResourceProvider {
         // Check whether they've asked for the Practitioner to be included
         if (incPractitioner) {
             LOG.info("Asked to add Practitioner");
-            if (slots.size() > 0) {
+            if (filteredSlots.size() > 0) {
                 LOG.info("Adding Practitioner");
-                slots.add(data.getPractitioner());
+                filteredSlots.add(data.getPractitioner());
             }
         }
 
         // Check whether they've asked for the PractitionerRole to be included
         if (incPractitionerRole) {
             LOG.info("Asked to add PractitionerRole");
-            if (slots.size() > 0) {
+            if (filteredSlots.size() > 0) {
                 LOG.info("Adding PractitionerRole");
-                slots.add(data.getPractitionerRole());
+                filteredSlots.add(data.getPractitionerRole());
             }
         }
 
         // Check whether they've asked for the Organization to be included
         if (incProvider) {
             LOG.info("Asked to add the Organization");
-            if (slots.size() > 0) {
+            if (filteredSlots.size() > 0) {
                 LOG.info("Adding the Organization");
-                slots.add(data.getOrganization());
+                filteredSlots.add(data.getOrganization());
             }
         }
-        LOG.info("Returned " + slots.size() + " slots.");
-        return slots;
+        LOG.info("Returned " + filteredSlots.size() + " slots.");
+        return filteredSlots;
     }
 
 }

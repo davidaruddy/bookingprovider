@@ -613,7 +613,7 @@ public final class DataStore {
      *
      * @return An ArrayList of all slots.
      */
-    public ArrayList<Slot> getSlots() {
+    public ArrayList getSlots() {
         return slots;
     }
 
@@ -679,7 +679,7 @@ public final class DataStore {
      *
      * @return An ArrayList of only the free Slots.
      */
-    public ArrayList<Slot> getFreeSlots() {
+    public ArrayList getFreeSlots() {
         ArrayList<Slot> freeSlots = new ArrayList<>();
 
         for (Slot n : slots) {
