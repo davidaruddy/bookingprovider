@@ -47,4 +47,4 @@ pipelines:
     - step:
         name: Announce to MS Teams
         script:
-          - curl -X POST "https://outlook.office.com/webhook/${TEAMS_LINK}" -f@teams_announce.json
+          - curl -X POST "https://outlook.office.com/webhook/${TEAMS_LINK}" --data @teams_announce.json
