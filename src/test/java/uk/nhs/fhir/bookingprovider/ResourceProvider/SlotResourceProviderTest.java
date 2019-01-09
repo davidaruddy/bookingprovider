@@ -129,6 +129,7 @@ public class SlotResourceProviderTest {
         theIncludes.add(new Include("Slot:schedule"));
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
+        newData.initialize();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
         int expResult = 21;
         List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
@@ -168,6 +169,7 @@ public class SlotResourceProviderTest {
         theIncludes.add(new Include("Slot:schedule"));
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
+        newData.initialize();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
         int expResult = 6;
         List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
@@ -205,6 +207,7 @@ public class SlotResourceProviderTest {
         theIncludes.add(new Include("Schedule:actor:HealthcareService"));
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
+        newData.initialize();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
         int expResult = 4;
         List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
