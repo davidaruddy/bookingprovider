@@ -40,14 +40,14 @@ pipelines:
             - sleep 2
             - aws ecs update-service --cluster BookingPOCCluster --service BookDemonstrator --force-new-deployment
             # This should put a message into the Teams channel (dodgy characters will need escaping)
-            #- curl -X POST https://outlook.office.com/webhook/${TEAMS_LINK} -H 'Content-Type: application/json' -d '{ "title": "New release deploying...", "text": "A new release of the CareConnect Booking provider demonstrator is currently being deployed."}'
+            - curl -X POST "https://outlook.office.com/webhook/${TEAMS_LINK}" --data @teams_announce.json
         services:
           - docker
 # Pipeline for develop branch...
 # Removed, to save precious Pipeline minutes for real deployment work.
-    #develop:
-    #- step:
-    #    caches:
-    #      - maven
-    #    script: # Modify the commands below to build your repository.
-    #      - mvn -B verify # -B batch mode makes Maven less verbose
+#    develop:
+#    - step:
+#        name: Announce to MS Teams
+#        script:
+#            - curl -X POST "https://outlook.office.com/webhook/${TEAMS_LINK}" --data @teams_announce.json
+
