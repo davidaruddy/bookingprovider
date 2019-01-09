@@ -237,6 +237,8 @@ public final class DataStore {
                 if (sched.equals(schedule)) {
                     if (slot.getStatus() == stat) {
                         result.add(slot);
+                    } else {
+                        LOG.info("Excluding Slot: " + slot.getId() + " as not free.");
                     }
                 }
             }

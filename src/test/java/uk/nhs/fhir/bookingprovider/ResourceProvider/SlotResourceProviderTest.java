@@ -126,19 +126,19 @@ public class SlotResourceProviderTest {
         Date theUpperBound = cal.getTime();
         DateRangeParam startRange = new DateRangeParam(theLowerBound, theUpperBound);
         Set<Include> theIncludes = new HashSet<Include>();
-        //theIncludes.add(new Include("Slot:schedule"));
+        theIncludes.add(new Include("Slot:schedule"));
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
-        int expResult = 20;
+        int expResult = 21;
         List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
-        int Schedcount = 0;
+        //int Schedcount = 0;
         for (int i = 0; i < result.size(); i++) {
             Resource res = (Resource) result.get(i);
             System.out.println(res.getResourceType().toString() + " - " + res.getId());
-            if(res.getResourceType().toString().equals("Schedule")) {
-                Schedcount++;
-            }
+        //    if(res.getResourceType().toString().equals("Schedule")) {
+        //        Schedcount++;
+        //    }
         }
         //assertEquals(1, Schedcount);
         assertEquals(expResult, result.size());
