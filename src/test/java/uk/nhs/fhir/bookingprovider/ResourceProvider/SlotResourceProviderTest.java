@@ -188,7 +188,7 @@ public class SlotResourceProviderTest {
         DateRangeParam startRange = new DateRangeParam(theLowerBound, theUpperBound);
         Set<Include> theIncludes = new HashSet<Include>();
         theIncludes.add(new Include("Slot:schedule"));
-        theIncludes.add(new Include("Schedule:actor:healthcareservice"));
+        theIncludes.add(new Include("Schedule:actor:HealthcareService"));
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);

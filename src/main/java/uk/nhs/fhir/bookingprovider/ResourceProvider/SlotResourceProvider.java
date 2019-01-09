@@ -143,7 +143,7 @@ public class SlotResourceProvider implements IResourceProvider {
             @OptionalParam(name = Slot.SP_START) DateRangeParam startRange,
             @IncludeParam(allow = {
         "Slot:schedule",
-        "Schedule:actor:healthcareservice",
+        "Schedule:actor:HealthcareService",
         "Schedule:actor:Practitioner",
         "Schedule:actor:PractitionerRole",
         "HealthcareService.providedBy"}) Set<Include> theIncludes) {
@@ -168,26 +168,36 @@ public class SlotResourceProvider implements IResourceProvider {
 
         }
 
+        // Here we process the array of Includes we've been asked for...
         Iterator<Include> itr = theIncludes.iterator();
         while (itr.hasNext()) {
             String inc = itr.next().getValue();
             LOG.info("Include: " + inc);
 
-            if (inc.equals("Slot:schedule")) {
-                incSchedule = true;
-                LOG.info("Will include Schedules");
-            }
-            if (inc.equals("Schedule:actor:healthcareservice")) {
-                incHealthcareService = true;
-            }
-            if (inc.equals("Schedule:actor:Practitioner")) {
-                incPractitioner = true;
-            }
-            if (inc.equals("Schedule:actor:PractitionerRole")) {
-                incPractitionerRole = true;
-            }
-            if (inc.equals("HealthcareService.providedBy")) {
-                incProvider = true;
+            // Decide what this include is and set a boolean for each one we support.
+            switch(inc) {
+                case "Slot:schedule":
+                    incSchedule = true;
+                    break;
+                    
+                case "Schedule:actor:HealthcareService":
+                    incHealthcareService = true;
+                    break;
+                    
+                case "Schedule:actor:Practitioner":
+                    incPractitioner = true;
+                    break;
+                    
+                case "Schedule:actor:PractitionerRole":
+                    incPractitionerRole = true;
+                    break;
+                    
+                case "HealthcareService.providedBy":
+                    incProvider = true;
+                    break;
+                    
+                default:
+                    LOG.info("Unexpected include sent: " + inc);
             }
         }
 
