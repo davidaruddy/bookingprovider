@@ -175,27 +175,27 @@ public class SlotResourceProvider implements IResourceProvider {
             LOG.info("Include: " + inc);
 
             // Decide what this include is and set a boolean for each one we support.
-            switch(inc) {
+            switch (inc) {
                 case "Slot:schedule":
                     incSchedule = true;
                     break;
-                    
+
                 case "Schedule:actor:HealthcareService":
                     incHealthcareService = true;
                     break;
-                    
+
                 case "Schedule:actor:Practitioner":
                     incPractitioner = true;
                     break;
-                    
+
                 case "Schedule:actor:PractitionerRole":
                     incPractitionerRole = true;
                     break;
-                    
+
                 case "HealthcareService.providedBy":
                     incProvider = true;
                     break;
-                    
+
                 default:
                     LOG.info("Unexpected include sent: " + inc);
             }
