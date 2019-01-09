@@ -48,4 +48,3 @@ pipelines:
         name: Announce to M$ Teams
         script:
         - curl -H 'Content-Type: application/json' -d@teams_announce.json https://outlook.office.com/webhook/${TEAMS_LINK}
-    #      - mvn -B verify # -B batch mode makes Maven less verbose
