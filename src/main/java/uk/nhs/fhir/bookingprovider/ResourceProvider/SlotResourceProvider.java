@@ -238,11 +238,7 @@ public class SlotResourceProvider implements IResourceProvider {
                                         lowerOkay = true;
                                     }
                                     break;
-                                case YEAR:
-                                case MONTH:
-                                case DAY:
-                                case MINUTE:
-                                case SECOND:
+                                default:
                                     String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
                                     throw new UnprocessableEntityException(notMillisErrMsg);
                             }
@@ -255,11 +251,7 @@ public class SlotResourceProvider implements IResourceProvider {
                                         lowerOkay = true;
                                     }
                                     break;
-                                case YEAR:
-                                case MONTH:
-                                case DAY:
-                                case MINUTE:
-                                case SECOND:
+                                default:
                                     String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
                                     throw new UnprocessableEntityException(notMillisErrMsg);
                             }
@@ -271,11 +263,7 @@ public class SlotResourceProvider implements IResourceProvider {
                                         lowerOkay = true;
                                     }
                                     break;
-                                case YEAR:
-                                case MONTH:
-                                case DAY:
-                                case MINUTE:
-                                case SECOND:
+                                default:
                                     String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
                                     throw new UnprocessableEntityException(notMillisErrMsg);
                             }
@@ -288,11 +276,7 @@ public class SlotResourceProvider implements IResourceProvider {
                                         lowerOkay = true;
                                     }
                                     break;
-                                case YEAR:
-                                case MONTH:
-                                case DAY:
-                                case MINUTE:
-                                case SECOND:
+                                default:
                                     String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
                                     throw new UnprocessableEntityException(notMillisErrMsg);
                             }
@@ -322,11 +306,7 @@ public class SlotResourceProvider implements IResourceProvider {
                                         upperOkay = true;
                                     }
                                     break;
-                                case YEAR:
-                                case MONTH:
-                                case DAY:
-                                case MINUTE:
-                                case SECOND:
+                                default:
                                     String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
                                     throw new UnprocessableEntityException(notMillisErrMsg);
                             }
@@ -339,11 +319,7 @@ public class SlotResourceProvider implements IResourceProvider {
                                         upperOkay = true;
                                     }
                                     break;
-                                case YEAR:
-                                case MONTH:
-                                case DAY:
-                                case MINUTE:
-                                case SECOND:
+                                default:
                                     String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
                                     throw new UnprocessableEntityException(notMillisErrMsg);
                             }
@@ -355,11 +331,7 @@ public class SlotResourceProvider implements IResourceProvider {
                                         upperOkay = true;
                                     }
                                     break;
-                                case YEAR:
-                                case MONTH:
-                                case DAY:
-                                case MINUTE:
-                                case SECOND:
+                                default:
                                     String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
                                     throw new UnprocessableEntityException(notMillisErrMsg);
                             }
@@ -372,11 +344,7 @@ public class SlotResourceProvider implements IResourceProvider {
                                         upperOkay = true;
                                     }
                                     break;
-                                case YEAR:
-                                case MONTH:
-                                case DAY:
-                                case MINUTE:
-                                case SECOND:
+                                default:
                                     String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
                                     throw new UnprocessableEntityException(notMillisErrMsg);
                             }
