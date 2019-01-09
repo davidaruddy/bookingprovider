@@ -45,6 +45,6 @@ pipelines:
 # Removed, to save precious Pipeline minutes for real deployment work.
     develop:
     - step:
-        name: Announce to M$ Teams
+        name: Announce to MS Teams
         script:
           - curl -H 'Content-Type: application/json' -d@teams_announce.json https://outlook.office.com/webhook/${TEAMS_LINK}
