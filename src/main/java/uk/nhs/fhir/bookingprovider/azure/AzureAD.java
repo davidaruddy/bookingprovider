@@ -38,9 +38,9 @@ public class AzureAD {
     private static final Logger LOG = Logger.getLogger(AzureAD.class.getName());
     private static String groupResponse = null;
     private static String appResponse = null;
-    private static Map groupNameMap;
-    private static Map groupDescMap;
-    private static Map appNameMap;
+    private static Map groupNameMap = null;
+    private static Map groupDescMap = null;
+    private static Map appNameMap = null;
 
     /**
      * Allow the caches to be reset.
