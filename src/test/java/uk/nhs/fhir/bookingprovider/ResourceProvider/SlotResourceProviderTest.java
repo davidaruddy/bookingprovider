@@ -132,10 +132,15 @@ public class SlotResourceProviderTest {
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
         int expResult = 21;
         List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
-        for(int i = 0; i < result.size(); i++) {
+        int Schedcount = 0;
+        for (int i = 0; i < result.size(); i++) {
             Resource res = (Resource) result.get(i);
             System.out.println(res.getResourceType().toString() + " - " + res.getId());
+            if(res.getResourceType().toString().equals("Schedule")) {
+                Schedcount++;
+            }
         }
+        assertEquals(1, Schedcount);
         assertEquals(expResult, result.size());
     }
 
@@ -166,6 +171,10 @@ public class SlotResourceProviderTest {
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
         int expResult = 6;
         List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
+        for (int i = 0; i < result.size(); i++) {
+            Resource res = (Resource) result.get(i);
+            System.out.println(res.getResourceType().toString() + " - " + res.getId());
+        }
         assertEquals(expResult, result.size());
     }
 
