@@ -581,7 +581,7 @@ public class AppointmentChecker {
 
         if (appointment.hasSupportingInformation()) {
             ArrayList<Reference> supportingInformationList = (ArrayList<Reference>) appointment.getSupportingInformation();
-            if (supportingInformationList.isEmpty()) {
+            if (supportingInformationList.isEmpty() || supportingInformationList == null) {
                 results.add(
                         new Fault(INVALIDSUPINFOERR, Severity.MAJOR)
                 );
