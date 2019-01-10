@@ -177,10 +177,13 @@ public class AzureADTest {
     public void testFlushCaches() {
         System.out.println("flushCaches");
         AzureAD instance = new AzureAD();
+        // We flush here, to make sure we have a known good state.
+        instance.flushCaches();
         boolean flushCaches = instance.flushCaches();
         assertFalse(flushCaches);
+        // Now we put something in the cache...
         String groupid = "ab412fe9-3f68-4368-9810-9dc24d1659b1";
-        instance.getGroupName(groupid);
+        String groupName = instance.getGroupName(groupid);
         flushCaches = instance.flushCaches();
         assertTrue(flushCaches);
         

@@ -14,9 +14,11 @@ pipelines:
           - maven
         script: # Modify the commands below to build your repository.
           - echo version=\${pom.version} > src/main/resources/version.txt
+          - echo build=\${BITBUCKET_BUILD_NUMBER} > src/main/resources/version.txt
           - echo build.date=\${timestamp} >> src/main/resources/version.txt
           - echo -n commit= >> src/main/resources/version.txt
           - git rev-parse HEAD >> src/main/resources/version.txt
+          - cat src/main/resources/version.txt
           - mvn -B clean install
           - git rev-parse HEAD >> target/classes/version.txt
           - curl -X POST "https://${BB_AUTH_STRING}@api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"target/bookingprovider-2.0-SNAPSHOT.war"
