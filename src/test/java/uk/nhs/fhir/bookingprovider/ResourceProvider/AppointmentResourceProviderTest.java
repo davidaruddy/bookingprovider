@@ -94,7 +94,7 @@ public class AppointmentResourceProviderTest {
         
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
-        
+        newData.initialize();
         checker = new AppointmentChecker();
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker);
         Class<Appointment> expResult = Appointment.class;

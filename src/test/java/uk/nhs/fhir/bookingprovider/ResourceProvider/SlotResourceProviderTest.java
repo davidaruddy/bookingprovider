@@ -71,6 +71,7 @@ public class SlotResourceProviderTest {
         System.out.println("getResourceType");
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
+        newData.initialize();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
         Class<Slot> expResult = Slot.class;
         Class<Slot> result = instance.getResourceType();
@@ -87,6 +88,7 @@ public class SlotResourceProviderTest {
         IdType theId = new IdType(idName);
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
+        newData.initialize();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
         Slot result = instance.getResourceById(theId);
         assertEquals(idName, result.getId());
@@ -100,6 +102,7 @@ public class SlotResourceProviderTest {
         System.out.println("searchSlots");
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
+        newData.initialize();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
         int expResult = 40;
         List<Slot> result = instance.searchSlots();
