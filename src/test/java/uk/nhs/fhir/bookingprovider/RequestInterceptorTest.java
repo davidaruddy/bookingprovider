@@ -16,6 +16,7 @@
 package uk.nhs.fhir.bookingprovider;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
@@ -78,6 +79,20 @@ public class RequestInterceptorTest {
      * Test of validateToken method, of class RequestInterceptor.
      */
     @Test
+    public void testValidateTokenExtraGroups() {
+        System.out.println("testValidateTokenExtraGroups");
+        String token = getTokenExtraGroup();
+        String reqURI = "http://appointments.directoryofservices.nhs.uk/poc";
+        RequestInterceptor instance = new RequestInterceptor();
+        boolean expResult = true;
+        boolean result = instance.validateToken(token, reqURI);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of validateToken method, of class RequestInterceptor.
+     */
+    @Test
     public void testValidateBadToken() {
         System.out.println("validateToken");
         String token = getToken();
@@ -102,6 +117,37 @@ public class RequestInterceptorTest {
 
             MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
             RequestBody body = RequestBody.create(mediaType, "client_id=0f7bc08b-3395-4b4b-b23b-f790fc62bf91&client_secret=mVBtuzRIwYhuDkSSFZIbp3Qmx7OWiL35BXreUpnBVb8%3D&grant_type=client_credentials&scope=http%3A%2F%2Fappointments.directoryofservices.nhs.uk%3A443%2Fpoc%2F.default");
+            Request request = new Request.Builder()
+                    .url("https://login.microsoftonline.com/e52111c7-4048-4f34-aea9-6326afa44a8d/oauth2/v2.0/token")
+                    .post(body)
+                    .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                    .addHeader("cache-control", "no-cache")
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            String responseStr = response.body().string();
+            Gson gson = new Gson();
+            TokenResponse responseObject = gson.fromJson(responseStr, TokenResponse.class);
+            token = responseObject.access_token;
+            //LOG.info(responseObject.access_token);
+
+            return token;
+        }
+        catch (IOException ex) {
+            LOG.severe(ex.getMessage());
+        }
+        return token;
+    }
+
+    private String getTokenExtraGroup() {
+        String token = null;
+
+        try {
+
+            OkHttpClient client = new OkHttpClient();
+
+            MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
+            RequestBody body = RequestBody.create(mediaType, "client_id=92d85f9d-0666-49bc-a31c-12b45b04a7de&client_secret=y7rCysA8anvYshLckwwFNs8qnC6JPyCerE7CUAAnGgo%3D&grant_type=client_credentials&scope=http%3A%2F%2Fappointments.directoryofservices.nhs.uk%3A443%2Fpoc%2F.default");
             Request request = new Request.Builder()
                     .url("https://login.microsoftonline.com/e52111c7-4048-4f34-aea9-6326afa44a8d/oauth2/v2.0/token")
                     .post(body)
@@ -182,4 +228,5 @@ public class RequestInterceptorTest {
         assertEquals(expResult, result);
 
     }
+
 }
