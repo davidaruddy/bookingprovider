@@ -155,6 +155,8 @@ public class RequestInterceptor extends InterceptorAdapter {
 
     /**
      * Method to check the various times; Not Before, Issued At and Expiry.
+     * NB: We allow 7 minutes 30 seconds of grace on both not before and expiry
+     * times to accommodate time drift.
      *
      * @param theJWT The Decoded JWT as per:
      * https://static.javadoc.io/com.auth0/java-jwt/3.3.0/com/auth0/jwt/interfaces/DecodedJWT.html

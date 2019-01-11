@@ -15,6 +15,7 @@
  */
 package uk.nhs.fhir.bookingprovider;
 
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
@@ -76,7 +77,8 @@ public class RequestInterceptorTest {
     }
 
     /**
-     * Test of validateToken method, of class RequestInterceptor.
+     * Test of validateToken method, of class RequestInterceptor. Checks that
+     * having Groups that can't be resolved is tolerated.
      */
     @Test
     public void testValidateTokenExtraGroups() {
@@ -108,6 +110,25 @@ public class RequestInterceptorTest {
 
     }
 
+    /**
+     * Test using a token Generated: 13:18 on 11th January 2019 Expires: Fri Jan
+     * 11 2019 14:18:07 GMT+0000 Should be rejected as not valid after that
+     * time.
+     */
+    @Test(expected = AuthenticationException.class)
+    public void testValidateExpiredToken() {
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Im5iQ3dXMTF3M1hrQi14VWFYd0tSU0xqTUhHUSIsImtpZCI6Im5iQ3dXMTF3M1hrQi14VWFYd0tSU0xqTUhHUSJ9.eyJhdWQiOiJodHRwOi8vYXBwb2ludG1lbnRzLmRpcmVjdG9yeW9mc2VydmljZXMubmhzLnVrOjQ0My9wb2MiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9lNTIxMTFjNy00MDQ4LTRmMzQtYWVhOS02MzI2YWZhNDRhOGQvIiwiaWF0IjoxNTQ3MjEyMzg3LCJuYmYiOjE1NDcyMTIzODcsImV4cCI6MTU0NzIxNjI4NywiYWlvIjoiNDJKZ1lBajU2emtyMkQvbWN6YWY0TnA3QnpjMEFBQT0iLCJhcHBpZCI6IjBmN2JjMDhiLTMzOTUtNGI0Yi1iMjNiLWY3OTBmYzYyYmY5MSIsImFwcGlkYWNyIjoiMSIsImdyb3VwcyI6WyJhYjQxMmZlOS0zZjY4LTQzNjgtOTgxMC05ZGMyNGQxNjU5YjEiLCJkYWNiODJjNS1hZWE4LTQ1MDktODg3Zi0yODEzMjQwNjJkZmQiXSwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvZTUyMTExYzctNDA0OC00ZjM0LWFlYTktNjMyNmFmYTQ0YThkLyIsIm9pZCI6IjU3MmQ2OGQ0LTExOTctNGE4Ny05MzJjLTAwM2Q4ZTRhN2RhOCIsInN1YiI6IjU3MmQ2OGQ0LTExOTctNGE4Ny05MzJjLTAwM2Q4ZTRhN2RhOCIsInRpZCI6ImU1MjExMWM3LTQwNDgtNGYzNC1hZWE5LTYzMjZhZmE0NGE4ZCIsInV0aSI6ImVidnpqYWRVU1VhYjhwYy0zcTZWQUEiLCJ2ZXIiOiIxLjAifQ.DsOrk8pvedRskimZf1VrTtvV2dUGfpVwIb-A8JRM8r-N9-vbko7YleLlKJJkHEJsss61lKGjuZJWSW1zSlWTn2JIE8HLJk6hUmSoh4fGyqceP3w3II93XHbfzhdMIRBDxVAkiGuI1QsrTDoK3_JJ2fUaMjpiFNIbuJ9PuGLHxTj_M4FGqWLh8kgFKiJdmae46-EQnW5yuaePmiFdpRmF6Nw6_1qQGYxlgCX5FjSGtpFbKY9LdhVgeQxO4aEx_P2zroLPyziNZgyBplsCMU0NFjqRvouWr-tJHpvICWKgeTCzmZieCaaE3DuBnyargb77bTqEKoY79vb_9euk_FPV8g";
+        System.out.println("validateToken");
+        String reqURI = "http://appointments.directoryofservices.nhs.uk/poc";
+        RequestInterceptor instance = new RequestInterceptor();
+        boolean result = instance.validateToken(token, reqURI);
+    }
+
+    /**
+     * Method to get an access_token as TestClient
+     *
+     * @return
+     */
     private String getToken() {
         String token = null;
 
