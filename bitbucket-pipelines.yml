@@ -14,7 +14,7 @@ pipelines:
           - maven
         script: # Modify the commands below to build your repository.
           - echo version=\${pom.version} > src/main/resources/version.txt
-          - echo build=${BITBUCKET_BUILD_NUMBER} > src/main/resources/version.txt
+          - echo build=${BITBUCKET_BUILD_NUMBER} >> src/main/resources/version.txt
           - echo build.date=\${timestamp} >> src/main/resources/version.txt
           - echo -n commit= >> src/main/resources/version.txt
           - git rev-parse HEAD >> src/main/resources/version.txt
@@ -55,7 +55,7 @@ pipelines:
         script: # Modify the commands below to build your repository.
           - echo DEVELOP RELEASE > src/main/resources/version.txt
           - echo version=\${pom.version} >> src/main/resources/version.txt
-          - echo build=${BITBUCKET_BUILD_NUMBER} > src/main/resources/version.txt
+          - echo build=${BITBUCKET_BUILD_NUMBER} >> src/main/resources/version.txt
           - echo build.date=\${timestamp} >> src/main/resources/version.txt
           - echo -n commit= >> src/main/resources/version.txt
           - git rev-parse HEAD >> src/main/resources/version.txt
