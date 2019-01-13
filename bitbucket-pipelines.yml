@@ -75,10 +75,10 @@ pipelines:
         script:
             - eval $(aws ecr get-login --region ${AWS_DEFAULT_REGION} --no-include-email)
             - docker build -t a2sibookingprovider .
-            - docker tag a2sibookingprovider:latest 410123189863.dkr.ecr.eu-west-2.amazonaws.com/bookingdev:latest
+            - docker tag a2sibookingprovidertest:latest 410123189863.dkr.ecr.eu-west-2.amazonaws.com/a2sibookingprovidertest:latest
             - docker push ${AWS_DEV_REGISTRY_URL}:latest
             - sleep 2
-            # - aws ecs update-service --cluster BookingPOCCluster --service BookingDev --force-new-deployment
+            - aws ecs update-service --cluster BookingPOCCluster --service a2sibookingprovidertest --force-new-deployment
             # This should put a message into the Teams channel (dodgy characters will need escaping)
             #- printf "{\"title\":\"Deployment of Care Connect Demonstrator\",\"text\":\"Build number %s is currently being deployed\"}" ${BITBUCKET_BUILD_NUMBER} > teams_announce.json
             #- curl -X POST "https://outlook.office.com/webhook/${TEAMS_LINK}" --data @teams_announce.json
