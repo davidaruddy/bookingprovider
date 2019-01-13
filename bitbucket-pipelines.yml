@@ -47,11 +47,40 @@ pipelines:
           - docker
 # Pipeline for develop branch...
 # Removed, to save precious Pipeline minutes for real deployment work.
-#    develop:
-#    - step:
-#        name: Announce to MS Teams
-#        script:
-#            # This should put a message into the Teams channel (dodgy characters will need escaping)
-#            - printf "{\"title\":\"Deployment of Care Connect Demonstrator\",\"text\":\"Build number %s is currently being deployed\"}" ${BITBUCKET_BUILD_NUMBER} > teams_announce.json
-#            - curl -X POST "https://outlook.office.com/webhook/${TEAMS_LINK}" --data @teams_announce.json
-
+    develop:
+    - step:
+        name: Build WAR file.
+        caches:
+          - maven
+        script: # Modify the commands below to build your repository.
+          - echo DEVELOP RELEASE > src/main/resources/version.txt
+          - echo version=\${pom.version} >> src/main/resources/version.txt
+          - echo build=${BITBUCKET_BUILD_NUMBER} > src/main/resources/version.txt
+          - echo build.date=\${timestamp} >> src/main/resources/version.txt
+          - echo -n commit= >> src/main/resources/version.txt
+          - git rev-parse HEAD >> src/main/resources/version.txt
+          - cat src/main/resources/version.txt
+          - sed -i "s\$baseurl=.*\baseurl=http://devappts.directoryofservices.nhs.uk:443/poc/\g" src/main/resources/server.properties
+          - mvn -B clean install
+          - git rev-parse HEAD >> target/classes/version.txt
+        artifacts:
+          - target/*.war
+# Requires a different image, with AWS CLI installed...
+    - step:
+        name: Deploy to ECS DEV service
+        deployment: develop
+        image: tstrohmeier/awscli:3.6.4
+        caches:
+          - docker
+        script:
+            - eval $(aws ecr get-login --region ${AWS_DEFAULT_REGION} --no-include-email)
+            - docker build -t a2sibookingprovider .
+            - docker tag a2sibookingprovider:latest 410123189863.dkr.ecr.eu-west-2.amazonaws.com/bookingdev:latest
+            - docker push ${AWS_DEV_REGISTRY_URL}:latest
+            - sleep 2
+            # - aws ecs update-service --cluster BookingPOCCluster --service BookingDev --force-new-deployment
+            # This should put a message into the Teams channel (dodgy characters will need escaping)
+            #- printf "{\"title\":\"Deployment of Care Connect Demonstrator\",\"text\":\"Build number %s is currently being deployed\"}" ${BITBUCKET_BUILD_NUMBER} > teams_announce.json
+            #- curl -X POST "https://outlook.office.com/webhook/${TEAMS_LINK}" --data @teams_announce.json
+        services:
+          - docker
