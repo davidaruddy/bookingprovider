@@ -74,7 +74,7 @@ pipelines:
           - docker
         script:
             - eval $(aws ecr get-login --region ${AWS_DEFAULT_REGION} --no-include-email)
-            - docker build -t a2sibookingprovider .
+            - docker build -t a2sibookingprovidertest .
             - docker tag a2sibookingprovidertest:latest 410123189863.dkr.ecr.eu-west-2.amazonaws.com/a2sibookingprovidertest:latest
             - docker push ${AWS_DEV_REGISTRY_URL}:latest
             - sleep 2
