@@ -75,8 +75,8 @@ pipelines:
         script:
             - eval $(aws ecr get-login --region ${AWS_DEFAULT_REGION} --no-include-email)
             - docker build -t a2sibookingprovidertest .
-            - docker tag a2sibookingprovidertest:latest 410123189863.dkr.ecr.eu-west-2.amazonaws.com/a2sibookingprovidertest:latest
-            - docker push ${AWS_DEV_REGISTRY_URL}:latest
+            - docker tag a2sibookingprovidertest:latest ${AWS_TEST_REGISTRY_URL}:latest
+            - docker push ${AWS_TEST_REGISTRY_URL}:latest
             - sleep 2
             - aws ecs update-service --cluster BookingPOCCluster --service a2sibookingprovidertest --force-new-deployment
             # This should put a message into the Teams channel (dodgy characters will need escaping)
