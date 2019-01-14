@@ -365,6 +365,8 @@ public class SlotResourceProvider implements IResourceProvider {
                 }
                 if (upperOkay && lowerOkay) {
                     filteredSlots.add(thisSlot);
+                } else {
+                    LOG.info("Filtering out Slot: " + thisSlot.getId() + " based on time");
                 }
             }
         } else {

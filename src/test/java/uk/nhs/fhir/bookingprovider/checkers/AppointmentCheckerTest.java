@@ -190,7 +190,7 @@ public class AppointmentCheckerTest {
     @Test
     public void testcheckParticipant() {
         System.out.println("checkParticipant");
-        
+
         String apptString = getFileContents("goodAppt.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
@@ -211,7 +211,11 @@ public class AppointmentCheckerTest {
         ArrayList<Fault> result = instance.checkParticipant(appointment);
         assertEquals(expResult, result.size());
     }
-    
+
+    /**
+     * This checks that an Appointment with good supportingInformation link to a
+     * contained DocumentReference resource is flagged as good.
+     */
     @Test
     public void testchecksupportingInfo() {
         System.out.println("checksupportingInfo");
@@ -224,6 +228,11 @@ public class AppointmentCheckerTest {
         assertEquals(expResult, result.size());
     }
 
+    /**
+     * This checks that an Appointment where the supportingINformation is a
+     * local canonical reference (e.g. /DocumentReference/123) it's marked as
+     * bad.
+     */
     @Test
     public void testchecksupportingInfoBAD1() {
         System.out.println("checksupportingInfoBAD1");
@@ -235,7 +244,12 @@ public class AppointmentCheckerTest {
         ArrayList<Fault> result = instance.checksupportingInfo(appointment);
         assertEquals(expResult, result.size());
     }
-    
+
+    /**
+     * This checks that if there's no supportingInformation items (e.g.
+     * "supportingInformation": [ ], it's flagged as bad.
+     * 
+     */
     @Test
     public void testchecksupportingInfoBAD2() {
         System.out.println("checksupportingInfoBAD2");
@@ -248,11 +262,46 @@ public class AppointmentCheckerTest {
         assertEquals(expResult, result.size());
     }
 
+    /**
+     * This checks that cases where the id in the contained DocumentReference
+     * resource isn't reflected in supportingInformation (with a hash prefix)
+     * are flagged up as bad.
+     */
+    @Test
+    public void testchecksupportingInfoBAD3() {
+        System.out.println("checksupportingInfoBAD1");
+        String apptString = getFileContents("badAppt_SupInfo2.json");
+        Appointment appointment = parser.parseResource(Appointment.class,
+                apptString);
+        AppointmentChecker instance = new AppointmentChecker();
+        int expResult = 1;
+        ArrayList<Fault> result = instance.checksupportingInfo(appointment);
+        assertEquals(expResult, result.size());
+    }
+
+    /**
+     * This checks that if there's no supportingInformation element at all, it's
+     * flagged as bad.
+     * 
+     */
+    @Test
+    public void testchecksupportingInfoBAD4() {
+        System.out.println("checksupportingInfoBAD2");
+        String apptString = getFileContents("badAppt_NoSupInfoElement.json");
+        Appointment appointment = parser.parseResource(Appointment.class,
+                apptString);
+        AppointmentChecker instance = new AppointmentChecker();
+        int expResult = 1;
+        ArrayList<Fault> result = instance.checksupportingInfo(appointment);
+        assertEquals(expResult, result.size());
+    }
+
+
     @Test
     public void testcheckPatientLink() {
         System.out.println("checkPatientLink");
         String apptString = getFileContents("goodAppt.json");
-        IParser newJsonParser = ctx.newJsonParser();        
+        IParser newJsonParser = ctx.newJsonParser();
         Appointment appointment = (Appointment) newJsonParser.parseResource(apptString);
         AppointmentChecker instance = new AppointmentChecker();
         int expResult = 0;
@@ -264,7 +313,7 @@ public class AppointmentCheckerTest {
     public void testcheckPatientLinkBAD() {
         System.out.println("checkPatientLinkBAD");
         String apptString = getFileContents("badAppt1.json");
-        IParser newJsonParser = ctx.newJsonParser();        
+        IParser newJsonParser = ctx.newJsonParser();
         Appointment appointment = (Appointment) newJsonParser.parseResource(apptString);
         AppointmentChecker instance = new AppointmentChecker();
         int expResult = 1;
@@ -282,7 +331,7 @@ public class AppointmentCheckerTest {
      */
     public final String getFileContents(String filename) {
         StringBuilder result = new StringBuilder("");
-        
+
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(filename).getFile());
         try (Scanner scanner = new Scanner(file)) {

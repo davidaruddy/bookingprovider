@@ -21,10 +21,12 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -46,22 +48,53 @@ import uk.nhs.fhir.bookingprovider.data.DataStore;
  */
 @WebServlet(urlPatterns = {"/poc/*"}, displayName = "FHIR Booking POC")
 public class RestfulServlet extends RestfulServer {
-    
-    RequestInterceptor requestInterceptor = null;
 
     /**
-     * Constructor, just sets the base URL (to a static fixed value for now).
+     * The object we use to intercept requests, to check supplied JWTs.
      */
-    public RestfulServlet() {
-        String base = "http://appointments.directoryofservices.nhs.uk:443/poc";
-        setServerAddressStrategy(new HardcodedServerAddressStrategy(base));
-    }
+    RequestInterceptor requestInterceptor = null;
 
     /**
      * The logger we use across this class. *
      */
     private static final Logger LOG
             = Logger.getLogger(RestfulServlet.class.getName());
+
+
+
+    /**
+     * Constructor, just sets the base URL (to a static fixed value for now).
+     */
+    public RestfulServlet() {
+        InputStream input = null;
+
+        String base = "http://appointments.directoryofservices.nhs.uk:443/poc";
+        try {
+            Properties serverProperties = new Properties();
+            ClassLoader classLoader = getClass().getClassLoader();
+            input = classLoader.getResource("server.properties").openStream();
+            serverProperties.load(input);
+            String baseurl = serverProperties.getProperty("baseurl");
+            if(baseurl!= null) {
+                LOG.info("Loaded baseurl from settings.properties: " + baseurl);
+                base = baseurl;
+            }
+            LOG.info("Setting server base url to: " + base);
+        } catch (IOException ex) {
+            LOG.severe("Error reading appid.properties file " + ex.getMessage());
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    LOG.severe("Error closing appid.properties file: " + e.getMessage());
+                }
+            }
+        }
+        setServerAddressStrategy(new HardcodedServerAddressStrategy(base));
+    }
+
+
 
     /**
      * The Class that holds all of our resources...
@@ -101,7 +134,7 @@ public class RestfulServlet extends RestfulServer {
             data.initialize();
             LOG.info("Flushing cached Groups and Applications from Azure");
             requestInterceptor.flushAzureCache();
-            
+
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("text/html");
             PrintWriter outputStream = response.getWriter();

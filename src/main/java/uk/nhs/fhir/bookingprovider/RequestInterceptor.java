@@ -51,7 +51,6 @@ public class RequestInterceptor extends InterceptorAdapter {
     private final String ISSUER;
     AzureAD adWrangler;
 
-    
     /**
      * Properties file in which we store the URLs used for checking tokens.
      */
@@ -60,7 +59,7 @@ public class RequestInterceptor extends InterceptorAdapter {
     /**
      * Constructor, just tells us to load the properties file holding all of the
      * App IDs, and the properties file which configures the AzureAD endpoints.
-     * 
+     *
      */
     public RequestInterceptor() {
         loadJWTURLs();
@@ -142,10 +141,12 @@ public class RequestInterceptor extends InterceptorAdapter {
                 return false;
             }
 
-        } catch (JwkException ex) {
+        }
+        catch (JwkException ex) {
             Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
             throw new UnprocessableEntityException("JwkException: " + ex.getMessage());
-        } catch (MalformedURLException ex) {
+        }
+        catch (MalformedURLException ex) {
             Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
             throw new UnprocessableEntityException("MalformedURLException: " + ex.getMessage());
         }
@@ -154,6 +155,8 @@ public class RequestInterceptor extends InterceptorAdapter {
 
     /**
      * Method to check the various times; Not Before, Issued At and Expiry.
+     * NB: We allow 7 minutes 30 seconds of grace on both not before and expiry
+     * times to accommodate time drift.
      *
      * @param theJWT The Decoded JWT as per:
      * https://static.javadoc.io/com.auth0/java-jwt/3.3.0/com/auth0/jwt/interfaces/DecodedJWT.html
@@ -221,14 +224,16 @@ public class RequestInterceptor extends InterceptorAdapter {
         for (String group : groups) {
             String groupName = adWrangler.getGroupName(group);
             LOG.info("Found group: " + groupName);
-            if (groupName.equals(createAppointments)) {
-                canBookAppts = true;
-            }
-            if (groupName.equals(readSlots)) {
-                canReadSlots = true;
+            if (groupName != null) {
+                if (groupName.equals(createAppointments)) {
+                    canBookAppts = true;
+                }
+                if (groupName.equals(readSlots)) {
+                    canReadSlots = true;
+                }
             }
         }
-        if(canBookAppts && canReadSlots) {
+        if (canBookAppts && canReadSlots) {
             LOG.info("Both Groups found, this request should be permitted.");
         } else {
             LOG.info("Groups not found, this request should be BLOCKED.");
@@ -240,8 +245,8 @@ public class RequestInterceptor extends InterceptorAdapter {
      * Method to check the token is intended for 'us'
      *
      * @param theJWT
-     * @return Validates that the URL called matches that of the audience in
-     * the supplied JWT.
+     * @return Validates that the URL called matches that of the audience in the
+     * supplied JWT.
      */
     private boolean checkAudience(DecodedJWT theJWT, String URI) {
         LOG.info("Checking JWT was intended for: " + URI);
@@ -279,10 +284,10 @@ public class RequestInterceptor extends InterceptorAdapter {
         String appName = adWrangler.getAppName(clientID);
         LOG.info("\"JWT was issued to: " + appName + " (" + clientID + ")");
     }
-    
+
     /**
      * Method to load the URLs used for JWT handling, from jwt.properties file.
-     * 
+     *
      */
     private void loadJWTURLs() {
         InputStream input = null;
@@ -291,19 +296,22 @@ public class RequestInterceptor extends InterceptorAdapter {
             ClassLoader classLoader = getClass().getClassLoader();
             input = classLoader.getResource("jwt.properties").openStream();
             jwtURLs.load(input);
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             LOG.severe("Error reading appid.properties file " + ex.getMessage());
-        } finally {
+        }
+        finally {
             if (input != null) {
                 try {
                     input.close();
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     LOG.severe("Error closing appid.properties file: " + e.getMessage());
                 }
             }
         }
     }
-    
+
     /**
      * TElls our resident Azure handler to flush any cached results it has.
      */

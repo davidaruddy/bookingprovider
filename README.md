@@ -20,6 +20,7 @@ To run locally in Docker, use the following commands:
 docker build -t a2sibookingprovider .
 docker run -d -p 443:8080 --name bookingprovider a2sibookingprovider
 ```
+NB: The URLs of all resources in responses use a server base setting read from the baseurl value in server.properties. It is advisable to edit this value so that links to (for example) any Slots resolve back to the server.
 
 [Repo and code](https://bitbucket.org/TCoates/bookingprovider/src)
 
