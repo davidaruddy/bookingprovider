@@ -259,6 +259,9 @@ public class RequestInterceptor extends InterceptorAdapter {
             if (audience.equals("http://appointments.directoryofservices.nhs.uk:443/poc")) {
                 audience = "http://appointments.directoryofservices.nhs.uk/poc";
             }
+            if (audience.equals("http://a2sibookingprovidertest.directoryofservices.nhs.uk:443/poc")) {
+                audience = "http://a2sibookingprovidertest.directoryofservices.nhs.uk/poc";
+            }
 
             if (URI.startsWith(audience)) {
                 correctAudience = true;
