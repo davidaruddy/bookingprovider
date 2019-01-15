@@ -6,7 +6,7 @@
 image: maven:3.3.9
 
 options:
-  max-time: 4
+  max-time: 5
 
 pipelines:
   branches:
