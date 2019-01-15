@@ -5,6 +5,9 @@
 # You can specify a custom docker image from Docker Hub as your build environment.
 image: maven:3.3.9
 
+options:
+  max-time: 4
+
 pipelines:
   branches:
     master:
