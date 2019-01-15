@@ -155,6 +155,8 @@ public class SlotResourceProvider implements IResourceProvider {
         boolean incProvider = false;
         DateParam lowerBound = null;
         DateParam upperBound = null;
+        
+        String notSecsErrMsg = "Currently requires dates to be accurate to seconds";
 
         LOG.info("Slot search being handled for provider: "
                 + theHealthcareService.getValue().toString());
@@ -244,51 +246,51 @@ public class SlotResourceProvider implements IResourceProvider {
                         case GREATERTHAN:
                             switch (lowerBound.getPrecision()) {
                                 case MILLI:
+                                case SECOND:
                                     if (thisSlot.getStart().after(lowerBound.getValue())) {
                                         lowerOkay = true;
                                     }
                                     break;
                                 default:
-                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
-                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                                    throw new UnprocessableEntityException(notSecsErrMsg);
                             }
                             break;
                         case GREATERTHAN_OR_EQUALS:
                             switch (lowerBound.getPrecision()) {
                                 case MILLI:
+                                case SECOND:
                                     if (thisSlot.getStart().after(lowerBound.getValue())
                                             || thisSlot.getStart().equals(lowerBound.getValue())) {
                                         lowerOkay = true;
                                     }
                                     break;
                                 default:
-                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
-                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                                    throw new UnprocessableEntityException(notSecsErrMsg);
                             }
                             break;
                         case LESSTHAN:
                             switch (lowerBound.getPrecision()) {
                                 case MILLI:
+                                case SECOND:
                                     if (thisSlot.getStart().before(lowerBound.getValue())) {
                                         lowerOkay = true;
                                     }
                                     break;
                                 default:
-                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
-                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                                    throw new UnprocessableEntityException(notSecsErrMsg);
                             }
                             break;
                         case LESSTHAN_OR_EQUALS:
                             switch (lowerBound.getPrecision()) {
                                 case MILLI:
+                                case SECOND:
                                     if (thisSlot.getStart().before(lowerBound.getValue())
                                             || thisSlot.getStart().equals(lowerBound.getValue())) {
                                         lowerOkay = true;
                                     }
                                     break;
                                 default:
-                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
-                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                                    throw new UnprocessableEntityException(notSecsErrMsg);
                             }
                             break;
                     }
@@ -312,51 +314,51 @@ public class SlotResourceProvider implements IResourceProvider {
                         case GREATERTHAN:
                             switch (upperBound.getPrecision()) {
                                 case MILLI:
+                                case SECOND:
                                     if (thisSlot.getStart().after(upperBound.getValue())) {
                                         upperOkay = true;
                                     }
                                     break;
                                 default:
-                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
-                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                                    throw new UnprocessableEntityException(notSecsErrMsg);
                             }
                             break;
                         case GREATERTHAN_OR_EQUALS:
                             switch (upperBound.getPrecision()) {
                                 case MILLI:
+                                case SECOND:
                                     if (thisSlot.getStart().after(upperBound.getValue())
                                             || thisSlot.getStart().equals(upperBound.getValue())) {
                                         upperOkay = true;
                                     }
                                     break;
                                 default:
-                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
-                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                                    throw new UnprocessableEntityException(notSecsErrMsg);
                             }
                             break;
                         case LESSTHAN:
                             switch (lowerBound.getPrecision()) {
                                 case MILLI:
+                                case SECOND:
                                     if (thisSlot.getStart().before(upperBound.getValue())) {
                                         upperOkay = true;
                                     }
                                     break;
                                 default:
-                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
-                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                                    throw new UnprocessableEntityException(notSecsErrMsg);
                             }
                             break;
                         case LESSTHAN_OR_EQUALS:
                             switch (upperBound.getPrecision()) {
                                 case MILLI:
+                                case SECOND:
                                     if (thisSlot.getStart().before(upperBound.getValue())
                                             || thisSlot.getStart().equals(upperBound.getValue())) {
                                         upperOkay = true;
                                     }
                                     break;
                                 default:
-                                    String notMillisErrMsg = "Currently requires dates to be accurate to milliseconds";
-                                    throw new UnprocessableEntityException(notMillisErrMsg);
+                                    throw new UnprocessableEntityException(notSecsErrMsg);
                             }
                             break;
                     }
