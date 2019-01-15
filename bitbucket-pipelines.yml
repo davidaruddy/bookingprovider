@@ -63,7 +63,7 @@ pipelines:
           - echo -n commit= >> src/main/resources/version.txt
           - git rev-parse HEAD >> src/main/resources/version.txt
           - cat src/main/resources/version.txt
-          - sed -i "s\baseurl=.*\baseurl=http://devappts.directoryofservices.nhs.uk:443/poc/\g" src/main/resources/server.properties
+          - sed -i "s\baseurl=.*\baseurl=http://a2sibookingprovidertest.directoryofservices.nhs.uk:443/poc/\g" src/main/resources/server.properties
           - mvn -B clean install
           - git rev-parse HEAD >> target/classes/version.txt
         artifacts:
