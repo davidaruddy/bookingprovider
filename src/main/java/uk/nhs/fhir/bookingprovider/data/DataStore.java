@@ -726,7 +726,7 @@ public final class DataStore {
      */
     public Object getLocation(String locID) {
         for(int i = 0; i < locations.size(); i++) {
-            Location locn = (Location) locations.get(0);
+            Location locn = (Location) locations.get(i);
             if(locn.getId().equals(locID))
             {
                 return locn;
