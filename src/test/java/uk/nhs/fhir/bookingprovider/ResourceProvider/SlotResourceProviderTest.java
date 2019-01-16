@@ -216,5 +216,40 @@ public class SlotResourceProviderTest {
         List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
         assertEquals(expResult, result.size());
     }
+    
+        /**
+     * Test of searchSlots method, of class SlotResourceProvider. This one has
+     * even 'tighter' time constraint applied, but also asks for the
+     * HealthcareService to be included in the resulting Bundle.
+     */
+    @Test
+    public void testSearchSlots_4argsFiltered3() {
+        System.out.println("searchSlots");
+        TokenParam theHealthcareService = new TokenParam("918999198999");
+        TokenParam statusToken = new TokenParam("free");
+        // Set start time to 09:00 tomorrow...
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.add(Calendar.DATE, 1);
+        Date theLowerBound = cal.getTime();
+        cal.set(Calendar.HOUR_OF_DAY, 9);
+        cal.set(Calendar.MINUTE, 15);
+        Date theUpperBound = cal.getTime();
+        DateRangeParam startRange = new DateRangeParam(theLowerBound, theUpperBound);
+        Set<Include> theIncludes = new HashSet<Include>();
+        theIncludes.add(new Include("Slot:schedule"));
+        theIncludes.add(new Include("Schedule:actor:HealthcareService"));
+        theIncludes.add(new Include("HealthcareService.location"));
+        ctx = FhirContext.forDstu3();
+        DataStore newData = DataStore.getInstance();
+        newData.initialize();
+        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
+        int expResult = 5;
+        List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
+        assertEquals(expResult, result.size());
+    }
 
 }

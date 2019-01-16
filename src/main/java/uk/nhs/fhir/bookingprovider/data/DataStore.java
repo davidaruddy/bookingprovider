@@ -719,4 +719,20 @@ public final class DataStore {
         return organizations.get(0);
     }
 
+    /**
+     * Method to get a specific Location resource based on it's id.
+     * @param locID The id of the requested Location.
+     * @return The matching resource as an object.
+     */
+    public Object getLocation(String locID) {
+        for(int i = 0; i < locations.size(); i++) {
+            Location locn = (Location) locations.get(0);
+            if(locn.getId().equals(locID))
+            {
+                return locn;
+            }
+        }
+        return null;
+    }
+
 }
