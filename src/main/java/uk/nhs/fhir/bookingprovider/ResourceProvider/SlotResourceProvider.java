@@ -107,10 +107,7 @@ public class SlotResourceProvider implements IResourceProvider {
     }
 
     /**
-     * The "@Search" annotation indicates that this method supports the search
-     * operation. You may have many different method annotated with this
-     * annotation, to support many different search criteria. This example
-     * searches by family name.
+     * This Search takes no parameters and therefore just returns all Slots.
      *
      * @return This method returns a list of all Slots.
      */
@@ -146,13 +143,15 @@ public class SlotResourceProvider implements IResourceProvider {
         "Schedule:actor:HealthcareService",
         "Schedule:actor:Practitioner",
         "Schedule:actor:PractitionerRole",
-        "HealthcareService.providedBy"}) Set<Include> theIncludes) {
+        "HealthcareService.providedBy",
+        "HealthcareService.location"}) Set<Include> theIncludes) {
 
         boolean incSchedule = false;
         boolean incHealthcareService = false;
         boolean incPractitionerRole = false;
         boolean incPractitioner = false;
         boolean incProvider = false;
+        boolean incLocation = false;
         DateParam lowerBound = null;
         DateParam upperBound = null;
         
@@ -197,6 +196,9 @@ public class SlotResourceProvider implements IResourceProvider {
                 case "HealthcareService.providedBy":
                     incProvider = true;
                     break;
+                    
+                case "HealthcareService.location":
+                    incLocation = true;
 
                 default:
                     LOG.info("Unexpected include sent: " + inc);
@@ -437,6 +439,54 @@ public class SlotResourceProvider implements IResourceProvider {
             if (filteredSlots.size() > 0) {
                 LOG.info("Adding the Organization");
                 filteredSlots.add(data.getOrganization());
+            }
+        }
+        
+        // Check whether they want Locations back too?
+        if(incLocation) {
+            LOG.info("Asked to include the Location");
+            if (filteredSlots.size() > 0) {
+                LOG.info("Adding the Location");
+                // If they've specified a HealthcareService...
+                String healthcareSvcSelected = theHealthcareService.getValue().toString();
+                String locID = null;
+                if(healthcareSvcSelected != null) {
+                    switch(healthcareSvcSelected) {
+                        case "918999198999":
+                            locID = "loc1111";
+                            break;
+                            
+                        case "118111118111":
+                            locID = "loc2222";
+                            break;
+                    }
+                    filteredSlots.add(data.getLocation(locID));
+                } else {
+                    // They haven't, so we need to iterate through all Slots
+                    // being returned, and determine which Location(s) need
+                    // to be added
+                    boolean addingLoc1 = false;
+                    boolean addingLoc2 = false;
+                    
+                    for (Object obj : filteredSlots) {
+                        Slot aSlot = (Slot) obj;
+
+                        if(aSlot.getSchedule().getReference().equals("/Schedule/sched1111")) {
+                            addingLoc1 = true;
+                        }
+                        if(aSlot.getSchedule().getReference().equals("/Schedule/sched2222")) {
+                            addingLoc2 = true;
+                        }
+                    }
+                    if(addingLoc1) {
+                        locID = "loc1111";
+                        filteredSlots.add(data.getLocation(locID));
+                    }
+                    if(addingLoc2) {
+                        locID = "loc2222";
+                        filteredSlots.add(data.getLocation(locID));
+                    }
+                }
             }
         }
         LOG.info("Returned " + filteredSlots.size() + " slots.");

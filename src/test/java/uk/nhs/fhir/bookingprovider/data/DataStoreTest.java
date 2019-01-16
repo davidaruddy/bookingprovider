@@ -692,4 +692,64 @@ public class DataStoreTest {
         assertEquals(expResult, result.getId());
     }
 
+    /**
+     * Test of getFreeSlotsByHCS method, of class DataStore.
+     */
+    @Test
+    public void testGetFreeSlotsByHCS() {
+        System.out.println("getFreeSlotsByHCS");
+        String hcsID = "918999198999";
+        String status = "free";
+        DataStore instance = DataStore.getInstance();
+        instance.initialize();
+        int expResult = 20;
+        ArrayList result = instance.getFreeSlotsByHCS(hcsID, status);
+        assertEquals(expResult, result.size());
+    }
+
+    /**
+     * Test of getFreeSlotsByHCS method, of class DataStore.
+     */
+    @Test
+    public void testGetFreeSlotsByHCS2() {
+        System.out.println("getFreeSlotsByHCS");
+        String hcsID = "118111118111";
+        String status = "free";
+        DataStore instance = DataStore.getInstance();
+        instance.initialize();
+        instance.setSlotBooked("slot053");
+        int expResult = 19;
+        ArrayList result = instance.getFreeSlotsByHCS(hcsID, status);
+        assertEquals(expResult, result.size());
+    }
+    
+    
+
+    /**
+     * Test of getLocation method, of class DataStore.
+     */
+    @Test
+    public void testGetLocation() {
+        System.out.println("getLocation");
+        String locID = "loc1111";
+        DataStore instance = DataStore.getInstance();
+        instance.initialize();
+        String expResult = "Location One";
+        Location result = (Location) instance.getLocation(locID);
+        assertEquals(expResult, result.getName());
+    }
+
+        /**
+     * Test of getLocation method, of class DataStore.
+     */
+    @Test
+    public void testGetLocation2() {
+        System.out.println("getLocation");
+        String locID = "nothingmatching";
+        DataStore instance = DataStore.getInstance();
+        instance.initialize();
+        Location result = (Location) instance.getLocation(locID);
+        assertNull(result);
+    }
+
 }
