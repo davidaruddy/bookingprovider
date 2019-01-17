@@ -82,7 +82,7 @@ public class CapabilityStatementBooster extends ServerCapabilityStatementProvide
                 props.getProperty("capability.profile.practitioner"));
 
         Reference practRoleProfileRef = new Reference();
-        practProfileRef.setReference(
+        practRoleProfileRef.setReference(
                 props.getProperty("capability.profile.practitionerrole"));
 
         Reference orgProfileRef = new Reference();
