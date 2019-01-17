@@ -23,6 +23,7 @@ pipelines:
           - git rev-parse HEAD >> src/main/resources/version.txt
           - cat src/main/resources/version.txt
           - sed -i "s\baseurl=.*\baseurl=http://appointments.directoryofservices.nhs.uk:443/poc/\g" src/main/resources/server.properties
+          - sed -i "s\capability.softwareversion=.*\capability.softwareversion=${BITBUCKET_BUILD_NUMBER}\g" src/main/resources/server.properties
           - mvn -B clean install
           - git rev-parse HEAD >> target/classes/version.txt
           - curl -X POST "https://${BB_AUTH_STRING}@api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"target/bookingprovider-2.0-SNAPSHOT.war"
