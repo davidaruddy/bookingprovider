@@ -1,0 +1,119 @@
+{
+    "resourceType": "CapabilityStatement",
+    "status": "active",
+    "date": "2019-01-17T08:49:12+00:00",
+    "publisher": "Not provided",
+    "kind": "instance",
+    "software": {
+        "name": "HAPI FHIR Server",
+        "version": "3.6.0"
+    },
+    "implementation": {
+        "description": "HAPI FHIR",
+        "url": "http://a2sibookingprovidertest.directoryofservices.nhs.uk:443/poc/"
+    },
+    "fhirVersion": "3.0.1",
+    "acceptUnknown": "extensions",
+    "format": [
+        "application/fhir+xml",
+        "application/fhir+json"
+    ],
+    "rest": [
+        {
+            "mode": "server",
+            "resource": [
+                {
+                    "type": "Appointment",
+                    "profile": {
+                        "reference": "http://hl7.org/fhir/StructureDefinition/Appointment"
+                    },
+                    "interaction": [
+                        {
+                            "code": "read"
+                        },
+                        {
+                            "code": "create"
+                        },
+                        {
+                            "code": "search-type"
+                        }
+                    ]
+                },
+                {
+                    "type": "OperationDefinition",
+                    "profile": {
+                        "reference": "http://hl7.org/fhir/StructureDefinition/OperationDefinition"
+                    },
+                    "interaction": [
+                        {
+                            "code": "read"
+                        }
+                    ]
+                },
+                {
+                    "type": "Slot",
+                    "profile": {
+                        "reference": "http://hl7.org/fhir/StructureDefinition/Slot"
+                    },
+                    "interaction": [
+                        {
+                            "code": "read"
+                        },
+                        {
+                            "code": "search-type"
+                        }
+                    ],
+                    "searchInclude": [
+                        "HealthcareService.location",
+                        "HealthcareService.providedBy",
+                        "Schedule:actor:HealthcareService",
+                        "Schedule:actor:Practitioner",
+                        "Schedule:actor:PractitionerRole",
+                        "Slot:schedule"
+                    ],
+                    "searchParam": [
+                        {
+                            "name": "schedule",
+                            "type": "token",
+                            "documentation": "This is the HealthcareService for which Slots are being requested - set this to the ASID of the Provider service"
+                        },
+                        {
+                            "name": "start",
+                            "type": "date",
+                            "documentation": "Appointment date/time."
+                        },
+                        {
+                            "name": "status",
+                            "type": "token",
+                            "documentation": "The free/busy status of the appointment"
+                        },
+                        {
+                            "name": "start",
+                            "type": "date",
+                            "documentation": "Appointment date/time."
+                        },
+                        {
+                            "name": "status",
+                            "type": "token",
+                            "documentation": "The free/busy status of the appointment"
+                        }
+                    ]
+                },
+                {
+                    "type": "StructureDefinition",
+                    "profile": {
+                        "reference": "http://hl7.org/fhir/StructureDefinition/StructureDefinition"
+                    },
+                    "interaction": [
+                        {
+                            "code": "read"
+                        },
+                        {
+                            "code": "search-type"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

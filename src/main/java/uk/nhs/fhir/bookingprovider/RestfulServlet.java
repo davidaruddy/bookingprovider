@@ -67,31 +67,32 @@ public class RestfulServlet extends RestfulServer {
      */
     public RestfulServlet() {
         InputStream input = null;
+        String propsName = "server.properties";
 
         String base = "http://appointments.directoryofservices.nhs.uk:443/poc";
         try {
             Properties serverProperties = new Properties();
             ClassLoader classLoader = getClass().getClassLoader();
-            input = classLoader.getResource("server.properties").openStream();
+            input = classLoader.getResource(propsName).openStream();
             serverProperties.load(input);
             String baseurl = serverProperties.getProperty("baseurl");
             if(baseurl!= null) {
-                LOG.info("Loaded baseurl from settings.properties: " + baseurl);
+                LOG.info("Loaded baseurl from: " + propsName + " " + baseurl);
                 base = baseurl;
             }
-            LOG.info("Setting server base url to: " + base);
         } catch (IOException ex) {
-            LOG.severe("Error reading appid.properties file " + ex.getMessage());
+            LOG.severe("Error reading " + propsName + " " + ex.getMessage());
         } finally {
             if (input != null) {
                 try {
                     input.close();
                 } catch (IOException e) {
-                    LOG.severe("Error closing appid.properties file: " + e.getMessage());
+                    LOG.severe("Error closing: " + propsName  + " " + e.getMessage());
                 }
             }
         }
         setServerAddressStrategy(new HardcodedServerAddressStrategy(base));
+        setServerConformanceProvider(new CapabilityStatementBooster());
     }
 
 

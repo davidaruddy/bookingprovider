@@ -64,6 +64,7 @@ pipelines:
           - git rev-parse HEAD >> src/main/resources/version.txt
           - cat src/main/resources/version.txt
           - sed -i "s\baseurl=.*\baseurl=http://a2sibookingprovidertest.directoryofservices.nhs.uk:443/poc/\g" src/main/resources/server.properties
+          - sed -i "s\capability.softwareversion=.*\capability.softwareversion=${BITBUCKET_BUILD_NUMBER}\g" src/main/resources/server.properties
           - mvn -B clean install
           - git rev-parse HEAD >> target/classes/version.txt
         artifacts:
@@ -82,7 +83,7 @@ pipelines:
             - docker push ${AWS_TEST_REGISTRY_URL}:latest
             - sleep 2
             - aws ecs update-service --cluster BookingPOCCluster --service a2sibookingprovidertest --force-new-deployment
-            # This should put a message into the Teams channel (dodgy characters will need escaping)
+            # This puts a message into the Teams channel
             #- printf "{\"title\":\"Deployment of Care Connect Demonstrator\",\"text\":\"Build number %s is currently being deployed\"}" ${BITBUCKET_BUILD_NUMBER} > teams_announce.json
             #- curl -X POST "https://outlook.office.com/webhook/${TEAMS_LINK}" --data @teams_announce.json
         services:
