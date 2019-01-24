@@ -49,6 +49,8 @@ import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
  */
 @WebServlet(urlPatterns = {"/poc/*"}, displayName = "FHIR Booking POC")
 public class RestfulServlet extends RestfulServer {
+    
+    String environment = "Developing";
 
     /**
      * The object we use to intercept requests, to check supplied JWTs.
@@ -77,6 +79,7 @@ public class RestfulServlet extends RestfulServer {
             input = classLoader.getResource(propsName).openStream();
             serverProperties.load(input);
             String baseurl = serverProperties.getProperty("baseurl");
+            environment = serverProperties.getProperty("environment");
             if(baseurl!= null) {
                 LOG.info("Loaded baseurl from: " + propsName + " " + baseurl);
                 base = baseurl;
@@ -200,7 +203,7 @@ public class RestfulServlet extends RestfulServer {
         checker = new AppointmentChecker();
         data = null;
         data = DataStore.getInstance();
-        ourLogger = ExternalLogger.GetInstance();
+        ourLogger = ExternalLogger.GetInstance(environment);
 
         // Create an interceptor to validate incoming requests
         requestInterceptor = new RequestInterceptor(ourLogger);

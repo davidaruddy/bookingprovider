@@ -34,6 +34,11 @@ public class ExternalLogger {
      */
     private static final Logger LOG = Logger.getLogger(ExternalLogger.class.getName());
     private static ExternalLogger instance = null;
+    private String environment;
+
+    private void setEnvironment(String env) {
+        this.environment = env;
+    }
 
     /**
      * Private constructor to prevent direct creation of this singleton class.
@@ -41,6 +46,11 @@ public class ExternalLogger {
      */
     private ExternalLogger() {
     }
+    
+    private ExternalLogger(String env) {
+        environment = env;
+    }
+    
 
     /**
      * Here's how to get the one instance.
@@ -53,6 +63,20 @@ public class ExternalLogger {
         }
         return instance;
     }
+    
+    /**
+     * Here's how to get the instance, and set the environment name.
+     * @param env
+     * @return 
+     */
+    public static ExternalLogger GetInstance(String env) {
+        if (instance == null) {
+            instance = new ExternalLogger();
+        }
+        instance.setEnvironment(env);
+        return instance;
+    }
+    
 
     /**
      * Main purpose of this class, we log the supplied message.
@@ -64,9 +88,16 @@ public class ExternalLogger {
         OkHttpClient client = new OkHttpClient();
 
         try {
-
+            String envName;
+            if(environment != null) {
+                envName = environment;
+            } else {
+                envName = "[None]";
+            }
+            
+            
             MediaType mediaType = MediaType.parse("application/json");
-            RequestBody body = RequestBody.create(mediaType, "{\"title\": \"Log event from Demonstrator\",\"text\": \"" + message + "\"}");
+            RequestBody body = RequestBody.create(mediaType, "{\"title\": \"Log event from Demonstrator in " + envName + "\",\"text\": \"" + message + "\"}");
             Request request = new Request.Builder()
                     .url("https://outlook.office.com/webhook/345757da-218e-4a1c-bbb8-93b142739fd4@50f6071f-bbfe-401a-8803-673748e629e2/IncomingWebhook/deb1c5af43484efc9e74a60cf1343245/208797b4-6c4d-4634-a989-37a45204ac2e")
                     .post(body)
