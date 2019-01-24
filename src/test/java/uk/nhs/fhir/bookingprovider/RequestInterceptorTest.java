@@ -73,9 +73,9 @@ public class RequestInterceptorTest {
         ExternalLogger ourLogger = ExternalLogger.GetInstance();
         String reqURI = "http://appointments.directoryofservices.nhs.uk/poc";
         RequestInterceptor instance = new RequestInterceptor(ourLogger);
-        boolean expResult = true;
-        boolean result = instance.validateToken(token, reqURI);
-        assertEquals(expResult, result);
+        String expResult = "TestClient";
+        String result = instance.validateToken(token, reqURI);
+        assertTrue(result.equals(expResult));
     }
 
     /**
@@ -89,9 +89,9 @@ public class RequestInterceptorTest {
         ExternalLogger ourLogger = ExternalLogger.GetInstance();
         String reqURI = "http://appointments.directoryofservices.nhs.uk/poc";
         RequestInterceptor instance = new RequestInterceptor(ourLogger);
-        boolean expResult = true;
-        boolean result = instance.validateToken(token, reqURI);
-        assertEquals(expResult, result);
+        String expResult = "ConsumerDemo";
+        String result = instance.validateToken(token, reqURI);
+        assertTrue(result.equals(expResult));
     }
 
     /**
@@ -106,7 +106,7 @@ public class RequestInterceptorTest {
         RequestInterceptor instance = new RequestInterceptor(ourLogger);
         String expResult = "The supplied JWT was not intended for: " + reqURI;
         try {
-            boolean result = instance.validateToken(token, reqURI);
+            String result = instance.validateToken(token, reqURI);
         }
         catch (UnprocessableEntityException ex) {
             assertEquals(expResult, ex.getMessage());
@@ -126,7 +126,7 @@ public class RequestInterceptorTest {
         String reqURI = "http://appointments.directoryofservices.nhs.uk/poc";
         ExternalLogger ourLogger = ExternalLogger.GetInstance();
         RequestInterceptor instance = new RequestInterceptor(ourLogger);
-        boolean result = instance.validateToken(token, reqURI);
+        String result = instance.validateToken(token, reqURI);
     }
 
     /**

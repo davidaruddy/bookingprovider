@@ -34,6 +34,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -87,6 +88,8 @@ public class RequestInterceptor extends InterceptorAdapter {
     public boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse) {
 
         String authHeader = theRequest.getHeader("Authorization");
+        String clientName = null;
+        String requestid = UUID.randomUUID().toString();
 
         if (authHeader != null) {
             LOG.info("JWT: " + authHeader);
@@ -94,10 +97,13 @@ public class RequestInterceptor extends InterceptorAdapter {
             LOG.info("Request received " + requestURI + " " + theRequest.getQueryString());
             if (authHeader.toLowerCase().startsWith("bearer")) {
                 String tokenValue = authHeader.substring(6, authHeader.length()).trim();
-                if (validateToken(tokenValue, requestURI)) {
-                    return true;
-                } else {
+                clientName = validateToken(tokenValue, requestURI);
+                if(clientName == null) {
                     throw new AuthenticationException("Authorization header not validated");
+                } else {
+                    theRequest.setAttribute("requestid", requestid);
+                    ourLogger.log(clientName + " presented a valid JWT " + requestid);
+                    return true;
                 }
             } else {
                 throw new AuthenticationException("Authorization header doesn't begin with 'Bearer'");
@@ -113,7 +119,8 @@ public class RequestInterceptor extends InterceptorAdapter {
      * @param token
      * @return
      */
-    public final boolean validateToken(final String token, final String reqURI) {
+    public final String validateToken(final String token, final String reqURI) {
+        String clientName = null;
         try {
             DecodedJWT actualJWT = JWT.decode(token);
             JwkProvider JWKSProvider = new UrlJwkProvider(new URL(JWKURL));
@@ -136,12 +143,12 @@ public class RequestInterceptor extends InterceptorAdapter {
             }
 
             // Log the client's ID
-            logAppID(actualJWT);;
+            clientName = logAppID(actualJWT);
 
             // Check the token is intended for this server
             if (!checkAudience(actualJWT, reqURI)) {
                 LOG.severe("Token was not intended for: " + reqURI);
-                return false;
+                return null;
             }
 
         }
@@ -153,7 +160,8 @@ public class RequestInterceptor extends InterceptorAdapter {
             Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
             throw new UnprocessableEntityException("MalformedURLException: " + ex.getMessage());
         }
-        return true;
+        
+        return clientName;
     }
 
     /**
@@ -285,10 +293,11 @@ public class RequestInterceptor extends InterceptorAdapter {
      *
      * @param theJWT The incoming JWT
      */
-    private void logAppID(DecodedJWT theJWT) {
+    private String logAppID(DecodedJWT theJWT) {
         String clientID = theJWT.getClaim("appid").asString();
         String appName = adWrangler.getAppName(clientID);
         LOG.info("\"JWT was issued to: " + appName + " (" + clientID + ")");
+        return appName;
     }
 
     /**
