@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
 /**
  *
@@ -69,8 +70,9 @@ public class RequestInterceptorTest {
     public void testValidateToken() {
         System.out.println("validateToken");
         String token = getToken();
+        ExternalLogger ourLogger = ExternalLogger.GetInstance();
         String reqURI = "http://appointments.directoryofservices.nhs.uk/poc";
-        RequestInterceptor instance = new RequestInterceptor();
+        RequestInterceptor instance = new RequestInterceptor(ourLogger);
         boolean expResult = true;
         boolean result = instance.validateToken(token, reqURI);
         assertEquals(expResult, result);
@@ -84,8 +86,9 @@ public class RequestInterceptorTest {
     public void testValidateTokenExtraGroups() {
         System.out.println("testValidateTokenExtraGroups");
         String token = getTokenExtraGroup();
+        ExternalLogger ourLogger = ExternalLogger.GetInstance();
         String reqURI = "http://appointments.directoryofservices.nhs.uk/poc";
-        RequestInterceptor instance = new RequestInterceptor();
+        RequestInterceptor instance = new RequestInterceptor(ourLogger);
         boolean expResult = true;
         boolean result = instance.validateToken(token, reqURI);
         assertEquals(expResult, result);
@@ -99,7 +102,8 @@ public class RequestInterceptorTest {
         System.out.println("validateToken");
         String token = getToken();
         String reqURI = "http://localhost:443/poc";
-        RequestInterceptor instance = new RequestInterceptor();
+        ExternalLogger ourLogger = ExternalLogger.GetInstance();
+        RequestInterceptor instance = new RequestInterceptor(ourLogger);
         String expResult = "The supplied JWT was not intended for: " + reqURI;
         try {
             boolean result = instance.validateToken(token, reqURI);
@@ -120,7 +124,8 @@ public class RequestInterceptorTest {
         String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Im5iQ3dXMTF3M1hrQi14VWFYd0tSU0xqTUhHUSIsImtpZCI6Im5iQ3dXMTF3M1hrQi14VWFYd0tSU0xqTUhHUSJ9.eyJhdWQiOiJodHRwOi8vYXBwb2ludG1lbnRzLmRpcmVjdG9yeW9mc2VydmljZXMubmhzLnVrOjQ0My9wb2MiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9lNTIxMTFjNy00MDQ4LTRmMzQtYWVhOS02MzI2YWZhNDRhOGQvIiwiaWF0IjoxNTQ3MjEyMzg3LCJuYmYiOjE1NDcyMTIzODcsImV4cCI6MTU0NzIxNjI4NywiYWlvIjoiNDJKZ1lBajU2emtyMkQvbWN6YWY0TnA3QnpjMEFBQT0iLCJhcHBpZCI6IjBmN2JjMDhiLTMzOTUtNGI0Yi1iMjNiLWY3OTBmYzYyYmY5MSIsImFwcGlkYWNyIjoiMSIsImdyb3VwcyI6WyJhYjQxMmZlOS0zZjY4LTQzNjgtOTgxMC05ZGMyNGQxNjU5YjEiLCJkYWNiODJjNS1hZWE4LTQ1MDktODg3Zi0yODEzMjQwNjJkZmQiXSwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvZTUyMTExYzctNDA0OC00ZjM0LWFlYTktNjMyNmFmYTQ0YThkLyIsIm9pZCI6IjU3MmQ2OGQ0LTExOTctNGE4Ny05MzJjLTAwM2Q4ZTRhN2RhOCIsInN1YiI6IjU3MmQ2OGQ0LTExOTctNGE4Ny05MzJjLTAwM2Q4ZTRhN2RhOCIsInRpZCI6ImU1MjExMWM3LTQwNDgtNGYzNC1hZWE5LTYzMjZhZmE0NGE4ZCIsInV0aSI6ImVidnpqYWRVU1VhYjhwYy0zcTZWQUEiLCJ2ZXIiOiIxLjAifQ.DsOrk8pvedRskimZf1VrTtvV2dUGfpVwIb-A8JRM8r-N9-vbko7YleLlKJJkHEJsss61lKGjuZJWSW1zSlWTn2JIE8HLJk6hUmSoh4fGyqceP3w3II93XHbfzhdMIRBDxVAkiGuI1QsrTDoK3_JJ2fUaMjpiFNIbuJ9PuGLHxTj_M4FGqWLh8kgFKiJdmae46-EQnW5yuaePmiFdpRmF6Nw6_1qQGYxlgCX5FjSGtpFbKY9LdhVgeQxO4aEx_P2zroLPyziNZgyBplsCMU0NFjqRvouWr-tJHpvICWKgeTCzmZieCaaE3DuBnyargb77bTqEKoY79vb_9euk_FPV8g";
         System.out.println("validateToken");
         String reqURI = "http://appointments.directoryofservices.nhs.uk/poc";
-        RequestInterceptor instance = new RequestInterceptor();
+        ExternalLogger ourLogger = ExternalLogger.GetInstance();
+        RequestInterceptor instance = new RequestInterceptor(ourLogger);
         boolean result = instance.validateToken(token, reqURI);
     }
 
@@ -237,7 +242,8 @@ public class RequestInterceptorTest {
     @Test
     public void testIncomingRequestPreProcessed() {
         System.out.println("incomingRequestPreProcessed");
-        RequestInterceptor instance = new RequestInterceptor();
+        ExternalLogger ourLogger = ExternalLogger.GetInstance();
+        RequestInterceptor instance = new RequestInterceptor(ourLogger);
         String queryString = "http://appointments.directoryofservices.nhs.uk/poc";
         String token = getToken();
         String authheader = "Bearer " + token;

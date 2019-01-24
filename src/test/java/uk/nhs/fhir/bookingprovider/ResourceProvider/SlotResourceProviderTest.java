@@ -35,6 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import uk.nhs.fhir.bookingprovider.data.DataStore;
+import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
 /**
  *
@@ -43,12 +44,14 @@ import uk.nhs.fhir.bookingprovider.data.DataStore;
 public class SlotResourceProviderTest {
 
     FhirContext ctx;
+    static ExternalLogger ourLogger;
 
     public SlotResourceProviderTest() {
     }
 
     @BeforeClass
     public static void setUpClass() {
+        ourLogger = ExternalLogger.GetInstance();
     }
 
     @AfterClass
@@ -72,7 +75,7 @@ public class SlotResourceProviderTest {
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
         newData.initialize();
-        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
+        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         Class<Slot> expResult = Slot.class;
         Class<Slot> result = instance.getResourceType();
         assertEquals(expResult, result);
@@ -89,7 +92,7 @@ public class SlotResourceProviderTest {
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
         newData.initialize();
-        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
+        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         Slot result = instance.getResourceById(theId);
         assertEquals(idName, result.getId());
     }
@@ -103,7 +106,7 @@ public class SlotResourceProviderTest {
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
         newData.initialize();
-        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
+        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         int expResult = 40;
         List<Slot> result = instance.searchSlots();
         assertEquals(expResult, result.size());
@@ -133,7 +136,7 @@ public class SlotResourceProviderTest {
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
         newData.initialize();
-        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
+        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         int expResult = 21;
         List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
         //int Schedcount = 0;
@@ -173,7 +176,7 @@ public class SlotResourceProviderTest {
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
         newData.initialize();
-        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
+        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         int expResult = 6;
         List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
         for (int i = 0; i < result.size(); i++) {
@@ -211,7 +214,7 @@ public class SlotResourceProviderTest {
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
         newData.initialize();
-        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
+        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         int expResult = 4;
         List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
         assertEquals(expResult, result.size());
@@ -246,7 +249,7 @@ public class SlotResourceProviderTest {
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
         newData.initialize();
-        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
+        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         int expResult = 5;
         List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
         assertEquals(expResult, result.size());
@@ -279,7 +282,7 @@ public class SlotResourceProviderTest {
         ctx = FhirContext.forDstu3();
         DataStore newData = DataStore.getInstance();
         newData.initialize();
-        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData);
+        SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         int expResult = 10;
         List<IResource> result = instance.searchSlots(statusToken, startRange, theIncludes);
         assertEquals(expResult, result.size());

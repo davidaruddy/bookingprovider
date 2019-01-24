@@ -35,6 +35,7 @@ import org.hl7.fhir.dstu3.model.Slot;
 import uk.nhs.fhir.bookingprovider.checkers.AppointmentChecker;
 import uk.nhs.fhir.bookingprovider.checkers.Fault;
 import uk.nhs.fhir.bookingprovider.data.DataStore;
+import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
 /**
  *
@@ -54,6 +55,8 @@ public class AppointmentResourceProvider implements IResourceProvider {
      */
     private static final Logger LOG =
             Logger.getLogger(AppointmentResourceProvider.class.getName());
+    
+    private ExternalLogger ourLogger;
 
     /**
      * FHIR Context we're operating within.
@@ -80,7 +83,8 @@ public class AppointmentResourceProvider implements IResourceProvider {
      */
     public AppointmentResourceProvider(final FhirContext ctx,
             final DataStore newData,
-            final AppointmentChecker newChecker) {
+            final AppointmentChecker newChecker,
+            final ExternalLogger newLogger) {
 
         /**
          * Local handle to a FHIR Context.
@@ -96,6 +100,11 @@ public class AppointmentResourceProvider implements IResourceProvider {
          * Checker object we'll use.
          */
         myChecker = newChecker;
+        
+        /**
+         * Logger we use to log results out
+         */
+        ourLogger = newLogger;
 
         LOG.info("New AppointmentResourceProvider created");
     }

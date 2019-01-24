@@ -37,6 +37,7 @@ import uk.nhs.fhir.bookingprovider.ResourceProvider.AppointmentResourceProvider;
 import uk.nhs.fhir.bookingprovider.ResourceProvider.SlotResourceProvider;
 import uk.nhs.fhir.bookingprovider.checkers.AppointmentChecker;
 import uk.nhs.fhir.bookingprovider.data.DataStore;
+import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
 /**
  * This is the actual Servlet, which hosts a set of ResourceProviders for each
@@ -96,6 +97,7 @@ public class RestfulServlet extends RestfulServer {
     }
 
 
+    private ExternalLogger ourLogger;
 
     /**
      * The Class that holds all of our resources...
@@ -198,16 +200,17 @@ public class RestfulServlet extends RestfulServer {
         checker = new AppointmentChecker();
         data = null;
         data = DataStore.getInstance();
+        ourLogger = ExternalLogger.GetInstance();
 
         // Create an interceptor to validate incoming requests
-        requestInterceptor = new RequestInterceptor();
+        requestInterceptor = new RequestInterceptor(ourLogger);
         // Now register the validating interceptor
         registerInterceptor(requestInterceptor);
         List<IResourceProvider> rpList = new ArrayList<>();
 
         // This list is all of the STU3 resource type on fhir.nhs.uk
-        rpList.add(new AppointmentResourceProvider(ctx, data, checker));
-        rpList.add(new SlotResourceProvider(ctx, data));
+        rpList.add(new AppointmentResourceProvider(ctx, data, checker, ourLogger));
+        rpList.add(new SlotResourceProvider(ctx, data, ourLogger));
 
         setResourceProviders(rpList);
         LOG.info("Created server to handle the configured resources.");

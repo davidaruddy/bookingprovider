@@ -40,6 +40,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Schedule;
 import org.hl7.fhir.dstu3.model.Slot;
 import uk.nhs.fhir.bookingprovider.data.DataStore;
+import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
 /**
  *
@@ -67,6 +68,11 @@ public class SlotResourceProvider implements IResourceProvider {
      * The in memory data store where we cache Slots and other objects.
      */
     private DataStore data;
+    
+    /**
+     * Logger to log results out.
+     */
+    ExternalLogger ourLogger;
 
     /**
      * Constructor that we pass in shared objects to.
@@ -75,9 +81,11 @@ public class SlotResourceProvider implements IResourceProvider {
      * @param newData The shared in memory data store we're using.
      */
     public SlotResourceProvider(final FhirContext ctx,
-            final DataStore newData) {
+            final DataStore newData,
+            final ExternalLogger newLogger) {
         myContext = ctx;
         data = newData;
+        ourLogger = newLogger;
     }
 
     /**

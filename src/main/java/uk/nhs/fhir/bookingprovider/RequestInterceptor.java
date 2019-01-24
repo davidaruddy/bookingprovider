@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import uk.nhs.fhir.bookingprovider.azure.AzureAD;
+import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
 /**
  *
@@ -50,6 +51,7 @@ public class RequestInterceptor extends InterceptorAdapter {
     private final String JWKURL;
     private final String ISSUER;
     AzureAD adWrangler;
+    ExternalLogger ourLogger;
 
     /**
      * Properties file in which we store the URLs used for checking tokens.
@@ -61,11 +63,12 @@ public class RequestInterceptor extends InterceptorAdapter {
      * App IDs, and the properties file which configures the AzureAD endpoints.
      *
      */
-    public RequestInterceptor() {
+    public RequestInterceptor(ExternalLogger newLogger) {
         loadJWTURLs();
         JWKURL = jwtURLs.getProperty("JWKURL");
         ISSUER = jwtURLs.getProperty("ISSUER");
         adWrangler = new AzureAD();
+        ourLogger = newLogger;
     }
 
     /**

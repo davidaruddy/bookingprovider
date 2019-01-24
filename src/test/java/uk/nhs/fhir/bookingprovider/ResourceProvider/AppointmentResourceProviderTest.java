@@ -36,6 +36,7 @@ import static org.junit.Assert.*;
 import uk.nhs.fhir.bookingprovider.checkers.AppointmentChecker;
 import uk.nhs.fhir.bookingprovider.checkers.ResourceMaker;
 import uk.nhs.fhir.bookingprovider.data.DataStore;
+import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
 /**
  *
@@ -49,12 +50,14 @@ public class AppointmentResourceProviderTest {
     AppointmentChecker checker;
 
     private static final Logger LOG = Logger.getLogger(AppointmentResourceProviderTest.class.getName());
+    static ExternalLogger ourLogger;
 
     public AppointmentResourceProviderTest() {
     }
 
     @BeforeClass
     public static void setUpClass() {
+        ourLogger = ExternalLogger.GetInstance();
     }
 
     @AfterClass
@@ -79,7 +82,7 @@ public class AppointmentResourceProviderTest {
     public void testGetResourceType() {
         System.out.println("getResourceType");
         checker = new AppointmentChecker();
-        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker);
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
         Class<Appointment> expResult = Appointment.class;
         Class<Appointment> result = instance.getResourceType();
         assertEquals(expResult, result);
@@ -96,7 +99,7 @@ public class AppointmentResourceProviderTest {
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         newData.initialize();
         checker = new AppointmentChecker();
-        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker);
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
         Class<Appointment> expResult = Appointment.class;
         MethodOutcome appt = instance.createAppointment(newAppointment);
         IBaseResource result = appt.getResource();
