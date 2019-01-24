@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -33,6 +35,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import uk.nhs.fhir.bookingprovider.MockRequest;
+import uk.nhs.fhir.bookingprovider.MockResponse;
+import static uk.nhs.fhir.bookingprovider.ResourceProvider.SlotResourceProviderTest.myRequestMock;
+import static uk.nhs.fhir.bookingprovider.ResourceProvider.SlotResourceProviderTest.ourLogger;
 import uk.nhs.fhir.bookingprovider.checkers.AppointmentChecker;
 import uk.nhs.fhir.bookingprovider.checkers.ResourceMaker;
 import uk.nhs.fhir.bookingprovider.data.DataStore;
@@ -48,6 +54,10 @@ public class AppointmentResourceProviderTest {
     JsonParser parser;
     DataStore newData;
     AppointmentChecker checker;
+    
+    static HttpServletRequest myRequestMock;
+    static HttpServletResponse responseMock;
+
 
     private static final Logger LOG = Logger.getLogger(AppointmentResourceProviderTest.class.getName());
     static ExternalLogger ourLogger;
@@ -58,6 +68,8 @@ public class AppointmentResourceProviderTest {
     @BeforeClass
     public static void setUpClass() {
         ourLogger = ExternalLogger.GetInstance();
+        myRequestMock = new MockRequest("", "");
+        responseMock = new MockResponse();
     }
 
     @AfterClass
@@ -101,7 +113,7 @@ public class AppointmentResourceProviderTest {
         checker = new AppointmentChecker();
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
         Class<Appointment> expResult = Appointment.class;
-        MethodOutcome appt = instance.createAppointment(newAppointment);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
         IBaseResource result = appt.getResource();
         assertEquals(expResult, result.getClass());
     }

@@ -28,6 +28,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -125,7 +127,9 @@ public class AppointmentResourceProvider implements IResourceProvider {
      * @return Returns the results of trying to create a new Appointment object.
      */
     @Create
-    public MethodOutcome createAppointment(@ResourceParam Appointment newAppt) {
+    public MethodOutcome createAppointment(@ResourceParam Appointment newAppt, 
+        HttpServletRequest theRequest, 
+        HttpServletResponse theResponse) {
         LOG.info("createAppointment() called");
 
         ArrayList<Fault> faults = myChecker.checkThis(newAppt);
@@ -196,7 +200,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
 
         retVal.setResource(newAppt);
         retVal.setId(new IdDt(result));
-
+        ourLogger.log("Response for: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " created Appointment: " + result);
         return retVal;
     }
 
