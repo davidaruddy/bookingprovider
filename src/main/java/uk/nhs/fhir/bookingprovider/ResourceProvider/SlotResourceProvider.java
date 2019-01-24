@@ -35,6 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.hl7.fhir.dstu3.model.HealthcareService;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Schedule;
@@ -120,9 +122,12 @@ public class SlotResourceProvider implements IResourceProvider {
      * @return This method returns a list of all Slots.
      */
     @Search()
-    public List<Slot> searchSlots() {
+    public List<Slot> searchSlots(
+        HttpServletRequest theRequest, 
+        HttpServletResponse theResponse) {
         ArrayList<Slot> slots = data.getSlots();
         LOG.info("Returned " + slots.size() + " slots.");
+        ourLogger.log("Response for: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " was: " + slots.size() + " slots");
         return slots;
     }
 
@@ -152,7 +157,9 @@ public class SlotResourceProvider implements IResourceProvider {
         "Schedule:actor:Practitioner",
         "Schedule:actor:PractitionerRole",
         "HealthcareService.providedBy",
-        "HealthcareService.location"}) Set<Include> theIncludes) {
+        "HealthcareService.location"}) Set<Include> theIncludes,
+        HttpServletRequest theRequest, 
+        HttpServletResponse theResponse) {
 
         boolean incSchedule = false;
         boolean incHealthcareService = false;
@@ -498,6 +505,7 @@ public class SlotResourceProvider implements IResourceProvider {
             }
         }
         LOG.info("Returned " + filteredSlots.size() + " slots.");
+        ourLogger.log("Response for: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " was: " + filteredSlots.size() + " slots");
         return filteredSlots;
     }
 
@@ -523,7 +531,9 @@ public class SlotResourceProvider implements IResourceProvider {
         "Schedule:actor:Practitioner",
         "Schedule:actor:PractitionerRole",
         "HealthcareService.providedBy",
-        "HealthcareService.location"}) Set<Include> theIncludes) {
+        "HealthcareService.location"}) Set<Include> theIncludes,
+        HttpServletRequest theRequest, 
+        HttpServletResponse theResponse) {
 
         boolean incSchedule = false;
         boolean incHealthcareService = false;
@@ -864,6 +874,7 @@ public class SlotResourceProvider implements IResourceProvider {
         }
         filteredSlots.addAll(extraResources);
         LOG.info("Returned " + filteredSlots.size() + " slots.");
+        ourLogger.log("Response for: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " was: " + filteredSlots.size() + " slots");
         return filteredSlots;
     }
 }

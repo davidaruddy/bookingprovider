@@ -101,7 +101,7 @@ public class RequestInterceptor extends InterceptorAdapter {
                 if(clientName == null) {
                     throw new AuthenticationException("Authorization header not validated");
                 } else {
-                    theRequest.setAttribute("requestid", requestid);
+                    theRequest.setAttribute("uk.nhs.fhir.bookingprovider.requestid", clientName  + " " + requestid);
                     ourLogger.log(clientName + " presented a valid JWT " + requestid);
                     return true;
                 }

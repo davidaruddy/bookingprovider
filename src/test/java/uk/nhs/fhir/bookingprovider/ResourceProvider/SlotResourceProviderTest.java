@@ -25,6 +25,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.Slot;
@@ -34,6 +36,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import uk.nhs.fhir.bookingprovider.MockRequest;
+import uk.nhs.fhir.bookingprovider.MockResponse;
 import uk.nhs.fhir.bookingprovider.data.DataStore;
 import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
@@ -46,12 +50,18 @@ public class SlotResourceProviderTest {
     FhirContext ctx;
     static ExternalLogger ourLogger;
 
+    static HttpServletRequest myRequestMock;
+    static HttpServletResponse responseMock;
+
     public SlotResourceProviderTest() {
     }
 
     @BeforeClass
     public static void setUpClass() {
         ourLogger = ExternalLogger.GetInstance();
+        myRequestMock = new MockRequest("", "");
+        responseMock = new MockResponse();
+
     }
 
     @AfterClass
@@ -108,7 +118,7 @@ public class SlotResourceProviderTest {
         newData.initialize();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         int expResult = 40;
-        List<Slot> result = instance.searchSlots();
+        List<Slot> result = instance.searchSlots(myRequestMock, responseMock);
         assertEquals(expResult, result.size());
     }
 
@@ -138,7 +148,7 @@ public class SlotResourceProviderTest {
         newData.initialize();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         int expResult = 21;
-        List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
+        List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes, myRequestMock, responseMock);
         //int Schedcount = 0;
         for (int i = 0; i < result.size(); i++) {
             Resource res = (Resource) result.get(i);
@@ -178,7 +188,7 @@ public class SlotResourceProviderTest {
         newData.initialize();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         int expResult = 6;
-        List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
+        List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes, myRequestMock, responseMock);
         for (int i = 0; i < result.size(); i++) {
             Resource res = (Resource) result.get(i);
             System.out.println(res.getResourceType().toString() + " - " + res.getId());
@@ -216,7 +226,7 @@ public class SlotResourceProviderTest {
         newData.initialize();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         int expResult = 4;
-        List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
+        List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes, myRequestMock, responseMock);
         assertEquals(expResult, result.size());
     }
     
@@ -251,7 +261,7 @@ public class SlotResourceProviderTest {
         newData.initialize();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         int expResult = 5;
-        List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes);
+        List<IResource> result = instance.searchSlots(theHealthcareService, statusToken, startRange, theIncludes, myRequestMock, responseMock);
         assertEquals(expResult, result.size());
     }
 
@@ -284,7 +294,7 @@ public class SlotResourceProviderTest {
         newData.initialize();
         SlotResourceProvider instance = new SlotResourceProvider(ctx, newData, ourLogger);
         int expResult = 10;
-        List<IResource> result = instance.searchSlots(statusToken, startRange, theIncludes);
+        List<IResource> result = instance.searchSlots(statusToken, startRange, theIncludes, myRequestMock, responseMock);
         assertEquals(expResult, result.size());
     }
 

@@ -19,8 +19,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.AsyncContext;
@@ -47,8 +49,10 @@ public class MockRequest implements HttpServletRequest {
 
     String queryString = null;
     String authHeader = null;
+    HashMap<String, Object> attrs;
 
     public MockRequest(String query, String header) {
+        this.attrs = new HashMap();
         queryString = query;
         authHeader = header;
     }
@@ -166,6 +170,7 @@ public class MockRequest implements HttpServletRequest {
 
     @Override
     public void setAttribute(String name, Object o) {
+        attrs.put(name, o);
         return;
     }
 
@@ -401,7 +406,7 @@ public class MockRequest implements HttpServletRequest {
 
     @Override
     public Object getAttribute(String name) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return attrs.get(name);
     }
 
 }
