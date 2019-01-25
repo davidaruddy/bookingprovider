@@ -70,7 +70,7 @@ public class SlotResourceProvider implements IResourceProvider {
      * The in memory data store where we cache Slots and other objects.
      */
     private DataStore data;
-    
+
     /**
      * Logger to log results out.
      */
@@ -123,14 +123,14 @@ public class SlotResourceProvider implements IResourceProvider {
      */
     @Search()
     public List<Slot> searchSlots(
-        HttpServletRequest theRequest, 
+        HttpServletRequest theRequest,
         HttpServletResponse theResponse) {
         if(theRequest.getRequestURL() != null) {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting all Slots: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
         } else {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting all Slots: " + theRequest.getRequestURL());
         }
-        
+
         ArrayList<Slot> slots = data.getSlots();
         LOG.info("Returned " + slots.size() + " slots.");
         ourLogger.log("Response for: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " was: " + slots.size() + " slots");
@@ -164,14 +164,14 @@ public class SlotResourceProvider implements IResourceProvider {
         "Schedule:actor:PractitionerRole",
         "HealthcareService.providedBy",
         "HealthcareService.location"}) Set<Include> theIncludes,
-        HttpServletRequest theRequest, 
+        HttpServletRequest theRequest,
         HttpServletResponse theResponse) {
         if(theRequest.getQueryString() != null) {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Slots: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
         } else {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Slots: " + theRequest.getRequestURL());
         }
-        
+
 
         boolean incSchedule = false;
         boolean incHealthcareService = false;
@@ -181,7 +181,8 @@ public class SlotResourceProvider implements IResourceProvider {
         boolean incLocation = false;
         DateParam lowerBound = null;
         DateParam upperBound = null;
-        
+        int slotCount = 0;
+
         String notSecsErrMsg = "Currently requires dates to be accurate to seconds";
 
         LOG.info("Slot search being handled for provider: "
@@ -223,7 +224,7 @@ public class SlotResourceProvider implements IResourceProvider {
                 case "HealthcareService.providedBy":
                     incProvider = true;
                     break;
-                    
+
                 case "HealthcareService.location":
                     incLocation = true;
 
@@ -404,6 +405,8 @@ public class SlotResourceProvider implements IResourceProvider {
             filteredSlots.addAll(slots);
         }
 
+        slotCount = filteredSlots.size();
+
         if (incSchedule) {
             // Now iterate through the Slots and get a list of Schedules...
             ArrayList<String> schedNames = new ArrayList<>();
@@ -468,7 +471,7 @@ public class SlotResourceProvider implements IResourceProvider {
                 filteredSlots.add(data.getOrganization());
             }
         }
-        
+
         // Check whether they want Locations back too?
         if(incLocation) {
             LOG.info("Asked to include the Location");
@@ -482,7 +485,7 @@ public class SlotResourceProvider implements IResourceProvider {
                         case "918999198999":
                             locID = "loc1111";
                             break;
-                            
+
                         case "118111118111":
                             locID = "loc2222";
                             break;
@@ -494,7 +497,7 @@ public class SlotResourceProvider implements IResourceProvider {
                     // to be added
                     boolean addingLoc1 = false;
                     boolean addingLoc2 = false;
-                    
+
                     for (Object obj : filteredSlots) {
                         Slot aSlot = (Slot) obj;
 
@@ -517,7 +520,7 @@ public class SlotResourceProvider implements IResourceProvider {
             }
         }
         LOG.info("Returned " + filteredSlots.size() + " slots.");
-        ourLogger.log("Response for: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " was: " + filteredSlots.size() + " slots");
+        ourLogger.log("Response for: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " was: " + slotCount + " slots, and " + filteredSlots.size() + " total resources.");
         return filteredSlots;
     }
 
@@ -544,7 +547,7 @@ public class SlotResourceProvider implements IResourceProvider {
         "Schedule:actor:PractitionerRole",
         "HealthcareService.providedBy",
         "HealthcareService.location"}) Set<Include> theIncludes,
-        HttpServletRequest theRequest, 
+        HttpServletRequest theRequest,
         HttpServletResponse theResponse) {
         if(theRequest.getQueryString() != null) {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Slots: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
@@ -560,7 +563,9 @@ public class SlotResourceProvider implements IResourceProvider {
         boolean incLocation = false;
         DateParam lowerBound = null;
         DateParam upperBound = null;
-        
+
+        int slotCount = 0;
+
         String notSecsErrMsg = "Currently requires dates to be accurate to seconds";
 
         if (startRange != null) {
@@ -599,7 +604,7 @@ public class SlotResourceProvider implements IResourceProvider {
                 case "HealthcareService.providedBy":
                     incProvider = true;
                     break;
-                    
+
                 case "HealthcareService.location":
                     incLocation = true;
                     break;
@@ -779,6 +784,8 @@ public class SlotResourceProvider implements IResourceProvider {
             filteredSlots.addAll(slots);
         }
 
+        slotCount = filteredSlots.size();
+
         if (incSchedule) {
             // Now iterate through the Slots and get a list of Schedules...
             ArrayList<String> schedNames = new ArrayList<>();
@@ -807,7 +814,7 @@ public class SlotResourceProvider implements IResourceProvider {
         if (incHealthcareService) {
             if (filteredSlots.size() > 0) {
                 LOG.info("Asked to add HealthcareService");
-                
+
                 boolean addingHCS1 = false;
                 boolean addingHCS2 = false;
 
@@ -857,13 +864,13 @@ public class SlotResourceProvider implements IResourceProvider {
                 extraResources.add(data.getOrganization());
             }
         }
-        
+
         // Check whether they want Locations back too?
         if(incLocation) {
             LOG.info("Asked to include the Location");
             if (filteredSlots.size() > 0) {
                 LOG.info("Adding the Location");
-                                
+
                 // They haven't, so we need to iterate through all Slots
                 // being returned, and determine which Location(s) need
                 // to be added
@@ -886,12 +893,12 @@ public class SlotResourceProvider implements IResourceProvider {
                 if(addingLoc2) {
                     extraResources.add(data.getLocation("loc2222"));
                 }
-                
+
             }
         }
         filteredSlots.addAll(extraResources);
         LOG.info("Returned " + filteredSlots.size() + " slots.");
-        ourLogger.log("Response for: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " was: " + filteredSlots.size() + " slots");
+        ourLogger.log("Response for: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " was: " + slotCount + " slots, and " + filteredSlots.size() + " total resources.");
         return filteredSlots;
     }
 }

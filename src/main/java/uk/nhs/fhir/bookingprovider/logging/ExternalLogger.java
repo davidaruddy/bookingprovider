@@ -85,6 +85,8 @@ public class ExternalLogger {
      * @param message
      */
     public boolean log(String message) {
+        
+        boolean result = false;
 
         OkHttpClient client = new OkHttpClient();
         ResponseBody responseBody = null;
@@ -109,25 +111,22 @@ public class ExternalLogger {
             Response response = client.newCall(request).execute();
 
             if (response.isSuccessful()) {
+                result = true;
                 LOG.info("Logging got a 200");
                 responseBody = response.body();
             } else {
                 LOG.warning("Logging failed");
-                return false;
             }
 
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             LOG.severe(ex.getMessage());
-            return false;
-        }
-        finally {
+        } finally {
             try {
                 responseBody.close();
             }
             catch (IOException ex) {
             }
         }
-        return true;
+        return result;
     }
 }
