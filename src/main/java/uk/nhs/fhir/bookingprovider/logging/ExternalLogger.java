@@ -22,6 +22,7 @@ import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import com.squareup.okhttp.ResponseBody;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -47,11 +48,10 @@ public class ExternalLogger {
      */
     private ExternalLogger() {
     }
-    
+
     private ExternalLogger(String env) {
         environment = env;
     }
-    
 
     /**
      * Here's how to get the one instance.
@@ -64,11 +64,12 @@ public class ExternalLogger {
         }
         return instance;
     }
-    
+
     /**
      * Here's how to get the instance, and set the environment name.
+     *
      * @param env
-     * @return 
+     * @return
      */
     public static ExternalLogger GetInstance(String env) {
         if (instance == null) {
@@ -77,7 +78,6 @@ public class ExternalLogger {
         instance.setEnvironment(env);
         return instance;
     }
-    
 
     /**
      * Main purpose of this class, we log the supplied message.
@@ -87,17 +87,16 @@ public class ExternalLogger {
     public boolean log(String message) {
 
         OkHttpClient client = new OkHttpClient();
+        ResponseBody responseBody = null;
 
         try {
             String envName;
-            if(environment != null) {
+            if (environment != null) {
                 envName = environment;
             } else {
                 envName = "[None]";
             }
-            ResponseBody responseBody;
-            
-            
+
             MediaType mediaType = MediaType.parse("application/json");
             RequestBody body = RequestBody.create(mediaType, "{\"title\": \"Log event from Demonstrator in " + envName + "\",\"text\": \"" + message + "\"}");
             Request request = new Request.Builder()
@@ -108,17 +107,26 @@ public class ExternalLogger {
                     .build();
 
             Response response = client.newCall(request).execute();
-            responseBody = response.body();
+
             if (response.isSuccessful()) {
                 LOG.info("Logging got a 200");
+                responseBody = response.body();
             } else {
-                LOG.warning("Logging failed");return false;
+                LOG.warning("Logging failed");
+                return false;
             }
-            responseBody.close();
+
         }
         catch (IOException ex) {
             LOG.severe(ex.getMessage());
             return false;
+        }
+        finally {
+            try {
+                responseBody.close();
+            }
+            catch (IOException ex) {
+            }
         }
         return true;
     }
