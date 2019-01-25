@@ -131,6 +131,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
         HttpServletRequest theRequest, 
         HttpServletResponse theResponse) {
         LOG.info("createAppointment() called");
+        ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " creating Appointment: " + theRequest.getRequestURL() + theRequest.getQueryString());
 
         ArrayList<Fault> faults = myChecker.checkThis(newAppt);
         if (!faults.isEmpty()) {
@@ -214,8 +215,12 @@ public class AppointmentResourceProvider implements IResourceProvider {
      * exists.
      */
     @Read()
-    public Appointment getResourceById(@IdParam IdType theId) {
+    public Appointment getResourceById(@IdParam IdType theId,
+        HttpServletRequest theRequest, 
+        HttpServletResponse theResponse) {
+        ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Appointment: " + theRequest.getRequestURL() + theRequest.getQueryString());
         Appointment myAppt = myData.getAppointment(theId.toString());
+        ourLogger.log("Response: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " got Appointment: " + myAppt.getId());
         return myAppt;
     }
 
@@ -229,8 +234,13 @@ public class AppointmentResourceProvider implements IResourceProvider {
      * multiple matching resources, or it may also be empty.
      */
     @Search()
-    public List<Appointment> getAppointment() {
+    public List<Appointment> getAppointment(
+        HttpServletRequest theRequest, 
+        HttpServletResponse theResponse) {
         LOG.info("Asked for all appointments");
-        return myData.getAppointments();
+        ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " to get all Appointments");
+        ArrayList<Appointment> appointments = myData.getAppointments();
+        ourLogger.log("Response: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " got: " + appointments.size() + " appointments");
+        return appointments;
     }
 }

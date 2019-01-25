@@ -125,6 +125,7 @@ public class SlotResourceProvider implements IResourceProvider {
     public List<Slot> searchSlots(
         HttpServletRequest theRequest, 
         HttpServletResponse theResponse) {
+        ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting all Slots: " + theRequest.getRequestURL() + theRequest.getQueryString());
         ArrayList<Slot> slots = data.getSlots();
         LOG.info("Returned " + slots.size() + " slots.");
         ourLogger.log("Response for: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " was: " + slots.size() + " slots");
@@ -160,6 +161,7 @@ public class SlotResourceProvider implements IResourceProvider {
         "HealthcareService.location"}) Set<Include> theIncludes,
         HttpServletRequest theRequest, 
         HttpServletResponse theResponse) {
+        ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Slots: " + theRequest.getRequestURL() + theRequest.getQueryString());
 
         boolean incSchedule = false;
         boolean incHealthcareService = false;
@@ -534,6 +536,7 @@ public class SlotResourceProvider implements IResourceProvider {
         "HealthcareService.location"}) Set<Include> theIncludes,
         HttpServletRequest theRequest, 
         HttpServletResponse theResponse) {
+        ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Slots: " + theRequest.getRequestURL() + theRequest.getQueryString());
 
         boolean incSchedule = false;
         boolean incHealthcareService = false;
