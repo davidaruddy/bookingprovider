@@ -131,7 +131,11 @@ public class AppointmentResourceProvider implements IResourceProvider {
         HttpServletRequest theRequest, 
         HttpServletResponse theResponse) {
         LOG.info("createAppointment() called");
-        ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " creating Appointment: " + theRequest.getRequestURL() + theRequest.getQueryString());
+        if(theRequest.getQueryString() != null) {
+            ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " creating Appointment: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
+        } else {
+            ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " creating Appointment: " + theRequest.getRequestURL());
+        }
 
         ArrayList<Fault> faults = myChecker.checkThis(newAppt);
         if (!faults.isEmpty()) {
@@ -218,7 +222,11 @@ public class AppointmentResourceProvider implements IResourceProvider {
     public Appointment getResourceById(@IdParam IdType theId,
         HttpServletRequest theRequest, 
         HttpServletResponse theResponse) {
-        ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Appointment: " + theRequest.getRequestURL() + theRequest.getQueryString());
+        if(theRequest.getQueryString() != null) {
+            ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Appointment: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
+        } else {
+            ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Appointment: " + theRequest.getRequestURL());
+        }
         Appointment myAppt = myData.getAppointment(theId.toString());
         ourLogger.log("Response: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " got Appointment: " + myAppt.getId());
         return myAppt;

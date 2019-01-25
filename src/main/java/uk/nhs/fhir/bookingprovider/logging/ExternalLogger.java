@@ -20,6 +20,7 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
+import com.squareup.okhttp.ResponseBody;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -94,6 +95,7 @@ public class ExternalLogger {
             } else {
                 envName = "[None]";
             }
+            ResponseBody responseBody;
             
             
             MediaType mediaType = MediaType.parse("application/json");
@@ -106,11 +108,13 @@ public class ExternalLogger {
                     .build();
 
             Response response = client.newCall(request).execute();
+            responseBody = response.body();
             if (response.isSuccessful()) {
                 LOG.info("Logging got a 200");
             } else {
                 LOG.warning("Logging failed");return false;
             }
+            responseBody.close();
         }
         catch (IOException ex) {
             LOG.severe(ex.getMessage());
