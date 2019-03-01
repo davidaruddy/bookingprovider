@@ -267,7 +267,11 @@ public class AppointmentResourceProvider implements IResourceProvider {
      * @return 
      */
     @Update()
-    public MethodOutcome updateAppointment(@IdParam IdType theId, @ResourceParam Appointment newAppt) {
+    public MethodOutcome updateAppointment(@IdParam IdType theId,
+            @ResourceParam Appointment newAppt,
+            HttpServletRequest theRequest,
+            HttpServletResponse theResponse) {
+        ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " updating Appointment: " + theRequest.getRequestURL());
         MethodOutcome retVal = new MethodOutcome();
         String identifier = theId.toString();
         LOG.info("updateAppointment() called for: " + identifier);
@@ -299,10 +303,19 @@ public class AppointmentResourceProvider implements IResourceProvider {
         
         // Update the Appointment
         myData.setAppointmentStatus(identifier, proposedStatus);
+        switch(proposedStatus) {
+            case CANCELLED:
+                ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " Appointment: " + identifier + " updated to 'cancelled'.");
+                break;
+            case ENTEREDINERROR:
+                ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " Appointment: " + identifier + " updated to 'enteredinerror'.");                
+                break;
+        }
         LOG.info("Appointment updated");
         
         // Update the Slot
         myData.setSlotFree(slotId);
+        ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " Slot: " + slotId + " set back to free.");
         LOG.info("Slot set back to free");
         retVal.setId(new IdType("Appointment", identifier));
 
