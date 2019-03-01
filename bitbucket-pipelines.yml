@@ -41,8 +41,8 @@ pipelines:
         script:
             - eval $(aws ecr get-login --region ${AWS_DEFAULT_REGION} --no-include-email)
             - docker build -t a2sibookingprovider .
-            - docker tag a2sibookingprovider:latest 410123189863.dkr.ecr.eu-west-2.amazonaws.com/a2sibookingprovider:latest
-            - docker push ${AWS_REGISTRY_URL}:latest
+            - docker tag a2sibookingprovider:latest ${AWS_REGISTRY_URL}a2sibookingprovider:latest
+            - docker push ${AWS_REGISTRY_URL}a2sibookingprovider:latest
             - sleep 2
             - aws ecs update-service --cluster BookingPOCCluster --service BookDemonstrator --force-new-deployment
             # This should put a message into the Teams channel (dodgy characters will need escaping)
@@ -82,8 +82,8 @@ pipelines:
         script:
             - eval $(aws ecr get-login --region ${AWS_DEFAULT_REGION} --no-include-email)
             - docker build -t a2sibookingprovidertest .
-            - docker tag a2sibookingprovidertest:latest ${AWS_TEST_REGISTRY_URL}:latest
-            - docker push ${AWS_TEST_REGISTRY_URL}:latest
+            - docker tag a2sibookingprovidertest:latest ${AWS_REGISTRY_URL}a2sibookingprovidertest:latest
+            - docker push ${AWS_REGISTRY_URL}a2sibookingprovidertest:latest
             - sleep 2
             - aws ecs update-service --cluster BookingPOCCluster --service a2sibookingprovidertest --force-new-deployment
             # This puts a message into the Teams channel

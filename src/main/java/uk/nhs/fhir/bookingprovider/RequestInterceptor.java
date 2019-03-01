@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
 import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.SigningKeyNotFoundException;
 import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -152,12 +153,17 @@ public class RequestInterceptor extends InterceptorAdapter {
             }
 
         }
+        catch(SigningKeyNotFoundException ex) {
+            // Signing Key used not found, has it been rotated out of use?
+            LOG.severe(ex.getMessage());
+            throw new UnprocessableEntityException("SigningKeyNotFoundException: " + ex.getMessage());
+        }
         catch (JwkException ex) {
-            Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.severe(ex.getMessage());
             throw new UnprocessableEntityException("JwkException: " + ex.getMessage());
         }
         catch (MalformedURLException ex) {
-            Logger.getLogger(RequestInterceptor.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.severe(ex.getMessage());
             throw new UnprocessableEntityException("MalformedURLException: " + ex.getMessage());
         }
         

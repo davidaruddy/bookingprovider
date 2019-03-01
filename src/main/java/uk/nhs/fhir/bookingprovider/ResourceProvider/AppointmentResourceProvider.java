@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -250,5 +251,11 @@ public class AppointmentResourceProvider implements IResourceProvider {
         ArrayList<Appointment> appointments = myData.getAppointments();
         ourLogger.log("Response: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " got: " + appointments.size() + " appointments");
         return appointments;
+    }
+    
+    @Update()
+    public MethodOutcome updateAppointment(@IdParam IdType theId, @ResourceParam Appointment theAppointment) {
+        MethodOutcome retVal = new MethodOutcome();
+        return retVal;        
     }
 }
