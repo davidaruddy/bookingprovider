@@ -32,7 +32,12 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.hl7.fhir.dstu3.model.Appointment;
+import org.hl7.fhir.dstu3.model.Appointment.AppointmentStatus;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
+import org.hl7.fhir.dstu3.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Slot;
 import uk.nhs.fhir.bookingprovider.checkers.AppointmentChecker;
@@ -253,9 +258,57 @@ public class AppointmentResourceProvider implements IResourceProvider {
         return appointments;
     }
     
+    /**
+     * The update method should ONLY to be used to change an appointment from
+     * booked to either cancelled or entered in error.
+     * 
+     * @param theId
+     * @param newAppt
+     * @return 
+     */
     @Update()
-    public MethodOutcome updateAppointment(@IdParam IdType theId, @ResourceParam Appointment theAppointment) {
+    public MethodOutcome updateAppointment(@IdParam IdType theId, @ResourceParam Appointment newAppt) {
         MethodOutcome retVal = new MethodOutcome();
+        String identifier = theId.toString();
+        LOG.info("updateAppointment() called for: " + identifier);
+        AppointmentStatus proposedStatus = newAppt.getStatus();
+        
+        // Check what status they're changing it to...
+        if(proposedStatus != AppointmentStatus.CANCELLED &&
+                proposedStatus != AppointmentStatus.ENTEREDINERROR) {
+            throw new UnprocessableEntityException("Status not accepted.");
+        }
+        
+        // Now check the Appointment exists...
+        Appointment currentAppt = myData.getAppointment(identifier);
+        if(currentAppt == null) {
+            throw new UnprocessableEntityException("Appointment " + identifier + " not found.");
+        }
+        
+        // Now check they're referring to the same Slot
+        if(newAppt.getSlot().size() != 1) {
+            throw new UnprocessableEntityException("Appointment refers to multiple Slots.");
+        }
+        String slotId = newAppt.getSlotFirstRep().getReference();
+        LOG.info("New Appt slot ID: " + slotId);
+        String currentSlotId = currentAppt.getSlotFirstRep().getReference();
+        LOG.info("Booked Appt slot ID: " + currentSlotId);
+        if( ! slotId.equals(currentSlotId)) {
+            throw new UnprocessableEntityException("Appointment refers to a different Slot.");
+        }        
+        
+        // Update the Appointment
+        myData.setAppointmentStatus(identifier, proposedStatus);
+        LOG.info("Appointment updated");
+        
+        // Update the Slot
+        myData.setSlotFree(slotId);
+        LOG.info("Slot set back to free");
+        retVal.setId(new IdType("Appointment", identifier));
+
+        retVal.setResource(myData.getAppointment(identifier));
+        retVal.setId(new IdDt(identifier));
+        
         return retVal;        
     }
 }

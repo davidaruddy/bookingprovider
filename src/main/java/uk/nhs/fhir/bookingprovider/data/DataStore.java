@@ -735,4 +735,51 @@ public final class DataStore {
         return null;
     }
 
+    /**
+     * Method to update an Appointment to Cancelled or EnteredInError
+     * 
+     * @param identifier
+     * @param proposedStatus 
+     */
+    public void setAppointmentStatus(String identifier, Appointment.AppointmentStatus proposedStatus) {
+        LOG.info("Trying to update: " + identifier);
+        for (int i = 0; i < appointments.size(); i++) {
+            Appointment appt = (Appointment) appointments.get(i);
+            String thisone = "Appointment/" + appt.getId();
+            LOG.info("Checking: " + thisone);
+            if (thisone.equals(identifier)) {
+                LOG.info("Found it");
+                appt.setStatus(proposedStatus);
+                break;
+            }
+        }
+    }
+
+    /**
+     * Sets a slot back to free from booked.
+     * @param slotId 
+     */
+    public void setSlotFree(final String id) {
+        // First we extract just the ID part from any id we've been sent...
+        LOG.info("Setting Slot " + id + " back to free");
+        String[] words = id.split("/");
+        String idPart = words[words.length - 1];
+
+        LOG.info("Setting Slot " + idPart + " to 'FREE'");
+
+        for (int x = 0; x < slots.size(); x++) {
+            Slot sl = (Slot) slots.get(x);
+            String slotId = sl.getId();
+            LOG.info("Trying " + slotId);
+            if (slotId.equals(idPart)) {
+                LOG.info("Slot found: " + sl.toString());
+                sl.setStatus(Slot.SlotStatus.FREE);
+                slots.remove(x);
+                LOG.info("Slot removed: " + sl.toString());
+                slots.add(sl);
+                LOG.info("Slot added: " + sl.toString());
+                return;
+            }
+        }
+    }
 }
