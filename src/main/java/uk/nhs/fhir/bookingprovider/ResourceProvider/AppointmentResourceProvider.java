@@ -17,6 +17,7 @@ package uk.nhs.fhir.bookingprovider.ResourceProvider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -268,14 +269,14 @@ public class AppointmentResourceProvider implements IResourceProvider {
             @ResourceParam Appointment newAppt,
             HttpServletRequest theRequest,
             HttpServletResponse theResponse) {
+        JsonParser jp = (JsonParser) FhirContext.forDstu3().newJsonParser();
+        LOG.info("Got resource:");
+        LOG.info(jp.encodeResourceToString(newAppt));
         ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " updating Appointment: " + theRequest.getRequestURL());
         MethodOutcome retVal = new MethodOutcome();
         String identifier = theId.toString();
-        LOG.info("updateAppointment() called for: " + identifier);
-        LOG.info("Appointment has ID: " + newAppt.getId());
-        if(!identifier.equals("Appointment/" + newAppt.getId())) {
-            throw new UnprocessableEntityException("Appointment doesn't have the ID set.");
-        }
+        String resourceID = newAppt.getId();
+        LOG.info("updateAppointment() called for ID: " + identifier);
         AppointmentStatus proposedStatus = newAppt.getStatus();
         
         // Check what status they're changing it to...

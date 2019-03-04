@@ -329,11 +329,11 @@ public class AppointmentResourceProviderTest {
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
-        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
-        IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
-        newAppointment.setId(appt.getResource().getIdElement());
-        newAppointment.setStatus(AppointmentStatus.CANCELLED);
-        MethodOutcome result2 = instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+        MethodOutcome outcome = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        Appointment savedAppt = (Appointment) outcome.getResource();
+        IdType newId = new IdType("Appointment/" + outcome.getResource().getIdElement());
+        savedAppt.setStatus(AppointmentStatus.CANCELLED);
+        MethodOutcome result2 = instance.updateAppointment(newId, savedAppt, myRequestMock, responseMock);
         Appointment updated = (Appointment) result2.getResource();
         assertEquals(updated.getSlotFirstRep(), newAppointment.getSlotFirstRep());
     }
