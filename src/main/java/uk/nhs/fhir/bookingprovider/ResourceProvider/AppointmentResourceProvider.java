@@ -35,10 +35,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Appointment.AppointmentStatus;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
-import org.hl7.fhir.dstu3.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Slot;
 import uk.nhs.fhir.bookingprovider.checkers.AppointmentChecker;
@@ -64,7 +60,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
      */
     private static final Logger LOG =
             Logger.getLogger(AppointmentResourceProvider.class.getName());
-    
+
     private ExternalLogger ourLogger;
 
     /**
@@ -109,7 +105,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
          * Checker object we'll use.
          */
         myChecker = newChecker;
-        
+
         /**
          * Logger we use to log results out
          */
@@ -134,8 +130,8 @@ public class AppointmentResourceProvider implements IResourceProvider {
      * @return Returns the results of trying to create a new Appointment object.
      */
     @Create
-    public MethodOutcome createAppointment(@ResourceParam Appointment newAppt, 
-        HttpServletRequest theRequest, 
+    public MethodOutcome createAppointment(@ResourceParam Appointment newAppt,
+        HttpServletRequest theRequest,
         HttpServletResponse theResponse) {
         LOG.info("createAppointment() called");
         if(theRequest.getQueryString() != null) {
@@ -227,7 +223,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
      */
     @Read()
     public Appointment getResourceById(@IdParam IdType theId,
-        HttpServletRequest theRequest, 
+        HttpServletRequest theRequest,
         HttpServletResponse theResponse) {
         if(theRequest.getQueryString() != null) {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Appointment: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
@@ -247,7 +243,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
      */
     @Search()
     public List<Appointment> getAppointment(
-        HttpServletRequest theRequest, 
+        HttpServletRequest theRequest,
         HttpServletResponse theResponse) {
         LOG.info("Asked for all appointments");
         ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " to get all Appointments");
@@ -255,14 +251,14 @@ public class AppointmentResourceProvider implements IResourceProvider {
         ourLogger.log("Response: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " got: " + appointments.size() + " appointments");
         return appointments;
     }
-    
+
     /**
      * The update method should ONLY to be used to change an appointment from
      * booked to either cancelled or entered in error.
-     * 
+     *
      * @param theId
      * @param newAppt
-     * @return 
+     * @return
      */
     @Update()
     public MethodOutcome updateAppointment(@IdParam IdType theId,
@@ -278,19 +274,19 @@ public class AppointmentResourceProvider implements IResourceProvider {
         String resourceID = newAppt.getId();
         LOG.info("updateAppointment() called for ID: " + identifier);
         AppointmentStatus proposedStatus = newAppt.getStatus();
-        
+
         // Check what status they're changing it to...
         if(proposedStatus != AppointmentStatus.CANCELLED &&
                 proposedStatus != AppointmentStatus.ENTEREDINERROR) {
             throw new UnprocessableEntityException("Status not accepted.");
         }
-        
+
         // Now check the Appointment exists...
         Appointment currentAppt = myData.getAppointment(identifier);
         if(currentAppt == null) {
             throw new UnprocessableEntityException("Appointment " + identifier + " not found.");
         }
-        
+
         // Now check they're referring to the same Slot
         if(newAppt.getSlot().size() != 1) {
             throw new UnprocessableEntityException("Appointment refers to multiple Slots.");
@@ -301,8 +297,8 @@ public class AppointmentResourceProvider implements IResourceProvider {
         LOG.info("Booked Appt slot ID: " + currentSlotId);
         if( ! slotId.equals(currentSlotId)) {
             throw new UnprocessableEntityException("Appointment refers to a different Slot.");
-        }        
-        
+        }
+
         // Update the Appointment
         myData.setAppointmentStatus(identifier, proposedStatus);
         switch(proposedStatus) {
@@ -310,11 +306,11 @@ public class AppointmentResourceProvider implements IResourceProvider {
                 ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " Appointment: " + identifier + " updated to 'cancelled'.");
                 break;
             case ENTEREDINERROR:
-                ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " Appointment: " + identifier + " updated to 'enteredinerror'.");                
+                ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " Appointment: " + identifier + " updated to 'enteredinerror'.");
                 break;
         }
         LOG.info("Appointment updated");
-        
+
         // Update the Slot
         myData.setSlotFree(slotId);
         ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " Slot: " + slotId + " set back to free.");
@@ -323,7 +319,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
 
         retVal.setResource(myData.getAppointment(identifier));
         retVal.setId(new IdDt(identifier));
-        
-        return retVal;        
+
+        return retVal;
     }
 }

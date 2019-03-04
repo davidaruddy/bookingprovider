@@ -15,7 +15,6 @@
  */
 package uk.nhs.fhir.bookingprovider.ResourceProvider;
 
-import uk.nhs.fhir.bookingprovider.ResourceProvider.AppointmentResourceProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.parser.JsonParser;
@@ -41,10 +40,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import uk.nhs.fhir.bookingprovider.MockRequest;
 import uk.nhs.fhir.bookingprovider.MockResponse;
-import static uk.nhs.fhir.bookingprovider.ResourceProvider.SlotResourceProviderTest.myRequestMock;
-import static uk.nhs.fhir.bookingprovider.ResourceProvider.SlotResourceProviderTest.ourLogger;
 import uk.nhs.fhir.bookingprovider.checkers.AppointmentChecker;
-import uk.nhs.fhir.bookingprovider.checkers.ResourceMaker;
 import uk.nhs.fhir.bookingprovider.data.DataStore;
 import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
@@ -337,10 +333,10 @@ public class AppointmentResourceProviderTest {
         Appointment updated = (Appointment) result2.getResource();
         assertEquals(updated.getSlotFirstRep(), newAppointment.getSlotFirstRep());
     }
-    
+
     /**
      * Test of updateAppointment method, of class AppointmentResourceProvider.
-     * 
+     *
      * This test that we can't ask for a non-existent appointment to be cancelled.
      */
     @Test(expected = UnprocessableEntityException.class)
@@ -357,12 +353,12 @@ public class AppointmentResourceProviderTest {
         newAppointment.setStatus(AppointmentStatus.CANCELLED);
         instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
     }
-    
-    
+
+
 
     /**
      * Test of updateAppointment method, of class AppointmentResourceProvider.
-     * 
+     *
      * This tests that we can't set the status to an arbitrary value...
      */
     @Test (expected = UnprocessableEntityException.class)
@@ -378,10 +374,10 @@ public class AppointmentResourceProviderTest {
         newAppointment.setStatus(AppointmentStatus.FULFILLED);
         instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
     }
-    
+
     /**
      * Test of updateAppointment method, of class AppointmentResourceProvider.
-     * 
+     *
      * This tests that we can't set the status to an arbitrary value...
      */
     @Test (expected = UnprocessableEntityException.class)
@@ -400,7 +396,7 @@ public class AppointmentResourceProviderTest {
 
     /**
      * Test of updateAppointment method, of class AppointmentResourceProvider.
-     * 
+     *
      * This tests that we can't set the status to an arbitrary value...
      */
     @Test (expected = UnprocessableEntityException.class)
@@ -419,7 +415,7 @@ public class AppointmentResourceProviderTest {
 
     /**
      * Test of updateAppointment method, of class AppointmentResourceProvider.
-     * 
+     *
      * This tests that we can't set the status to an arbitrary value...
      */
     @Test (expected = UnprocessableEntityException.class)
@@ -438,7 +434,7 @@ public class AppointmentResourceProviderTest {
 
     /**
      * Test of updateAppointment method, of class AppointmentResourceProvider.
-     * 
+     *
      * This tests that we can't set the status to an arbitrary value...
      */
     @Test (expected = UnprocessableEntityException.class)
@@ -457,7 +453,7 @@ public class AppointmentResourceProviderTest {
 
     /**
      * Test of updateAppointment method, of class AppointmentResourceProvider.
-     * 
+     *
      * This tests that we can't set the status to an arbitrary value...
      */
     @Test (expected = UnprocessableEntityException.class)
@@ -476,7 +472,7 @@ public class AppointmentResourceProviderTest {
 
     /**
      * Test of updateAppointment method, of class AppointmentResourceProvider.
-     * 
+     *
      * This tests that we can't set the status to an arbitrary value...
      */
     @Test (expected = UnprocessableEntityException.class)
