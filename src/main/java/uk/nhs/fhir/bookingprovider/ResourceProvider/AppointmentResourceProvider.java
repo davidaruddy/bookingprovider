@@ -239,10 +239,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
     }
 
     /**
-     * The "@Search" annotation indicates that this method supports the search
-     * operation. You may have many different method annotated with this
-     * annotation, to support many different search criteria. This example
-     * searches by family name.
+     * This returns ALL Appointments.
      *
      * @return This method returns a list of Patients. This list may contain
      * multiple matching resources, or it may also be empty.
@@ -275,6 +272,10 @@ public class AppointmentResourceProvider implements IResourceProvider {
         MethodOutcome retVal = new MethodOutcome();
         String identifier = theId.toString();
         LOG.info("updateAppointment() called for: " + identifier);
+        LOG.info("Appointment has ID: " + newAppt.getId());
+        if(!identifier.equals("Appointment/" + newAppt.getId())) {
+            throw new UnprocessableEntityException("Appointment doesn't have the ID set.");
+        }
         AppointmentStatus proposedStatus = newAppt.getStatus();
         
         // Check what status they're changing it to...

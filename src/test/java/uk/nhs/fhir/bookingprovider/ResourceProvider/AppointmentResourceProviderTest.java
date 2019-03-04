@@ -20,13 +20,17 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.hl7.fhir.dstu3.model.Appointment;
+import org.hl7.fhir.dstu3.model.Appointment.AppointmentStatus;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
@@ -54,7 +58,7 @@ public class AppointmentResourceProviderTest {
     JsonParser parser;
     DataStore newData;
     AppointmentChecker checker;
-    
+
     static HttpServletRequest myRequestMock;
     static HttpServletResponse responseMock;
 
@@ -106,7 +110,7 @@ public class AppointmentResourceProviderTest {
     @Test
     public void testCreateAppointment() {
         System.out.println("createAppointment");
-        
+
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         newData.initialize();
@@ -265,8 +269,8 @@ public class AppointmentResourceProviderTest {
         FhirContext ctx = FhirContext.forDstu3();
         return ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
     }
-    
-    
+
+
     /**
      * Method to get the contents of files in src/test/resources
      *
@@ -277,7 +281,7 @@ public class AppointmentResourceProviderTest {
      */
     public final String getFileContents(String filename) {
         StringBuilder result = new StringBuilder("");
-        
+
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(filename).getFile());
         try (Scanner scanner = new Scanner(file)) {
@@ -295,4 +299,196 @@ public class AppointmentResourceProviderTest {
         return result.toString();
     }
 
-}
+    /**
+     * Test of getAppointment method, of class AppointmentResourceProvider.
+     * Gets ALL Appointments
+     */
+    @Test
+    public void testGetAppointment() {
+        System.out.println("getAppointment");
+        newData.initialize();
+        checker = new AppointmentChecker();
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
+        List<Appointment> result = instance.getAppointment(myRequestMock, responseMock);
+        assertEquals(0, result.size());
+        String apptString = getFileContents("goodAppt_1.json");
+        Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        result = instance.getAppointment(myRequestMock, responseMock);
+        assertEquals(1, result.size());
+    }
+
+    /**
+     * Test of updateAppointment method, of class AppointmentResourceProvider.
+     */
+    @Test
+    public void testUpdateAppointment() {
+        System.out.println("updateAppointment");
+        newData.initialize();
+        checker = new AppointmentChecker();
+        String apptString = getFileContents("goodAppt_1.json");
+        Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
+        newAppointment.setId(appt.getResource().getIdElement());
+        newAppointment.setStatus(AppointmentStatus.CANCELLED);
+        MethodOutcome result2 = instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+        Appointment updated = (Appointment) result2.getResource();
+        assertEquals(updated.getSlotFirstRep(), newAppointment.getSlotFirstRep());
+    }
+    
+    /**
+     * Test of updateAppointment method, of class AppointmentResourceProvider.
+     * 
+     * This test that we can't ask for a non-existent appointment to be cancelled.
+     */
+    @Test(expected = UnprocessableEntityException.class)
+    public void testUpdateAppointmentBADID() {
+        System.out.println("updateAppointment");
+        newData.initialize();
+        checker = new AppointmentChecker();
+        String apptString = getFileContents("goodAppt_1.json");
+        Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        IdType newId = new IdType("Appointment/f04cf6dd-a30e-4e99-ab50-804c6b5ce38a");
+        newAppointment.setId(appt.getResource().getIdElement());
+        newAppointment.setStatus(AppointmentStatus.CANCELLED);
+        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+    }
+    
+    
+
+    /**
+     * Test of updateAppointment method, of class AppointmentResourceProvider.
+     * 
+     * This tests that we can't set the status to an arbitrary value...
+     */
+    @Test (expected = UnprocessableEntityException.class)
+    public void testUpdateAppointmentBadStatusFULFILLED() {
+        System.out.println("updateAppointment");
+        newData.initialize();
+        checker = new AppointmentChecker();
+        String apptString = getFileContents("goodAppt_1.json");
+        Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
+        newAppointment.setStatus(AppointmentStatus.FULFILLED);
+        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+    }
+    
+    /**
+     * Test of updateAppointment method, of class AppointmentResourceProvider.
+     * 
+     * This tests that we can't set the status to an arbitrary value...
+     */
+    @Test (expected = UnprocessableEntityException.class)
+    public void testUpdateAppointmentBadStatusARRIVED() {
+        System.out.println("updateAppointment");
+        newData.initialize();
+        checker = new AppointmentChecker();
+        String apptString = getFileContents("goodAppt_1.json");
+        Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
+        newAppointment.setStatus(AppointmentStatus.ARRIVED);
+        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+    }
+
+    /**
+     * Test of updateAppointment method, of class AppointmentResourceProvider.
+     * 
+     * This tests that we can't set the status to an arbitrary value...
+     */
+    @Test (expected = UnprocessableEntityException.class)
+    public void testUpdateAppointmentBadStatusBOOKED() {
+        System.out.println("updateAppointment");
+        newData.initialize();
+        checker = new AppointmentChecker();
+        String apptString = getFileContents("goodAppt_1.json");
+        Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
+        newAppointment.setStatus(AppointmentStatus.BOOKED);
+        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+    }
+
+    /**
+     * Test of updateAppointment method, of class AppointmentResourceProvider.
+     * 
+     * This tests that we can't set the status to an arbitrary value...
+     */
+    @Test (expected = UnprocessableEntityException.class)
+    public void testUpdateAppointmentBadStatusNOSHOW() {
+        System.out.println("updateAppointment");
+        newData.initialize();
+        checker = new AppointmentChecker();
+        String apptString = getFileContents("goodAppt_1.json");
+        Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
+        newAppointment.setStatus(AppointmentStatus.NOSHOW);
+        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+    }
+
+    /**
+     * Test of updateAppointment method, of class AppointmentResourceProvider.
+     * 
+     * This tests that we can't set the status to an arbitrary value...
+     */
+    @Test (expected = UnprocessableEntityException.class)
+    public void testUpdateAppointmentBadStatusNULL() {
+        System.out.println("updateAppointment");
+        newData.initialize();
+        checker = new AppointmentChecker();
+        String apptString = getFileContents("goodAppt_1.json");
+        Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
+        newAppointment.setStatus(AppointmentStatus.NULL);
+        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+    }
+
+    /**
+     * Test of updateAppointment method, of class AppointmentResourceProvider.
+     * 
+     * This tests that we can't set the status to an arbitrary value...
+     */
+    @Test (expected = UnprocessableEntityException.class)
+    public void testUpdateAppointmentBadStatusPENDING() {
+        System.out.println("updateAppointment");
+        newData.initialize();
+        checker = new AppointmentChecker();
+        String apptString = getFileContents("goodAppt_1.json");
+        Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
+        newAppointment.setStatus(AppointmentStatus.PENDING);
+        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+    }
+
+    /**
+     * Test of updateAppointment method, of class AppointmentResourceProvider.
+     * 
+     * This tests that we can't set the status to an arbitrary value...
+     */
+    @Test (expected = UnprocessableEntityException.class)
+    public void testUpdateAppointmentBadStatusPROPOSED() {
+        System.out.println("updateAppointment");
+        newData.initialize();
+        checker = new AppointmentChecker();
+        String apptString = getFileContents("goodAppt_1.json");
+        Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
+        newAppointment.setStatus(AppointmentStatus.PROPOSED);
+        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+    }}
