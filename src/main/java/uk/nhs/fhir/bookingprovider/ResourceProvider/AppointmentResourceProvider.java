@@ -289,7 +289,11 @@ public class AppointmentResourceProvider implements IResourceProvider {
 
         // Now check they're referring to the same Slot
         if(newAppt.getSlot().size() != 1) {
-            throw new UnprocessableEntityException("Appointment refers to multiple Slots.");
+            if(newAppt.getSlot().size() == 0) {
+                throw new UnprocessableEntityException("Appointment does not refer to a Slot.");
+            } else {
+                throw new UnprocessableEntityException("Appointment refers to multiple Slots.");
+            }
         }
         String slotId = newAppt.getSlotFirstRep().getReference();
         LOG.info("New Appt slot ID: " + slotId);
