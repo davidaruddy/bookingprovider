@@ -122,6 +122,8 @@ public class RequestInterceptorTest {
      * Edit: Now token from: 14:19 on 15th April 2019
      * Expires: Mon Apr 15 2019 15:18:58 GMT+0100
      * 
+     * NB: Bear in mind that we allow 450 seconds (7:30) grace period for both
+     * the issued and expires times.
      * Should be rejected as not valid after that
      * time.
      * 
