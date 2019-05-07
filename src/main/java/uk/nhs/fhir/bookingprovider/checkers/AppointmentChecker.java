@@ -253,9 +253,9 @@ public class AppointmentChecker {
                                                                         Severity.MAJOR)
                                                         );
                                                     } else {
-                                                        if (!system.equals("uuid")) {
+                                                        if (!system.equals("https://tools.ietf.org/html/rfc4122")) {
                                                             results.add(
-                                                                    new Fault("Contained DocumentReference has an Identifier with System not set to 'uuid'.",
+                                                                    new Fault("Contained DocumentReference has an Identifier with System not set to 'https://tools.ietf.org/html/rfc4122'.",
                                                                             Severity.MAJOR)
                                                             );
                                                         }

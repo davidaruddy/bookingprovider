@@ -11,7 +11,7 @@
             "resourceType": "DocumentReference",
             "id": "123",
             "identifier": {
-                "system": "uuid",
+                "system": "https://tools.ietf.org/html/rfc4122",
                 "value": "A709A442-3CF4-476E-8377-376500E829C9"
             },
             "status": "current",
