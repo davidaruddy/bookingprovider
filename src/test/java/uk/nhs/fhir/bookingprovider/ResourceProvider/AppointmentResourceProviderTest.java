@@ -93,7 +93,7 @@ public class AppointmentResourceProviderTest {
     @Test
     public void testGetResourceType() {
         System.out.println("getResourceType");
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
         Class<Appointment> expResult = Appointment.class;
         Class<Appointment> result = instance.getResourceType();
@@ -110,7 +110,7 @@ public class AppointmentResourceProviderTest {
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         newData.initialize();
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
         Class<Appointment> expResult = Appointment.class;
         MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
@@ -303,7 +303,7 @@ public class AppointmentResourceProviderTest {
     public void testGetAppointment() {
         System.out.println("getAppointment");
         newData.initialize();
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
         List<Appointment> result = instance.getAppointment(myRequestMock, responseMock);
         assertEquals(0, result.size());
@@ -321,7 +321,7 @@ public class AppointmentResourceProviderTest {
     public void testUpdateAppointment() {
         System.out.println("updateAppointment");
         newData.initialize();
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
@@ -343,7 +343,7 @@ public class AppointmentResourceProviderTest {
     public void testUpdateAppointmentBADID() {
         System.out.println("updateAppointment");
         newData.initialize();
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
@@ -365,7 +365,7 @@ public class AppointmentResourceProviderTest {
     public void testUpdateAppointmentBadStatusFULFILLED() {
         System.out.println("updateAppointment");
         newData.initialize();
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
@@ -384,7 +384,7 @@ public class AppointmentResourceProviderTest {
     public void testUpdateAppointmentBadStatusARRIVED() {
         System.out.println("updateAppointment");
         newData.initialize();
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
@@ -403,7 +403,7 @@ public class AppointmentResourceProviderTest {
     public void testUpdateAppointmentBadStatusBOOKED() {
         System.out.println("updateAppointment");
         newData.initialize();
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
@@ -422,7 +422,7 @@ public class AppointmentResourceProviderTest {
     public void testUpdateAppointmentBadStatusNOSHOW() {
         System.out.println("updateAppointment");
         newData.initialize();
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
@@ -441,7 +441,7 @@ public class AppointmentResourceProviderTest {
     public void testUpdateAppointmentBadStatusNULL() {
         System.out.println("updateAppointment");
         newData.initialize();
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
@@ -460,7 +460,7 @@ public class AppointmentResourceProviderTest {
     public void testUpdateAppointmentBadStatusPENDING() {
         System.out.println("updateAppointment");
         newData.initialize();
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
@@ -479,7 +479,7 @@ public class AppointmentResourceProviderTest {
     public void testUpdateAppointmentBadStatusPROPOSED() {
         System.out.println("updateAppointment");
         newData.initialize();
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);

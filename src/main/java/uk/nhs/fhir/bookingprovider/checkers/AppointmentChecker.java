@@ -17,7 +17,8 @@ package uk.nhs.fhir.bookingprovider.checkers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
-import java.io.Console;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,8 +26,12 @@ import java.util.logging.Logger;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Appointment.AppointmentParticipantComponent;
 import org.hl7.fhir.dstu3.model.DocumentReference;
+import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -117,8 +122,8 @@ public class AppointmentChecker {
             = "Appointment has no Participant (Patient!).";
     private static final String INVALIDSUPINFOERR
             = "supportingInformation is invalid.";
-    private static final String BADSUPINFOREF =
-            "SupportingInformation does not point to contained DocumentReference resource";
+    private static final String BADSUPINFOREF
+            = "SupportingInformation does not point to contained DocumentReference resource";
     private static final String MULTISUPINFOERR
             = "Multiple supportingInformation references, causing confusion.";
     private static final String NOSUPINFOERR
@@ -127,8 +132,34 @@ public class AppointmentChecker {
 
     private static final String PATMISMATCHERR
             = "No linked Participant Patient in Contained resources.";
+    private static final String VALIDATIONERROR
+            = "ERROR received when validating the resource, use: https://data.developer.nhs.uk/ccri/term/validate";
+    private static final String VALIDATIONFATAL
+            = "FATAL received when validating the resource, use: https://data.developer.nhs.uk/ccri/term/validate";
+    private static final String VALIDATIONWARNING
+            = "WARNING received when validating the resource, use: https://data.developer.nhs.uk/ccri/term/validate";
 
     String localDocRefReference;
+    FhirContext ctx;
+    IGenericClient client;
+
+    /**
+     * Constructor which takes in the FhirContext from the Servlet, to allow us
+     * to create a Fhir client, to POST the resource to the CCRI validator.
+     *
+     * @param mainContext A HAPI FhirContext object.
+     */
+    public AppointmentChecker(FhirContext mainContext) {
+        this.ctx = mainContext;
+        String serverBase = "https://data.developer.nhs.uk/ccri-fhir/STU3";
+        client = ctx.newRestfulGenericClient(serverBase);
+    }
+
+    /**
+     * Private Constructor to ensure we always get the Context.
+     */
+    private AppointmentChecker() {
+    }
 
     /**
      * Checks an Appointment object passed in for conformance to a number of
@@ -183,6 +214,9 @@ public class AppointmentChecker {
 
         // Check that participant actor links to a contained resource.
         results.addAll(checkPatientLink(appointment));
+        
+        // Send the resource for validation by CCRI
+        results.addAll(validateAppointment(appointment));
 
         // Finally check contained resources...
         boolean hasDocRef = false;
@@ -590,12 +624,12 @@ public class AppointmentChecker {
                     localDocRefReference = supportingInformationList.get(0).getReference();
                     List<Resource> containedList = appointment.getContained();
                     boolean matched = false;
-                    for(Resource res : containedList) {
-                        if(res.getId().equals(localDocRefReference)) {
+                    for (Resource res : containedList) {
+                        if (res.getId().equals(localDocRefReference)) {
                             matched = true;
                         }
                     }
-                    if(matched == false) {
+                    if (matched == false) {
                         results.add(new Fault(BADSUPINFOREF, Severity.MINOR));
                     }
                 } else {
@@ -642,6 +676,39 @@ public class AppointmentChecker {
 
         if (!matched) {
             results.add(new Fault(PATMISMATCHERR, Severity.MAJOR));
+        }
+        return results;
+    }
+
+    /**
+     * Method to post the resource to the CCRI validator endpoint.
+     *
+     * @param appointment The resource we're validating.
+     * @return An ArrayList of Faults we've identified.
+     */
+    public ArrayList<Fault> validateAppointment(final Appointment appointment) {
+        ArrayList<Fault> results = new ArrayList<>();
+
+        // Perform a validation
+        MethodOutcome outcome = client
+                .validate()
+                .resource(appointment)
+                .execute();
+
+        OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+        LOG.info("Validation complete, returned: " + oo.getIssue().size() + " issues.");
+
+        for (OperationOutcomeIssueComponent nextIssue : oo.getIssue()) {
+            Enumeration<IssueSeverity> severityElement = nextIssue.getSeverityElement();
+            if (severityElement.equals(IssueSeverity.ERROR)) {
+                results.add(new Fault(VALIDATIONERROR, Severity.MAJOR));
+            }
+            if (severityElement.equals(IssueSeverity.FATAL)) {
+                results.add(new Fault(VALIDATIONFATAL, Severity.CRITICAL));
+            }
+            if (severityElement.equals(IssueSeverity.WARNING)) {
+                results.add(new Fault(VALIDATIONWARNING, Severity.CRITICAL));
+            }
         }
         return results;
     }

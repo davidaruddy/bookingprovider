@@ -200,7 +200,7 @@ public class RestfulServlet extends RestfulServer {
     @Override
     protected final void initialize() throws ServletException {
         LOG.info("Initialising servlet");
-        checker = new AppointmentChecker();
+        checker = new AppointmentChecker(ctx);
         data = null;
         data = DataStore.getInstance();
         ourLogger = ExternalLogger.GetInstance(environment);

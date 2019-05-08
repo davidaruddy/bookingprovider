@@ -71,7 +71,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("goodAppt.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         ArrayList<Fault> expResult = new ArrayList<>();
         ArrayList<Fault> result = instance.checkThis(appointment);
         assertEquals(expResult, result);
@@ -83,7 +83,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("goodAppt.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 0;
         ArrayList<Fault> result = instance.checkLanguage(appointment);
         assertEquals(expResult, result.size());
@@ -96,7 +96,7 @@ public class AppointmentCheckerTest {
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
         appointment.setLanguage("fr");
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 1;
         ArrayList<Fault> result = instance.checkLanguage(appointment);
         assertEquals(expResult, result.size());
@@ -108,7 +108,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("goodAppt.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 0;
         ArrayList<Fault> result = instance.checkStatus(appointment);
         assertEquals(expResult, result.size());
@@ -120,7 +120,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("badAppt_Status.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 1;
         ArrayList<Fault> result = instance.checkStatus(appointment);
         assertEquals(expResult, result.size());
@@ -132,7 +132,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("goodAppt.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 0;
         ArrayList<Fault> result = instance.checkSlot(appointment);
         assertEquals(expResult, result.size());
@@ -145,7 +145,7 @@ public class AppointmentCheckerTest {
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
 
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 1;
         ArrayList<Fault> result = instance.checkSlot(appointment);
         assertEquals(expResult, result.size());
@@ -157,7 +157,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("baddAppt_SlotType.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 1;
         ArrayList<Fault> result = instance.checkSlot(appointment);
         assertEquals(expResult, result.size());
@@ -169,7 +169,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("goodAppt.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 0;
         ArrayList<Fault> result = instance.checkCreated(appointment);
         assertEquals(expResult, result.size());
@@ -181,7 +181,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("badAppt_Created.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 1;
         ArrayList<Fault> result = instance.checkCreated(appointment);
         assertEquals(expResult, result.size());
@@ -194,7 +194,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("goodAppt.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 0;
         ArrayList<Fault> result = instance.checkParticipant(appointment);
         assertEquals(expResult, result.size());
@@ -206,7 +206,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("badAppt_MoreParticipants.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 2;
         ArrayList<Fault> result = instance.checkParticipant(appointment);
         assertEquals(expResult, result.size());
@@ -222,7 +222,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("goodAppt.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 0;
         ArrayList<Fault> result = instance.checksupportingInfo(appointment);
         assertEquals(expResult, result.size());
@@ -239,7 +239,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("badAppt_SupInfo.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 1;
         ArrayList<Fault> result = instance.checksupportingInfo(appointment);
         assertEquals(expResult, result.size());
@@ -256,7 +256,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("badAppt_NoSupInfo.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 1;
         ArrayList<Fault> result = instance.checksupportingInfo(appointment);
         assertEquals(expResult, result.size());
@@ -273,7 +273,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("badAppt_SupInfo2.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 1;
         ArrayList<Fault> result = instance.checksupportingInfo(appointment);
         assertEquals(expResult, result.size());
@@ -290,7 +290,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("badAppt_NoSupInfoElement.json");
         Appointment appointment = parser.parseResource(Appointment.class,
                 apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 1;
         ArrayList<Fault> result = instance.checksupportingInfo(appointment);
         assertEquals(expResult, result.size());
@@ -303,7 +303,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("goodAppt.json");
         IParser newJsonParser = ctx.newJsonParser();
         Appointment appointment = (Appointment) newJsonParser.parseResource(apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 0;
         ArrayList<Fault> result = instance.checkPatientLink(appointment);
         assertEquals(expResult, result.size());
@@ -315,7 +315,7 @@ public class AppointmentCheckerTest {
         String apptString = getFileContents("badAppt1.json");
         IParser newJsonParser = ctx.newJsonParser();
         Appointment appointment = (Appointment) newJsonParser.parseResource(apptString);
-        AppointmentChecker instance = new AppointmentChecker();
+        AppointmentChecker instance = new AppointmentChecker(ctx);
         int expResult = 1;
         ArrayList<Fault> result = instance.checkPatientLink(appointment);
         assertEquals(expResult, result.size());
