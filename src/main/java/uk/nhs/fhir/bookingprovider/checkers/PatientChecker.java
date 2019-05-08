@@ -186,19 +186,19 @@ public class PatientChecker {
                                             Coding coding = extConcept.getCoding().get(0);
                                             if (!coding.getCode().equals("01")) {
                                                 results.add(
-                                                        new Fault("Patient NHS Number is not Verified",
+                                                        new Fault("Patient NHS Number is not Verified (1)",
                                                                 Severity.MINOR)
                                                 );
                                             }
                                             if (!coding.getDisplay().equals("Number present and verified")) {
                                                 results.add(
-                                                        new Fault("Patient NHS Number is not Verified",
+                                                        new Fault("Patient NHS Number is not Verified (2)",
                                                                 Severity.MINOR)
                                                 );
                                             }
-                                            if (!coding.getSystem().equals("https://fhir.hl7.org.uk/STU3/ValueSet/CareConnect-NHSNumberVerificationStatus-1")) {
+                                            if (!coding.getSystem().equals("https://fhir.hl7.org.uk/STU3/CodeSystem/CareConnect-NHSNumberVerificationStatus-1")) {
                                                 results.add(
-                                                        new Fault("Patient NHS Number is not Verified",
+                                                        new Fault("Patient NHS Number is not Verified (3)",
                                                                 Severity.MINOR)
                                                 );
                                             }

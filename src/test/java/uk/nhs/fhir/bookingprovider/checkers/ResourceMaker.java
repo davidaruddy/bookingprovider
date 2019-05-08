@@ -68,7 +68,7 @@ public class ResourceMaker {
         pat.setId(refValue);
         Identifier patNHSNumber = new Identifier();
 
-        Coding verStatusCoding = new Coding("https://fhir.hl7.org.uk/STU3/ValueSet/CareConnect-NHSNumberVerificationStatus-1", "01", "Number present and verified");
+        Coding verStatusCoding = new Coding("https://fhir.hl7.org.uk/STU3/CodeSystem/CareConnect-NHSNumberVerificationStatus-1", "01", "Number present and verified");
         CodeableConcept verStatus = new CodeableConcept();
         verStatus.addCoding(verStatusCoding);
         Extension verifiedExtension = new Extension("https://fhir.hl7.org.uk/STU3/StructureDefinition/Extension-CareConnect-NHSNumberVerificationStatus-1");
