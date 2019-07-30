@@ -191,7 +191,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
         }
 
         // Save this Appointment to the database...
-        String result = myData.addAppointment(newAppt);
+        IdDt result = myData.addAppointment(newAppt);
         if (result == null) {
             throw new UnprocessableEntityException("Couldn't save Appointment");
         } else {
@@ -204,10 +204,10 @@ public class AppointmentResourceProvider implements IResourceProvider {
         // the ID (composed of the type Patient, the logical ID 3746, and the
         // version ID 1)
         MethodOutcome retVal = new MethodOutcome();
-        retVal.setId(new IdType("Appointment", result));
+        retVal.setId(result);
 
         retVal.setResource(newAppt);
-        retVal.setId(new IdDt(result));
+        retVal.setId(result);
         ourLogger.log("Response for: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " created Appointment: " + result);
         return retVal;
     }
@@ -270,7 +270,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
         LOG.info(jp.encodeResourceToString(newAppt));
         ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " updating Appointment: " + theRequest.getRequestURL());
         MethodOutcome retVal = new MethodOutcome();
-        String identifier = theId.toString();
+        String identifier = "Appointment/" + theId.getIdPart();
         String resourceID = newAppt.getId();
         LOG.info("updateAppointment() called for ID: " + identifier);
         AppointmentStatus proposedStatus = newAppt.getStatus();
@@ -319,10 +319,10 @@ public class AppointmentResourceProvider implements IResourceProvider {
         myData.setSlotFree(slotId);
         ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " Slot: " + slotId + " set back to free.");
         LOG.info("Slot set back to free");
-        retVal.setId(new IdType("Appointment", identifier));
 
+        String newVersionString = "2";
         retVal.setResource(myData.getAppointment(identifier));
-        retVal.setId(new IdDt(identifier));
+        retVal.setId(new IdType("Appointment", identifier, newVersionString));
 
         return retVal;
     }

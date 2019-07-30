@@ -17,6 +17,7 @@ package uk.nhs.fhir.bookingprovider.data;
 
 import uk.nhs.fhir.bookingprovider.data.DataStore;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -348,11 +349,12 @@ public class DataStoreTest {
         DataStore instance = DataStore.getInstance();
         instance.initialize();
         int expResult = 36;
-        String result = instance.addAppointment(newAppt);
-        assertEquals(expResult, result.length());
+        IdDt result = instance.addAppointment(newAppt);
+        assertEquals(expResult, result.getIdPart().length());
+        assertEquals("1", result.getVersionIdPart());
 
         // Now we do some additional checks on the created Appt...
-        Appointment retrieved = instance.getAppointment("Appointment/" + result);
+        Appointment retrieved = instance.getAppointment("Appointment/" + result.getIdPart());
         Appointment.AppointmentStatus theStatus = retrieved.getStatus();
         Appointment.AppointmentStatus expStatus = Appointment.AppointmentStatus.BOOKED;
         assertEquals(expStatus, theStatus);
@@ -529,11 +531,12 @@ public class DataStoreTest {
         Appointment newAppt = makeAppointment(true);
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        String result = instance.addAppointment(newAppt);
+        IdDt newId = instance.addAppointment(newAppt);
+        String result = newId.getIdPart();
         //LOG.info("Created Appointment: " + result);
         Appointment appointment = instance.getAppointment("Appointment/" + result);
         //LOG.info("Retrieved Appointment: " + appointment.getText());
-        assertEquals(result, appointment.getId());
+        assertEquals(result, appointment.getIdElement().getIdPart());
     }
 
     /**
@@ -545,7 +548,8 @@ public class DataStoreTest {
         Appointment newAppt = makeAppointment(true);
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        String result = instance.addAppointment(newAppt);
+        IdDt newId = instance.addAppointment(newAppt);
+        String result = newId.getIdPart();
         //LOG.info("Created Appointment: " + result);
         Appointment appointment = instance.getAppointment("Appointment/" + result);
         //LOG.info("Retrieved Appointment: " + appointment.getText());
@@ -563,9 +567,10 @@ public class DataStoreTest {
         System.out.println("getAppointment");
         DataStore instance = DataStore.getInstance();
         instance.initialize();
-        String identifier = instance.addAppointment(makeAppointment(true));
+        IdDt newId = instance.addAppointment(makeAppointment(true));
+        String identifier = newId.getIdPart();
         Appointment result = instance.getAppointment("Appointment/" + identifier);
-        assertEquals(identifier, result.getId());
+        assertEquals(identifier, result.getIdElement().getIdPart());
     }
 
     /**

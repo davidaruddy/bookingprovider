@@ -544,8 +544,9 @@ public final class DataStore {
      * @param newAppt The new Appointment to save.
      * @return The ID (a random UUID) assigned to the new appointment.
      */
-    public String addAppointment(final Appointment newAppt) {
-        String newID = UUID.randomUUID().toString();
+    public IdDt addAppointment(final Appointment newAppt) {
+        String newIDValue = UUID.randomUUID().toString();
+        IdDt newID = new IdDt("Appointment", newIDValue, "1");
         newAppt.setId(newID);
         appointments.add(newAppt);
         return newID;
@@ -562,7 +563,7 @@ public final class DataStore {
         Appointment appt;
         for (int i = 0; i < appointments.size(); i++) {
             appt = (Appointment) appointments.get(i);
-            String thisone = "Appointment/" + appt.getId();
+            String thisone = "Appointment/" + appt.getIdElement().getIdPart();
             if (thisone.equals(identifier)) {
                 LOG.info("Found it");
                 return appt;

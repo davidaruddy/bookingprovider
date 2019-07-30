@@ -326,11 +326,15 @@ public class AppointmentResourceProviderTest {
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
         MethodOutcome outcome = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        // So now we've created an Appointment from goodAppt_1.json
+        
         Appointment savedAppt = (Appointment) outcome.getResource();
         IdType newId = new IdType("Appointment/" + outcome.getResource().getIdElement());
         savedAppt.setStatus(AppointmentStatus.CANCELLED);
+        
         MethodOutcome result2 = instance.updateAppointment(newId, savedAppt, myRequestMock, responseMock);
         Appointment updated = (Appointment) result2.getResource();
+        
         assertEquals(updated.getSlotFirstRep(), newAppointment.getSlotFirstRep());
     }
 
