@@ -21,11 +21,8 @@ import ca.uhn.fhir.parser.JsonParser;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Scanner;
 import org.hl7.fhir.dstu3.model.Appointment;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -347,5 +344,18 @@ public class AppointmentCheckerTest {
         }
 
         return result.toString();
+    }
+
+    /**
+     * Test of validateAppointment method, of class AppointmentChecker.
+     */
+    @Test
+    public void testValidateAppointment() {
+        System.out.println("validateAppointment");
+        String apptString = getFileContents("invalidAppt.json");
+        Appointment appointment = parser.parseResource(Appointment.class, apptString);
+        AppointmentChecker instance = new AppointmentChecker(ctx);
+        ArrayList<Fault> result = instance.validateAppointment(appointment);
+        assertEquals(3, result.size());
     }
 }

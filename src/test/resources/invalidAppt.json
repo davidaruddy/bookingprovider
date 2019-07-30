@@ -1,0 +1,7 @@
+
+{
+    "resourceType": "Appointment",
+    "meta": {
+        "profile": "https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Appointment-1"
+    }
+}

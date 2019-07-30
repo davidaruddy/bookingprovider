@@ -74,7 +74,7 @@
                     "system": "phone",
                     "value": "01234 567 890",
                     "use": "home",
-                    "rank": 0
+                    "rank": 1
                 }
             ],
             "gender": "male",
@@ -106,6 +106,8 @@
         }
     ],
     "created": "2018-12-11T13:42:18.124Z",
+    "start": "2019-07-11T13:00:00.000Z",
+    "end": "2019-07-11T13:15:00.000Z",
     "participant": [
         {
             "actor": {
@@ -116,7 +118,8 @@
                     "value": "1231231234"
                 },
                 "display": "Mr John Smith"
-            }
+            },
+            "status": "accepted"
         }
     ]
 }

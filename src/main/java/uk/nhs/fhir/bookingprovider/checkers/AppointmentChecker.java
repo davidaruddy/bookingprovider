@@ -700,13 +700,14 @@ public class AppointmentChecker {
 
         for (OperationOutcomeIssueComponent nextIssue : oo.getIssue()) {
             Enumeration<IssueSeverity> severityElement = nextIssue.getSeverityElement();
-            if (severityElement.equals(IssueSeverity.ERROR)) {
+            String valueAsString = severityElement.getValueAsString();
+            if (valueAsString.equals("error")) {
                 results.add(new Fault(VALIDATIONERROR, Severity.MAJOR));
             }
-            if (severityElement.equals(IssueSeverity.FATAL)) {
+            if (valueAsString.equals("fatal")) {
                 results.add(new Fault(VALIDATIONFATAL, Severity.CRITICAL));
             }
-            if (severityElement.equals(IssueSeverity.WARNING)) {
+            if (valueAsString.equals("warning")) {
                 results.add(new Fault(VALIDATIONWARNING, Severity.CRITICAL));
             }
         }
