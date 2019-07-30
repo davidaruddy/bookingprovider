@@ -138,6 +138,7 @@ public class AppointmentChecker {
             = "FATAL received when validating the resource, use: https://data.developer.nhs.uk/ccri/term/validate";
     private static final String VALIDATIONWARNING
             = "WARNING received when validating the resource, use: https://data.developer.nhs.uk/ccri/term/validate";
+    private static final String DOCREFPROFILE = "https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-DocumentReference-1";
 
     String localDocRefReference;
     FhirContext ctx;
@@ -251,6 +252,25 @@ public class AppointmentChecker {
                                 //    results.add(new Fault("supportingInformation reference: " + localDocRefReference + " does NOT point to contained DocumentReference resource: " + docRefID, Severity.CRITICAL));
                                 //}
                             }
+                            
+                            List<UriType> profileList = docRef.getMeta().getProfile();
+                            if(profileList.size() == 1) {
+                                if(profileList.get(0).asStringValue().equals(DOCREFPROFILE)) {
+                                    LOG.info("DocRef has correct profile");
+                                } else {
+                                    results.add(
+                                        new Fault("Contained Document Reference has incorrect profile, should be " + DOCREFPROFILE,
+                                           Severity.MAJOR)
+                                    );
+                                }
+                            } else {
+                                results.add(
+                                        new Fault("Contained Document Reference doesn't have exactly 1 profile",
+                                               Severity.MAJOR)
+                                );
+                            }
+                            
+                            
                             if (docRef.hasIdentifier()) {
                                 List<Identifier> identList = docRef.getIdentifier();
                                 if (identList.isEmpty()) {

@@ -74,6 +74,36 @@ public class AppointmentCheckerTest {
         assertEquals(expResult, result);
     }
 
+    /**
+     * Test of CheckThis method, of class AppointmentChecker.
+     */
+    @Test
+    public void testCheckThisNoDocRefProfile() {
+        System.out.println("testCheckThisNoDocRefProfile");
+        String apptString = getFileContents("noDocRefProfileAppt.json");
+        Appointment appointment = parser.parseResource(Appointment.class,
+                apptString);
+        AppointmentChecker instance = new AppointmentChecker(ctx);
+        ArrayList<Fault> result = instance.checkThis(appointment);
+        assertEquals(result.get(0).getDescription(), "Contained Document Reference doesn't have exactly 1 profile");
+    }
+
+        /**
+     * Test of CheckThis method, of class AppointmentChecker.
+     */
+    @Test
+    public void testCheckThisBadDocRefProfile() {
+        System.out.println("testCheckThisBadDocRefProfile");
+        String apptString = getFileContents("badDocRefProfileAppt.json");
+        Appointment appointment = parser.parseResource(Appointment.class,
+                apptString);
+        AppointmentChecker instance = new AppointmentChecker(ctx);
+        ArrayList<Fault> result = instance.checkThis(appointment);
+        assertEquals(result.get(9).getDescription(), "Contained Document Reference has incorrect profile, should be https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-DocumentReference-1");
+    }
+
+
+
     @Test
     public void testcheckLanguage() {
         System.out.println("checkLanguage");
