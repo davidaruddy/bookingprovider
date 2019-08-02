@@ -49,6 +49,7 @@ public class MockRequest implements HttpServletRequest {
 
     String queryString = null;
     String authHeader = null;
+    String ifMatchHeader = null;
     HashMap<String, Object> attrs;
 
     public MockRequest(String query, String header) {
@@ -57,6 +58,13 @@ public class MockRequest implements HttpServletRequest {
         authHeader = header;
     }
 
+    public void addHeader(String name, String value) {
+        if (name.equals("If-Match")) {
+            ifMatchHeader = value;
+        }
+        return;
+    }
+    
     public String getQueryString() {
         return queryString;
     }
@@ -64,6 +72,9 @@ public class MockRequest implements HttpServletRequest {
     public String getHeader(String name) {
         if (name.equals("Authorization")) {
             return authHeader;
+        }
+        if (name.equals("If-Match")) {
+            return ifMatchHeader;
         }
         return null;
     }

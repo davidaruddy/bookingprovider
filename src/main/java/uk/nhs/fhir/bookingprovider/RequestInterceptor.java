@@ -15,6 +15,9 @@
  */
 package uk.nhs.fhir.bookingprovider;
 
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -44,7 +47,7 @@ import uk.nhs.fhir.bookingprovider.azure.AzureAD;
 import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
 /**
- *
+ * See https://hapifhir.io/doc_rest_server_interceptor.html for more details
  * @author tim.coates@nhs.net
  */
 public class RequestInterceptor extends InterceptorAdapter {
@@ -76,6 +79,8 @@ public class RequestInterceptor extends InterceptorAdapter {
     /**
      * Override the incomingRequestPreProcessed method, which is called for each
      * incoming request before any processing is done.
+     * 
+     * This is where we do the auth checking.
      *
      * @param theRequest The request we've received.
      * @param theResponse The expected response.
@@ -338,5 +343,44 @@ public class RequestInterceptor extends InterceptorAdapter {
      */
     public void flushAzureCache() {
         adWrangler.flushCaches();
+    }
+    
+    /**
+     * Intercepts all outbound (non-error) responses.
+     * 
+     * This is where we are able to add the eTAG to support checks for versions
+     * as described at: http://hl7.org/fhir/stu3/http.html#concurrency
+     * 
+     * 
+     * @param theRequestDetails
+     * @param theResponseDetails
+     * @param theServletRequest
+     * @param theServletResponse
+     * @return Returns true to continue with normal processing, or false to
+     *          break (e.g. if this is handling the response)
+     * @throws AuthenticationException 
+     */
+    @Override
+    public boolean outgoingResponse(RequestDetails theRequestDetails,
+                         ResponseDetails theResponseDetails,
+                         HttpServletRequest theServletRequest,
+                         HttpServletResponse theServletResponse)
+                  throws AuthenticationException {
+        
+        // If the request was related to Appointment
+        if(theRequestDetails.getResourceName().equals("Appointment")) {
+            LOG.info("Adding ETag - Was an Appointment request");
+            if(theRequestDetails.getRestOperationType() == RestOperationTypeEnum.READ) {
+                LOG.info("Adding ETag - And it was a READ");
+                String version = theResponseDetails.getResponseResource().getIdElement().getVersionIdPart();
+                if(! version.equals("")) {
+                    LOG.info("Adding ETag - Resource had a version");
+                    String ETag = "W/\"" + version + "\"";
+                    LOG.info("Adding ETag - Adding the ETag header: " + ETag + " to the response.");
+                    theServletResponse.addHeader("ETag", ETag);
+                }
+            }
+        }        
+        return true;
     }
 }

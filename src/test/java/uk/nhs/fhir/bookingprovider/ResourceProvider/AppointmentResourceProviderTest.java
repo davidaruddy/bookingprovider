@@ -354,8 +354,13 @@ public class AppointmentResourceProviderTest {
         MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
         IdType newId = new IdType("Appointment/f04cf6dd-a30e-4e99-ab50-804c6b5ce38a");
         newAppointment.setId(appt.getResource().getIdElement());
+        
+        // NB: We need to apply this workaround in a few more places to get 
+        // beyond the checks for If-Match headers in various tests.        
+        MockRequest myRequestMock2 = new MockRequest("", "");
+        myRequestMock2.addHeader("If-Match", "W/\"1\"");
         newAppointment.setStatus(AppointmentStatus.CANCELLED);
-        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+        instance.updateAppointment(newId, newAppointment, (HttpServletRequest) myRequestMock2, responseMock);
     }
 
 

@@ -26,6 +26,8 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -216,15 +218,25 @@ public class AppointmentResourceProvider implements IResourceProvider {
      * The "@Read" annotation indicates that this method supports the read
      * operation. Read operations should return a single resource instance.
      *
+     * This supports VRead too, as described at:
+     * https://hapifhir.io/doc_rest_operations.html#_toc_instance_level_-_vread
+     * 
+     * 
      * @param theId The read operation takes one parameter, which must be of
      * type IdDt and must be annotated with the "@Read.IdParam" annotation.
      * @return Returns a resource matching this identifier, or null if none
      * exists.
      */
-    @Read()
+    @Read(version=true)
     public Appointment getResourceById(@IdParam IdType theId,
         HttpServletRequest theRequest,
         HttpServletResponse theResponse) {
+        
+        if (theId.hasVersionIdPart()) {
+            // this is a vread   
+        } else {
+            // this is a read
+        }
         if(theRequest.getQueryString() != null) {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Appointment: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
         } else {
@@ -265,6 +277,15 @@ public class AppointmentResourceProvider implements IResourceProvider {
             @ResourceParam Appointment newAppt,
             HttpServletRequest theRequest,
             HttpServletResponse theResponse) {
+        
+        /////////////////////////////////////////////////////
+        // Here we need to check that an If-Match header was supplied!
+        String versionToUpdate = theRequest.getHeader("If-Match");
+        if(versionToUpdate == null) {
+            // No If-Match header was supplied, so we need to respond with a 412 Pre-condition failed.
+            throw new PreconditionFailedException("No If-Match was supplied, see: https://www.hl7.org/fhir/STU3/http.html#concurrency");
+        }
+        
         JsonParser jp = (JsonParser) FhirContext.forDstu3().newJsonParser();
         LOG.info("Got resource:");
         LOG.info(jp.encodeResourceToString(newAppt));
@@ -285,6 +306,11 @@ public class AppointmentResourceProvider implements IResourceProvider {
         Appointment currentAppt = myData.getAppointment(identifier);
         if(currentAppt == null) {
             throw new UnprocessableEntityException("Appointment " + identifier + " not found.");
+        }
+        
+        // Now check the If-match condition
+        if(versionToUpdate.equals(currentAppt.getIdElement().getVersionIdPart()) == false) {
+            throw new ResourceVersionConflictException("Appointment " + identifier + " was a different Version ");
         }
 
         // Now check they're referring to the same Slot
