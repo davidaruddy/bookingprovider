@@ -281,9 +281,16 @@ public class AppointmentResourceProvider implements IResourceProvider {
         /////////////////////////////////////////////////////
         // Here we need to check that an If-Match header was supplied!
         String versionToUpdate = theRequest.getHeader("If-Match");
+        
         if(versionToUpdate == null) {
             // No If-Match header was supplied, so we need to respond with a 412 Pre-condition failed.
             throw new PreconditionFailedException("No If-Match was supplied, see: https://www.hl7.org/fhir/STU3/http.html#concurrency");
+        }
+        
+        // Check it's a Weak ETag, and if so strip off the W bit
+        if(versionToUpdate.startsWith("W/\"")) {
+            versionToUpdate = versionToUpdate.substring(3);
+            versionToUpdate = versionToUpdate.replace("\"", "");
         }
         
         JsonParser jp = (JsonParser) FhirContext.forDstu3().newJsonParser();
@@ -346,10 +353,11 @@ public class AppointmentResourceProvider implements IResourceProvider {
         ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " Slot: " + slotId + " set back to free.");
         LOG.info("Slot set back to free");
 
-        String newVersionString = "2";
-        retVal.setResource(myData.getAppointment(identifier));
-        retVal.setId(new IdType("Appointment", identifier, newVersionString));
-
+        String newVersionString = Long.toString(Long.parseLong(versionToUpdate) + 1);
+        Appointment updatedAppt = myData.getAppointment(identifier);
+        updatedAppt.setId(new IdType("Appointment", identifier, newVersionString));
+        retVal.setResource(updatedAppt);
+        //retVal.setId(new IdType("Appointment", identifier, newVersionString));
         return retVal;
     }
 }

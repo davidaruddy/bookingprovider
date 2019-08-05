@@ -52,10 +52,26 @@ public class MockRequest implements HttpServletRequest {
     String ifMatchHeader = null;
     HashMap<String, Object> attrs;
 
+    /**
+     * Main constructor...
+     * 
+     * @param query
+     * @param header 
+     */
     public MockRequest(String query, String header) {
         this.attrs = new HashMap();
         queryString = query;
         authHeader = header;
+    }
+    
+    /**
+     * Constructor for use where we're not checking the Auth token etc
+     * 
+     */
+    public MockRequest() {
+        this.attrs = new HashMap();
+        queryString = "";
+        authHeader = "";
     }
 
     public void addHeader(String name, String value) {

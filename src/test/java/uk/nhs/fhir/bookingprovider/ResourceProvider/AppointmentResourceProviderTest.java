@@ -19,6 +19,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.io.File;
 import java.io.IOException;
@@ -69,6 +70,7 @@ public class AppointmentResourceProviderTest {
     public static void setUpClass() {
         ourLogger = ExternalLogger.GetInstance();
         myRequestMock = new MockRequest("", "");
+        
         responseMock = new MockResponse();
     }
 
@@ -331,13 +333,45 @@ public class AppointmentResourceProviderTest {
         Appointment savedAppt = (Appointment) outcome.getResource();
         IdType newId = new IdType("Appointment/" + outcome.getResource().getIdElement());
         savedAppt.setStatus(AppointmentStatus.CANCELLED);
-        
-        MethodOutcome result2 = instance.updateAppointment(newId, savedAppt, myRequestMock, responseMock);
+        MockRequest myRequestMock2 = new MockRequest();
+        myRequestMock2.addHeader("If-Match", "W/\"1\"");
+
+        MethodOutcome result2 = instance.updateAppointment(newId, savedAppt, myRequestMock2, responseMock);
         Appointment updated = (Appointment) result2.getResource();
         
         assertEquals(updated.getSlotFirstRep(), newAppointment.getSlotFirstRep());
+        
+        // Now we assert that the version has been updated to Version 2!
+        Long updatedVersion = updated.getIdElement().getVersionIdPartAsLong();
+        Long requiredVersion = 2L;
+        assertEquals(updatedVersion, requiredVersion);
+        
     }
 
+    /**
+     * Test of updateAppointment method, of class AppointmentResourceProvider.
+     */
+    @Test(expected = ResourceVersionConflictException.class)
+    public void testUpdateAppointmentWrongIfMatch() {
+        System.out.println("updateAppointment");
+        newData.initialize();
+        checker = new AppointmentChecker(ctx);
+        String apptString = getFileContents("goodAppt_1.json");
+        Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
+        AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
+        MethodOutcome outcome = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        // So now we've created an Appointment from goodAppt_1.json
+        
+        Appointment savedAppt = (Appointment) outcome.getResource();
+        IdType newId = new IdType("Appointment/" + outcome.getResource().getIdElement());
+        savedAppt.setStatus(AppointmentStatus.CANCELLED);
+        MockRequest myRequestMock2 = new MockRequest();
+        myRequestMock2.addHeader("If-Match", "W/\"2\"");
+
+        MethodOutcome result2 = instance.updateAppointment(newId, savedAppt, myRequestMock2, responseMock);
+    }
+
+    
     /**
      * Test of updateAppointment method, of class AppointmentResourceProvider.
      *
@@ -357,7 +391,7 @@ public class AppointmentResourceProviderTest {
         
         // NB: We need to apply this workaround in a few more places to get 
         // beyond the checks for If-Match headers in various tests.        
-        MockRequest myRequestMock2 = new MockRequest("", "");
+        MockRequest myRequestMock2 = new MockRequest();
         myRequestMock2.addHeader("If-Match", "W/\"1\"");
         newAppointment.setStatus(AppointmentStatus.CANCELLED);
         instance.updateAppointment(newId, newAppointment, (HttpServletRequest) myRequestMock2, responseMock);
@@ -381,7 +415,10 @@ public class AppointmentResourceProviderTest {
         MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.FULFILLED);
-        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+        MockRequest myRequestMock2 = new MockRequest();
+        myRequestMock2.addHeader("If-Match", "W/\"1\"");
+        
+        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
     }
 
     /**
@@ -400,7 +437,10 @@ public class AppointmentResourceProviderTest {
         MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.ARRIVED);
-        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+        MockRequest myRequestMock2 = new MockRequest();
+        myRequestMock2.addHeader("If-Match", "W/\"1\"");
+
+        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
     }
 
     /**
@@ -419,7 +459,10 @@ public class AppointmentResourceProviderTest {
         MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.BOOKED);
-        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+        MockRequest myRequestMock2 = new MockRequest();
+        myRequestMock2.addHeader("If-Match", "W/\"1\"");
+
+        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
     }
 
     /**
@@ -438,7 +481,10 @@ public class AppointmentResourceProviderTest {
         MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.NOSHOW);
-        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+        MockRequest myRequestMock2 = new MockRequest();
+        myRequestMock2.addHeader("If-Match", "W/\"1\"");
+
+        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
     }
 
     /**
@@ -457,7 +503,10 @@ public class AppointmentResourceProviderTest {
         MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.NULL);
-        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+        MockRequest myRequestMock2 = new MockRequest();
+        myRequestMock2.addHeader("If-Match", "W/\"1\"");
+
+        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
     }
 
     /**
@@ -476,7 +525,10 @@ public class AppointmentResourceProviderTest {
         MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.PENDING);
-        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+        MockRequest myRequestMock2 = new MockRequest();
+        myRequestMock2.addHeader("If-Match", "W/\"1\"");
+        
+        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
     }
 
     /**
@@ -495,5 +547,8 @@ public class AppointmentResourceProviderTest {
         MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.PROPOSED);
-        instance.updateAppointment(newId, newAppointment, myRequestMock, responseMock);
+        MockRequest myRequestMock2 = new MockRequest();
+        myRequestMock2.addHeader("If-Match", "W/\"1\"");
+
+        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
     }}

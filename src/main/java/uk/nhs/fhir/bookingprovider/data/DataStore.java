@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Schedule;
 import org.hl7.fhir.dstu3.model.Slot;
 import org.hl7.fhir.dstu3.model.Slot.SlotStatus;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * Singleton instance of an in memory data store.
@@ -751,6 +752,10 @@ public final class DataStore {
             if (thisone.equals(identifier)) {
                 LOG.info("Found it");
                 appt.setStatus(proposedStatus);
+                //IIdType oldId = appt.getIdElement();
+                //oldId.setParts(oldId.getBaseUrl(), oldId.getResourceType(), oldId.getIdPart(), Long.toString(oldId.getVersionIdPartAsLong() + 1));
+                //appt.setId(oldId);
+                //appointments.set(i, appt);
                 break;
             }
         }
