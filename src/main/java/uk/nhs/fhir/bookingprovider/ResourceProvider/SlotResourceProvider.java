@@ -108,6 +108,7 @@ public class SlotResourceProvider implements IResourceProvider {
      * @return Returns a resource matching this identifier, or null if none
      * exists.
      */
+    @Description(shortDefinition = "Gets a specific Slot. NB: this is NOT version aware.")
     @Read()
     public Slot getResourceById(@IdParam IdType theId) {
         LOG.info("Request for Slot: " + theId.getIdPart());
@@ -121,6 +122,7 @@ public class SlotResourceProvider implements IResourceProvider {
      *
      * @return This method returns a list of all Slots.
      */
+    @Description(shortDefinition = "Search takes no parameters and therefore just returns all Slots.")
     @Search()
     public List<Slot> searchSlots(
         HttpServletRequest theRequest,
@@ -149,11 +151,9 @@ public class SlotResourceProvider implements IResourceProvider {
      * @return This method returns a list of Slots. This list may contain
      * multiple matching resources, or it may also be empty.
      */
+    @Description(shortDefinition = "Search which takes 'HealthcareService' (set to the ASID of the service being targetted), 'start' and 'status' parameters, and also allows for loads of _includes.")
     @Search()
     public List<IResource> searchSlots(
-            @Description(shortDefinition = "This is the HealthcareService for "
-                    + "which Slots are being requested - set this to the ASID "
-                    + "of the Provider service")
             @RequiredParam(name = "schedule.actor:healthcareservice") TokenParam theHealthcareService,
             @OptionalParam(name = Slot.SP_STATUS) TokenParam statusToken,
             @OptionalParam(name = Slot.SP_START) DateRangeParam startRange,
@@ -530,12 +530,12 @@ public class SlotResourceProvider implements IResourceProvider {
      * annotation, to support many different search criteria. This example
      * searches by HealthcareService and Status.
      *
-     * @param theHealthcareService The Service that Slots are being filtered to.
      * @param statusToken The status filter we are requested for.
      * @param theIncludes Set of Resource types to be included in the response.
      * @return This method returns a list of Slots. This list may contain
      * multiple matching resources, or it may also be empty.
      */
+    @Description(shortDefinition = "Search which takes 'start' and 'status' parameters, and also allows for loads of _includes.")
     @Search()
     public List<IResource> searchSlots(
             @OptionalParam(name = Slot.SP_STATUS) TokenParam statusToken,

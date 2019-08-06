@@ -16,6 +16,7 @@
 package uk.nhs.fhir.bookingprovider.ResourceProvider;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -131,6 +132,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
      * @param newAppt The new Appointment resource.
      * @return Returns the results of trying to create a new Appointment object.
      */
+    @Description(shortDefinition="Validates the submitted appointment, carries out a few checks and if all is okay it creates the Appointment.")
     @Create
     public MethodOutcome createAppointment(@ResourceParam Appointment newAppt,
         HttpServletRequest theRequest,
@@ -227,6 +229,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
      * @return Returns a resource matching this identifier, or null if none
      * exists.
      */
+    @Description(shortDefinition="Returns this specific Appointment. NB: This function is version aware!")
     @Read(version=true)
     public Appointment getResourceById(@IdParam IdType theId,
         HttpServletRequest theRequest,
@@ -250,9 +253,10 @@ public class AppointmentResourceProvider implements IResourceProvider {
     /**
      * This returns ALL Appointments.
      *
-     * @return This method returns a list of Patients. This list may contain
+     * @return This method returns a list of Appointments. This list may contain
      * multiple matching resources, or it may also be empty.
      */
+    @Description(shortDefinition = "Searches for Appointments, it accepts no search criteria, and just returns all Appointments.")
     @Search()
     public List<Appointment> getAppointment(
         HttpServletRequest theRequest,
@@ -272,6 +276,7 @@ public class AppointmentResourceProvider implements IResourceProvider {
      * @param newAppt
      * @return
      */
+    @Description(shortDefinition = "Allows an Appointment to be updated from 'booked' to 'cancelled' or to 'entered in error'. This also increments the version of the Appointment. It validates the version being updated is correct. NB: This doesn't YET (issue feature/BP-18 created) validate the replacement Appointment.")
     @Update()
     public MethodOutcome updateAppointment(@IdParam IdType theId,
             @ResourceParam Appointment newAppt,
