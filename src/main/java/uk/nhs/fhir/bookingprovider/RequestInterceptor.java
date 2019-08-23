@@ -299,8 +299,7 @@ public class RequestInterceptor extends InterceptorAdapter {
     /**
      * Method to simply log out which client made the request.
      *
-     * TODO: This really SHOULd do a lookup into Azure AD and determine and log
-     * the name as well as the GUID.
+     * Does a lookup into Azure AD and determine and log the name as well as the GUID.
      *
      * @param theJWT The incoming JWT
      */

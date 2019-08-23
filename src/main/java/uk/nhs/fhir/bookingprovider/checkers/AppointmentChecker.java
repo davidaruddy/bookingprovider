@@ -595,7 +595,7 @@ public class AppointmentChecker {
                                                     Severity.MAJOR)
                                     );
                                 } else {
-                                    // TODO: Add more checks in here?
+                                    // TODO: Add more checks in here to validate an NHS Number, e.g. the check digit?
                                 }
                             } else {
                                 results.add(
