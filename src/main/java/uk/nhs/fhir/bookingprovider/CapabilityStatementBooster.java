@@ -31,7 +31,8 @@ import org.hl7.fhir.dstu3.model.Reference;
  * Class to boost up our Capability Statement, ensuring things like the supplier
  * etc are correct.
  *
- * Loads most values from server.properties
+ * Loads most values from server.properties which is located in
+ * bookingprovider/src/main/resources/server.properties
  *
  * @author tim.coates@nhs.net
  */
@@ -47,8 +48,9 @@ public class CapabilityStatementBooster extends ServerCapabilityStatementProvide
     /**
      * Overridden method to produce CapabilityStatement. Relies on
      * super.getServerConformance() to do the hard work, but then augments the
-     * result by setting values mainly from the server.properties file. In
-     * particular it specifies which profiles we expect.
+     * result by setting values mainly from the server.properties file using the
+     * function getProperties() which is below. In particular it specifies which
+     * profiles we expect.
      *
      * @param theRequest The inbound http request
      * @return The 'improved' CapabilityStatement for our server.

@@ -39,7 +39,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,7 +46,19 @@ import uk.nhs.fhir.bookingprovider.azure.AzureAD;
 import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
 /**
- * See https://hapifhir.io/doc_rest_server_interceptor.html for more details
+ * See https://hapifhir.io/doc_rest_server_interceptor.html for more details,
+ * this class overrides the functions incomingRequestPreProcessed() and
+ * outgoingResponse().
+ * incomingRequestPreProcessed() is where the JWT is inspected and validated,
+ * and also where the request has a GUID assigned to it, that follows the
+ * request and response throughout processing.
+ * 
+ * It also logs both the request and the response with this correlation GUID
+ * through an ExternalLogger class which is passed into the constructor.
+ * 
+ * The overridden outgoingResponse() method also adds the ETag to support
+ * versioning.
+ * 
  * @author tim.coates@nhs.net
  */
 public class RequestInterceptor extends InterceptorAdapter {
@@ -66,6 +77,9 @@ public class RequestInterceptor extends InterceptorAdapter {
     /**
      * Constructor, just tells us to load the properties file holding all of the
      * App IDs, and the properties file which configures the AzureAD endpoints.
+     * 
+     * The ExternalLogger we are passed in will be used to send details of both
+     * the Request and the Response correlated to a GUID.
      *
      */
     public RequestInterceptor(ExternalLogger newLogger) {

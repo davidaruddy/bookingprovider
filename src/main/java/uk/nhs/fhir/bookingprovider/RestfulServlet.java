@@ -40,8 +40,8 @@ import uk.nhs.fhir.bookingprovider.data.DataStore;
 import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
 /**
- * This is the actual Servlet, which hosts a set of ResourceProviders for each
- * Resource type that we're handling.
+ * This is the actual Servlet, which hosts a set of ResourceProviders, one for
+ * each Resource type that we're handling.
  *
  * Serves out FHIR base at localhost:443/poc/ See for example /poc/metadata
  *
@@ -99,16 +99,24 @@ public class RestfulServlet extends RestfulServer {
         setServerConformanceProvider(new CapabilityStatementBooster());
     }
 
-
+    /**
+     * This object is shared quite widely by being passed into various
+     * constructors, it is used to share key information.
+     * 
+     */
     private ExternalLogger ourLogger;
 
     /**
-     * The Class that holds all of our resources...
+     * The Class that holds all of our resources. Again this instance is shared
+     * across various other objects.
      */
     private DataStore data;
 
     /**
-     * The HAPI Fhir context. *
+     * The HAPI Fhir context see
+     * https://hapifhir.io/doc_intro.html#_toc_introducing_the_fhir_context
+     * for details of how this is used.
+     * 
      */
     private final FhirContext ctx = FhirContext.forDstu3();
 
@@ -193,28 +201,44 @@ public class RestfulServlet extends RestfulServer {
     }
 
     /**
-     * Here is where the Servlet is first initialised.
+     * Here is where the Servlet is first initialised by the Application server
+     * (e.g. Tomcat or Jetty) it's being hosted by.
      *
      * @throws ServletException
      */
     @Override
     protected final void initialize() throws ServletException {
         LOG.info("Initialising servlet");
+        
+        /**
+         * Here we instantiate some globally used objects:
+         **/
+                 
+        // An object that checks an Appointment FHIR Resource.
         checker = new AppointmentChecker(ctx);
-        data = null;
+        
+        // An object holding the data (typically in memory) resources/objects.
         data = DataStore.getInstance();
+        
+        // An object that logs things out over some external channel (MS Teams?)
         ourLogger = ExternalLogger.GetInstance(environment);
 
         // Create an interceptor to validate incoming requests
         requestInterceptor = new RequestInterceptor(ourLogger);
         // Now register the validating interceptor
         registerInterceptor(requestInterceptor);
+        
+        /**
+         * Now we're going to add ResourceProviders see
+         * https://hapifhir.io/doc_rest_server.html#_toc_defining_resource_providers
+         */
         List<IResourceProvider> rpList = new ArrayList<>();
 
-        // This list is all of the STU3 resource type on fhir.nhs.uk
+        // We pass our Global objects from above into both our Resource Providers.
         rpList.add(new AppointmentResourceProvider(ctx, data, checker, ourLogger));
         rpList.add(new SlotResourceProvider(ctx, data, ourLogger));
 
+        // And add the list to this Servlet
         setResourceProviders(rpList);
         LOG.info("Created server to handle the configured resources.");
     }
@@ -268,6 +292,10 @@ public class RestfulServlet extends RestfulServer {
      *
      * @return A String holding a sample JSON request body to be used to book an
      * Appointment.
+     * 
+     * The string is loaded from a Resource file in
+     * bookingprovider/src/main/resources/request.json
+     * 
      */
     public final String getRequest() {
         return getFileContents("request.json");
@@ -275,7 +303,8 @@ public class RestfulServlet extends RestfulServer {
 
     /**
      * Method to return the perfect POST payload in XML format for booking an
-     * Appointment.
+     * Appointment. This is loaded from
+     * bookingprovider/src/main/resources/request.xml
      *
      * @return XML Payload
      */

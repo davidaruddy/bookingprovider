@@ -15,7 +15,9 @@
  */
 
 /**
- * This is the package to hold the main servlet, and it turns out little else.
+ * This is the package to hold the main servlet, a class to supplement the auto
+ * generated CapabilityStatement and a class to override handling requests and
+ * responses to add validation of the JWT and more.
  *
  */
 package uk.nhs.fhir.bookingprovider;
