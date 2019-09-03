@@ -16,7 +16,8 @@
 
 /**
  * This is the package to hold the ResourceProviders to handle different FHIR
- * Resources.
+ * Resources, see:
+ * https://hapifhir.io/doc_rest_server.html#_toc_defining_resource_providers
  *
  * We only need two, to handle Slots and Appointments.
  *

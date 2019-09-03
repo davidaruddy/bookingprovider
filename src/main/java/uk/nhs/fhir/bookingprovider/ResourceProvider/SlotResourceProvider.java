@@ -51,7 +51,8 @@ import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 /**
  * Handles all RESTful FHIR requests for Slot resources.
  *
- * All resource providers must implement IResourceProvider.
+ * All resource providers must implement IResourceProvider see:
+ * https://hapifhir.io/doc_rest_server.html#_toc_defining_resource_providers
  */
 public class SlotResourceProvider implements IResourceProvider {
 
@@ -62,17 +63,18 @@ public class SlotResourceProvider implements IResourceProvider {
             = Logger.getLogger(SlotResourceProvider.class.getName());
 
     /**
-     * FHIR Context.
+     * FHIR Context, see:
+     * https://hapifhir.io/doc_intro.html#_toc_introducing_the_fhir_context
      */
     private FhirContext myContext;
 
     /**
-     * The in memory data store where we cache Slots and other objects.
+     * The data store where we cache Slots and other FHIR resources / objects.
      */
     private DataStore data;
 
     /**
-     * Logger to log results out.
+     * Logger to log results out to (MS Teams) external systems.
      */
     ExternalLogger ourLogger;
 
@@ -81,6 +83,7 @@ public class SlotResourceProvider implements IResourceProvider {
      *
      * @param ctx The overall FHIR Context we're using.
      * @param newData The shared in memory data store we're using.
+     * @param newLogger The global External Logger object we're using.
      */
     public SlotResourceProvider(final FhirContext ctx,
             final DataStore newData,
@@ -93,6 +96,8 @@ public class SlotResourceProvider implements IResourceProvider {
     /**
      * The getResourceType method comes from IResourceProvider, and must be
      * overridden to indicate what type of resource this provider supplies.
+     * @return Returns a subClass of DomainResource to show what type of
+     * Resources this provider handles.
      */
     @Override
     public Class<Slot> getResourceType() {
@@ -101,16 +106,26 @@ public class SlotResourceProvider implements IResourceProvider {
 
     /**
      * The "@Read" annotation indicates that this method supports the read
-     * operation. Read operations should return a single resource instance.
+     * operation.Read operations should return a single resource instance.
      *
      * @param theId The read operation takes one parameter, which must be of
      * type IdDt and must be annotated with the "@Read.IdParam" annotation.
+     * @param theRequest The underlying request used to convey to us the
+     *          correlation ID that was injected in by the Request Interceptor.
      * @return Returns a resource matching this identifier, or null if none
      * exists.
      */
     @Description(shortDefinition = "Gets a specific Slot. NB: this is NOT version aware.")
     @Read()
-    public Slot getResourceById(@IdParam IdType theId) {
+    public Slot getResourceById(@IdParam IdType theId,
+            HttpServletRequest theRequest) {
+        
+        if(theRequest.getQueryString()!= null) {
+            ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting a Slot: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
+        } else {
+            ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting a Slot: " + theRequest.getRequestURL());
+        }
+
         LOG.info("Request for Slot: " + theId.getIdPart());
         Slot mySlot = data.getSlotByID(theId.getIdPart());
         mySlot.addIdentifier();
@@ -120,14 +135,15 @@ public class SlotResourceProvider implements IResourceProvider {
     /**
      * This Search takes no parameters and therefore just returns all Slots.
      *
+     * @param theRequest The underlying request used to convey to us the
+     *          correlation ID that was injected in by the Request Interceptor.
      * @return This method returns a list of all Slots.
      */
     @Description(shortDefinition = "Search takes no parameters and therefore just returns all Slots.")
     @Search()
     public List<Slot> searchSlots(
-        HttpServletRequest theRequest,
-        HttpServletResponse theResponse) {
-        if(theRequest.getRequestURL() != null) {
+        HttpServletRequest theRequest) {
+        if(theRequest.getQueryString() != null) {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting all Slots: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
         } else {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting all Slots: " + theRequest.getRequestURL());
@@ -142,12 +158,15 @@ public class SlotResourceProvider implements IResourceProvider {
     /**
      * The "@Search" annotation indicates that this method supports the search
      * operation.You may have many different method annotated with this
-     * annotation, to support many different search criteria. This example
-     * searches by HealthcareService and Status.
+     * annotation, to support many different search criteria.This example
+ searches by HealthcareService and Status.
      *
      * @param theHealthcareService The Service that Slots are being filtered to.
      * @param statusToken The status filter we are requested for.
+     * @param startRange Allows us to filter on start date
      * @param theIncludes Set of Resource types to be included in the response.
+     * @param theRequest The underlying request used to convey to us the
+     *          correlation ID that was injected in by the Request Interceptor.
      * @return This method returns a list of Slots. This list may contain
      * multiple matching resources, or it may also be empty.
      */
@@ -164,8 +183,7 @@ public class SlotResourceProvider implements IResourceProvider {
         "Schedule:actor:PractitionerRole",
         "HealthcareService.providedBy",
         "HealthcareService.location"}) Set<Include> theIncludes,
-        HttpServletRequest theRequest,
-        HttpServletResponse theResponse) {
+        HttpServletRequest theRequest) {
         if(theRequest.getQueryString() != null) {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Slots: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
         } else {
@@ -527,11 +545,14 @@ public class SlotResourceProvider implements IResourceProvider {
     /**
      * The "@Search" annotation indicates that this method supports the search
      * operation.You may have many different method annotated with this
-     * annotation, to support many different search criteria. This example
-     * searches by HealthcareService and Status.
+     * annotation, to support many different search criteria.This example
+ searches by HealthcareService and Status.
      *
      * @param statusToken The status filter we are requested for.
+     * @param startRange Allows us to filter on start date.
      * @param theIncludes Set of Resource types to be included in the response.
+     * @param theRequest The underlying request used to convey to us the
+     *          correlation ID that was injected in by the Request Interceptor.
      * @return This method returns a list of Slots. This list may contain
      * multiple matching resources, or it may also be empty.
      */
@@ -547,8 +568,7 @@ public class SlotResourceProvider implements IResourceProvider {
         "Schedule:actor:PractitionerRole",
         "HealthcareService.providedBy",
         "HealthcareService.location"}) Set<Include> theIncludes,
-        HttpServletRequest theRequest,
-        HttpServletResponse theResponse) {
+        HttpServletRequest theRequest) {
         if(theRequest.getQueryString() != null) {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting Slots: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
         } else {

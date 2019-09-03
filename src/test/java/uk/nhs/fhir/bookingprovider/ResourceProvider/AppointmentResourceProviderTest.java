@@ -115,7 +115,7 @@ public class AppointmentResourceProviderTest {
         checker = new AppointmentChecker(ctx);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
         Class<Appointment> expResult = Appointment.class;
-        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock);
         IBaseResource result = appt.getResource();
         assertEquals(expResult, result.getClass());
     }
@@ -307,12 +307,12 @@ public class AppointmentResourceProviderTest {
         newData.initialize();
         checker = new AppointmentChecker(ctx);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
-        List<Appointment> result = instance.getAppointment(myRequestMock, responseMock);
+        List<Appointment> result = instance.getAppointment(myRequestMock);
         assertEquals(0, result.size());
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
-        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
-        result = instance.getAppointment(myRequestMock, responseMock);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock);
+        result = instance.getAppointment(myRequestMock);
         assertEquals(1, result.size());
     }
 
@@ -327,7 +327,7 @@ public class AppointmentResourceProviderTest {
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
-        MethodOutcome outcome = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        MethodOutcome outcome = instance.createAppointment(newAppointment, myRequestMock);
         // So now we've created an Appointment from goodAppt_1.json
         
         Appointment savedAppt = (Appointment) outcome.getResource();
@@ -336,7 +336,7 @@ public class AppointmentResourceProviderTest {
         MockRequest myRequestMock2 = new MockRequest();
         myRequestMock2.addHeader("If-Match", "W/\"1\"");
 
-        MethodOutcome result2 = instance.updateAppointment(newId, savedAppt, myRequestMock2, responseMock);
+        MethodOutcome result2 = instance.updateAppointment(newId, savedAppt, myRequestMock2);
         Appointment updated = (Appointment) result2.getResource();
         
         assertEquals(updated.getSlotFirstRep(), newAppointment.getSlotFirstRep());
@@ -359,7 +359,7 @@ public class AppointmentResourceProviderTest {
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
-        MethodOutcome outcome = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        MethodOutcome outcome = instance.createAppointment(newAppointment, myRequestMock);
         // So now we've created an Appointment from goodAppt_1.json
         
         Appointment savedAppt = (Appointment) outcome.getResource();
@@ -368,7 +368,7 @@ public class AppointmentResourceProviderTest {
         MockRequest myRequestMock2 = new MockRequest();
         myRequestMock2.addHeader("If-Match", "W/\"2\"");
 
-        MethodOutcome result2 = instance.updateAppointment(newId, savedAppt, myRequestMock2, responseMock);
+        MethodOutcome result2 = instance.updateAppointment(newId, savedAppt, myRequestMock2);
     }
 
     
@@ -385,7 +385,7 @@ public class AppointmentResourceProviderTest {
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
-        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock);
         IdType newId = new IdType("Appointment/f04cf6dd-a30e-4e99-ab50-804c6b5ce38a");
         newAppointment.setId(appt.getResource().getIdElement());
         
@@ -394,7 +394,7 @@ public class AppointmentResourceProviderTest {
         MockRequest myRequestMock2 = new MockRequest();
         myRequestMock2.addHeader("If-Match", "W/\"1\"");
         newAppointment.setStatus(AppointmentStatus.CANCELLED);
-        instance.updateAppointment(newId, newAppointment, (HttpServletRequest) myRequestMock2, responseMock);
+        instance.updateAppointment(newId, newAppointment, (HttpServletRequest) myRequestMock2);
     }
 
 
@@ -412,13 +412,13 @@ public class AppointmentResourceProviderTest {
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
-        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.FULFILLED);
         MockRequest myRequestMock2 = new MockRequest();
         myRequestMock2.addHeader("If-Match", "W/\"1\"");
         
-        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
+        instance.updateAppointment(newId, newAppointment, myRequestMock2);
     }
 
     /**
@@ -434,13 +434,13 @@ public class AppointmentResourceProviderTest {
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
-        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.ARRIVED);
         MockRequest myRequestMock2 = new MockRequest();
         myRequestMock2.addHeader("If-Match", "W/\"1\"");
 
-        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
+        instance.updateAppointment(newId, newAppointment, myRequestMock2);
     }
 
     /**
@@ -456,13 +456,13 @@ public class AppointmentResourceProviderTest {
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
-        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.BOOKED);
         MockRequest myRequestMock2 = new MockRequest();
         myRequestMock2.addHeader("If-Match", "W/\"1\"");
 
-        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
+        instance.updateAppointment(newId, newAppointment, myRequestMock2);
     }
 
     /**
@@ -478,13 +478,13 @@ public class AppointmentResourceProviderTest {
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
-        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.NOSHOW);
         MockRequest myRequestMock2 = new MockRequest();
         myRequestMock2.addHeader("If-Match", "W/\"1\"");
 
-        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
+        instance.updateAppointment(newId, newAppointment, myRequestMock2);
     }
 
     /**
@@ -500,13 +500,13 @@ public class AppointmentResourceProviderTest {
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
-        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.NULL);
         MockRequest myRequestMock2 = new MockRequest();
         myRequestMock2.addHeader("If-Match", "W/\"1\"");
 
-        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
+        instance.updateAppointment(newId, newAppointment, myRequestMock2);
     }
 
     /**
@@ -522,13 +522,13 @@ public class AppointmentResourceProviderTest {
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
-        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.PENDING);
         MockRequest myRequestMock2 = new MockRequest();
         myRequestMock2.addHeader("If-Match", "W/\"1\"");
         
-        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
+        instance.updateAppointment(newId, newAppointment, myRequestMock2);
     }
 
     /**
@@ -544,11 +544,11 @@ public class AppointmentResourceProviderTest {
         String apptString = getFileContents("goodAppt_1.json");
         Appointment newAppointment = parser.parseResource(Appointment.class, apptString);
         AppointmentResourceProvider instance = new AppointmentResourceProvider(ctx, newData, checker, ourLogger);
-        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock, responseMock);
+        MethodOutcome appt = instance.createAppointment(newAppointment, myRequestMock);
         IdType newId = new IdType("Appointment/" + appt.getResource().getIdElement());
         newAppointment.setStatus(AppointmentStatus.PROPOSED);
         MockRequest myRequestMock2 = new MockRequest();
         myRequestMock2.addHeader("If-Match", "W/\"1\"");
 
-        instance.updateAppointment(newId, newAppointment, myRequestMock2, responseMock);
+        instance.updateAppointment(newId, newAppointment, myRequestMock2);
     }}

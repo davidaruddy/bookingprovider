@@ -55,6 +55,8 @@ import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
  * resource.
  *
  * All resource providers must implement IResourceProvider.
+ * See:
+ * https://hapifhir.io/doc_rest_server.html#_toc_defining_resource_providers
  */
 public class AppointmentResourceProvider implements IResourceProvider {
 
@@ -64,20 +66,25 @@ public class AppointmentResourceProvider implements IResourceProvider {
     private static final Logger LOG =
             Logger.getLogger(AppointmentResourceProvider.class.getName());
 
+    /**
+     * The external logger is passed into us on the constructor. It is used
+     * to log out to (MS Teams) other places.
+     */
     private ExternalLogger ourLogger;
 
     /**
-     * FHIR Context we're operating within.
+     * FHIR Context we're operating within, see:
+     * https://hapifhir.io/doc_intro.html#_toc_introducing_the_fhir_context
      */
     private FhirContext myContext;
 
     /**
-     * DataStore where we hold all resources in memory.
+     * DataStore where we hold all resources (currently in memory).
      */
     private DataStore myData;
 
     /**
-     * Object we're going to use to validate Appointment Objects.
+     * Object we're going to use to check and validate Appointment Objects.
      */
     private AppointmentChecker myChecker;
 
@@ -85,8 +92,8 @@ public class AppointmentResourceProvider implements IResourceProvider {
      * Constructor that we pass in any shared objects to.
      *
      * @param ctx The overall FHIR context we're using.
-     * @param newData Our DataStore, the in memory object we use to cache Slots
-     *                and other objects.
+     * @param newData Our DataStore, the object we use to store Slots and other
+     * FHIR resources / objects.
      * @param newChecker The object we'll use to check Appointments conform.
      */
     public AppointmentResourceProvider(final FhirContext ctx,
@@ -130,13 +137,14 @@ public class AppointmentResourceProvider implements IResourceProvider {
      * Method to book (create a new) Appointment resource.
      *
      * @param newAppt The new Appointment resource.
+     * @param theRequest The underlying request used to convey to us the
+     *          correlation ID that was injected in by the Request Interceptor.
      * @return Returns the results of trying to create a new Appointment object.
      */
     @Description(shortDefinition="Validates the submitted appointment, carries out a few checks and if all is okay it creates the Appointment.")
     @Create
     public MethodOutcome createAppointment(@ResourceParam Appointment newAppt,
-        HttpServletRequest theRequest,
-        HttpServletResponse theResponse) {
+        HttpServletRequest theRequest) {
         LOG.info("createAppointment() called");
         if(theRequest.getQueryString() != null) {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " creating Appointment: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
@@ -218,22 +226,21 @@ public class AppointmentResourceProvider implements IResourceProvider {
 
     /**
      * The "@Read" annotation indicates that this method supports the read
-     * operation. Read operations should return a single resource instance.
-     *
-     * This supports VRead too, as described at:
-     * https://hapifhir.io/doc_rest_operations.html#_toc_instance_level_-_vread
-     * 
+     * operation.Read operations should return a single resource instance. This
+     * supports VRead too, as described at:
+ https://hapifhir.io/doc_rest_operations.html#_toc_instance_level_-_vread
      * 
      * @param theId The read operation takes one parameter, which must be of
      * type IdDt and must be annotated with the "@Read.IdParam" annotation.
+     * @param theRequest The underlying request used to convey to us the
+     *          correlation ID that was injected in by the Request Interceptor.
      * @return Returns a resource matching this identifier, or null if none
      * exists.
      */
     @Description(shortDefinition="Returns this specific Appointment. NB: This function is version aware!")
     @Read(version=true)
     public Appointment getResourceById(@IdParam IdType theId,
-        HttpServletRequest theRequest,
-        HttpServletResponse theResponse) {
+        HttpServletRequest theRequest) {
         
         if (theId.hasVersionIdPart()) {
             // this is a vread   
@@ -253,14 +260,15 @@ public class AppointmentResourceProvider implements IResourceProvider {
     /**
      * This returns ALL Appointments.
      *
+     * @param theRequest The underlying request used to convey to us the
+     *          correlation ID that was injected in by the Request Interceptor.
      * @return This method returns a list of Appointments. This list may contain
      * multiple matching resources, or it may also be empty.
      */
     @Description(shortDefinition = "Searches for Appointments, it accepts no search criteria, and just returns all Appointments.")
     @Search()
     public List<Appointment> getAppointment(
-        HttpServletRequest theRequest,
-        HttpServletResponse theResponse) {
+        HttpServletRequest theRequest) {
         LOG.info("Asked for all appointments");
         ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " to get all Appointments");
         ArrayList<Appointment> appointments = myData.getAppointments();
@@ -272,16 +280,17 @@ public class AppointmentResourceProvider implements IResourceProvider {
      * The update method should ONLY to be used to change an appointment from
      * booked to either cancelled or entered in error.
      *
-     * @param theId
-     * @param newAppt
+     * @param theId The ID of the appointment to be updated.
+     * @param newAppt The replacement Appointment.
+     * @param theRequest The underlying request used to convey to us the
+     *          correlation ID that was injected in by the Request Interceptor.
      * @return
      */
     @Description(shortDefinition = "Allows an Appointment to be updated from 'booked' to 'cancelled' or to 'entered in error'. This also increments the version of the Appointment. It validates the version being updated is correct. NB: This doesn't YET (issue feature/BP-18 created) validate the replacement Appointment.")
     @Update()
     public MethodOutcome updateAppointment(@IdParam IdType theId,
             @ResourceParam Appointment newAppt,
-            HttpServletRequest theRequest,
-            HttpServletResponse theResponse) {
+            HttpServletRequest theRequest) {
         
         /////////////////////////////////////////////////////
         // Here we need to check that an If-Match header was supplied!

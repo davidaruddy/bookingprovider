@@ -27,7 +27,13 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- *
+ * This class is used to decode into more human readable info by querying
+ * AzureAD.
+ * It's currently set to use my own Azure AD Tenant see the variable 'tenant'
+ * below.
+ * 
+ * This should probably be moved to server.properties ?
+ * 
  * @author tim.coates@nhs.net
  */
 public class AzureAD {
