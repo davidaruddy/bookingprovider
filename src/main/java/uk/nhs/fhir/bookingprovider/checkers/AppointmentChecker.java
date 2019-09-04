@@ -172,7 +172,7 @@ public class AppointmentChecker {
      * @return A List of any faults found, hopefully of zero length.
      */
     public final ArrayList<Fault> checkThis(final Appointment appointment) {
-        ArrayList<Fault> results = new ArrayList<Fault>();
+        ArrayList<Fault> results = new ArrayList<>();
 
         // First check no ID was sent
         if (appointment.hasId()) {
@@ -567,7 +567,7 @@ public class AppointmentChecker {
 
         if (appointment.hasParticipant()) {
             List<AppointmentParticipantComponent> participantList = appointment.getParticipant();
-            if (participantList.size() == 0) {
+            if (participantList.isEmpty()) {
                 results.add(
                         new Fault(NOPARTSERR, Severity.MINOR)
                 );
@@ -635,7 +635,7 @@ public class AppointmentChecker {
 
         if (appointment.hasSupportingInformation()) {
             ArrayList<Reference> supportingInformationList = (ArrayList<Reference>) appointment.getSupportingInformation();
-            if (supportingInformationList.isEmpty() || supportingInformationList == null) {
+            if (supportingInformationList.isEmpty()) {
                 results.add(
                         new Fault(INVALIDSUPINFOERR, Severity.MAJOR)
                 );
