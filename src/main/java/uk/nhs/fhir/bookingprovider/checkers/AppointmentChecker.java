@@ -215,7 +215,7 @@ public class AppointmentChecker {
 
         // Check that participant actor links to a contained resource.
         results.addAll(checkPatientLink(appointment));
-        
+
         // Send the resource for validation by CCRI
         results.addAll(validateAppointment(appointment));
 
@@ -252,7 +252,7 @@ public class AppointmentChecker {
                                 //    results.add(new Fault("supportingInformation reference: " + localDocRefReference + " does NOT point to contained DocumentReference resource: " + docRefID, Severity.CRITICAL));
                                 //}
                             }
-                            
+
                             List<UriType> profileList = docRef.getMeta().getProfile();
                             if(profileList.size() == 1) {
                                 if(profileList.get(0).asStringValue().equals(DOCREFPROFILE)) {
@@ -269,8 +269,8 @@ public class AppointmentChecker {
                                                Severity.MAJOR)
                                 );
                             }
-                            
-                            
+
+
                             if (docRef.hasIdentifier()) {
                                 List<Identifier> identList = docRef.getIdentifier();
                                 if (identList.isEmpty()) {

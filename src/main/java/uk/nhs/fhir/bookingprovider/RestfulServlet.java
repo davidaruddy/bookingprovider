@@ -49,7 +49,7 @@ import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
  */
 @WebServlet(urlPatterns = {"/poc/*"}, displayName = "FHIR Booking POC")
 public class RestfulServlet extends RestfulServer {
-    
+
     String environment = "Developing";
 
     /**
@@ -102,7 +102,7 @@ public class RestfulServlet extends RestfulServer {
     /**
      * This object is shared quite widely by being passed into various
      * constructors, it is used to share key information.
-     * 
+     *
      */
     private ExternalLogger ourLogger;
 
@@ -116,7 +116,7 @@ public class RestfulServlet extends RestfulServer {
      * The HAPI Fhir context see
      * https://hapifhir.io/doc_intro.html#_toc_introducing_the_fhir_context
      * for details of how this is used.
-     * 
+     *
      */
     private final FhirContext ctx = FhirContext.forDstu3();
 
@@ -209,17 +209,17 @@ public class RestfulServlet extends RestfulServer {
     @Override
     protected final void initialize() throws ServletException {
         LOG.info("Initialising servlet");
-        
+
         /**
          * Here we instantiate some globally used objects:
          **/
-                 
+
         // An object that checks an Appointment FHIR Resource.
         checker = new AppointmentChecker(ctx);
-        
+
         // An object holding the data (typically in memory) resources/objects.
         data = DataStore.getInstance();
-        
+
         // An object that logs things out over some external channel (MS Teams?)
         ourLogger = ExternalLogger.GetInstance(environment);
 
@@ -227,7 +227,7 @@ public class RestfulServlet extends RestfulServer {
         requestInterceptor = new RequestInterceptor(ourLogger);
         // Now register the validating interceptor
         registerInterceptor(requestInterceptor);
-        
+
         /**
          * Now we're going to add ResourceProviders see
          * https://hapifhir.io/doc_rest_server.html#_toc_defining_resource_providers
@@ -292,10 +292,10 @@ public class RestfulServlet extends RestfulServer {
      *
      * @return A String holding a sample JSON request body to be used to book an
      * Appointment.
-     * 
+     *
      * The string is loaded from a Resource file in
      * bookingprovider/src/main/resources/request.json
-     * 
+     *
      */
     public final String getRequest() {
         return getFileContents("request.json");

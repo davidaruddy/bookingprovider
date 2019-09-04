@@ -52,13 +52,13 @@ import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
  * incomingRequestPreProcessed() is where the JWT is inspected and validated,
  * and also where the request has a GUID assigned to it, that follows the
  * request and response throughout processing.
- * 
+ *
  * It also logs both the request and the response with this correlation GUID
  * through an ExternalLogger class which is passed into the constructor.
- * 
+ *
  * The overridden outgoingResponse() method also adds the ETag to support
  * versioning.
- * 
+ *
  * @author tim.coates@nhs.net
  */
 public class RequestInterceptor extends InterceptorAdapter {
@@ -77,7 +77,7 @@ public class RequestInterceptor extends InterceptorAdapter {
     /**
      * Constructor, just tells us to load the properties file holding all of the
      * App IDs, and the properties file which configures the AzureAD endpoints.
-     * 
+     *
      * The ExternalLogger we are passed in will be used to send details of both
      * the Request and the Response correlated to a GUID.
      *
@@ -93,7 +93,7 @@ public class RequestInterceptor extends InterceptorAdapter {
     /**
      * Override the incomingRequestPreProcessed method, which is called for each
      * incoming request before any processing is done.
-     * 
+     *
      * This is where we do the auth checking.
      *
      * @param theRequest The request we've received.
@@ -185,7 +185,7 @@ public class RequestInterceptor extends InterceptorAdapter {
             LOG.severe(ex.getMessage());
             throw new UnprocessableEntityException("MalformedURLException: " + ex.getMessage());
         }
-        
+
         return clientName;
     }
 
@@ -357,21 +357,21 @@ public class RequestInterceptor extends InterceptorAdapter {
     public void flushAzureCache() {
         adWrangler.flushCaches();
     }
-    
+
     /**
      * Intercepts all outbound (non-error) responses.
-     * 
+     *
      * This is where we are able to add the eTAG to support checks for versions
      * as described at: http://hl7.org/fhir/stu3/http.html#concurrency
-     * 
-     * 
+     *
+     *
      * @param theRequestDetails
      * @param theResponseDetails
      * @param theServletRequest
      * @param theServletResponse
      * @return Returns true to continue with normal processing, or false to
      *          break (e.g. if this is handling the response)
-     * @throws AuthenticationException 
+     * @throws AuthenticationException
      */
     @Override
     public boolean outgoingResponse(RequestDetails theRequestDetails,
@@ -379,7 +379,7 @@ public class RequestInterceptor extends InterceptorAdapter {
                          HttpServletRequest theServletRequest,
                          HttpServletResponse theServletResponse)
                   throws AuthenticationException {
-        
+
         // If the request was related to Appointment
         if(theRequestDetails.getResourceName().equals("Appointment")) {
             LOG.info("Adding ETag - Was an Appointment request");
@@ -393,7 +393,7 @@ public class RequestInterceptor extends InterceptorAdapter {
                     theServletResponse.addHeader("ETag", ETag);
                 }
             }
-        }        
+        }
         return true;
     }
 }

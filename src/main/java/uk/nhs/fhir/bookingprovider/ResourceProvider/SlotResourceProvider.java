@@ -119,7 +119,7 @@ public class SlotResourceProvider implements IResourceProvider {
     @Read()
     public Slot getResourceById(@IdParam IdType theId,
             HttpServletRequest theRequest) {
-        
+
         if(theRequest.getQueryString()!= null) {
             ourLogger.log("Request: " + theRequest.getAttribute("uk.nhs.fhir.bookingprovider.requestid") + " getting a Slot: " + theRequest.getRequestURL() + "?" + theRequest.getQueryString());
         } else {

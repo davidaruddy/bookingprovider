@@ -738,7 +738,7 @@ public final class DataStore {
 
     /**
      * Method to update an Appointment to Cancelled or EnteredInError
-     * 
+     *
      * @param identifier The identifier of the Slot we're manipulating
      * @param proposedStatus The status we've been asked to change it to
      */

@@ -31,9 +31,9 @@ import java.util.logging.Logger;
  * AzureAD.
  * It's currently set to use my own Azure AD Tenant see the variable 'tenant'
  * below.
- * 
+ *
  * This should probably be moved to server.properties ?
- * 
+ *
  * @author tim.coates@nhs.net
  */
 public class AzureAD {

@@ -29,10 +29,10 @@ import java.util.logging.Logger;
  * Class which logs information out to an MS Teams channel. It is defined as a
  * Singleton class, but one instance is created and shared around the whole
  * system.
- * 
+ *
  * It might be better to do a GetInstance wherever, or make the log() method
  * static and just call it directly?
- * 
+ *
  * @author dev
  */
 public class ExternalLogger {
@@ -92,7 +92,7 @@ public class ExternalLogger {
      * @return An indication of success (true) or failure (false).
      */
     public boolean log(String message) {
-        
+
         boolean result = false;
 
         OkHttpClient client = new OkHttpClient();
