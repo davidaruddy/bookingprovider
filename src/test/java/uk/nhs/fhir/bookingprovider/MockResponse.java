@@ -24,7 +24,10 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Mock Class used for testing.
+ * Mock Class used for testing, not implemented the Overrides are only
+ * overridden so that we can claim to implement the interface.
+ *
+ * NB EVERY Overridden function simply throws an UnsupportedOperationException
  *
  * @author tim.coates@nhs.net
  */

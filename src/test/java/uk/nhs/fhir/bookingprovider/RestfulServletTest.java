@@ -26,6 +26,9 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
+ * Class to test (not very much) our underlying RestfulServlet class.
+ *
+ * Because the Servlet doesn't itself do much, there's very little to test.
  *
  * @author tim.coates@nhs.net
  */

@@ -17,7 +17,6 @@ package uk.nhs.fhir.bookingprovider;
 
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
@@ -37,7 +36,7 @@ import static org.junit.Assert.*;
 import uk.nhs.fhir.bookingprovider.logging.ExternalLogger;
 
 /**
- *
+ * Class which holds all of the tests for our RequestInterceptor.
  * @author tim.coates@nhs.net
  */
 public class RequestInterceptorTest {
@@ -118,18 +117,12 @@ public class RequestInterceptorTest {
      * Test using a token Generated:
      * 13:18 on 11th January 2019
      * Expires: Fri Jan 11 2019 14:18:07 GMT+0000
-     * 
-     * Edit: Now token from: 14:19 on 15th April 2019
-     * Expires: Mon Apr 15 2019 15:18:58 GMT+0100
-     * 
-     * Edit: Now token from: Tue May 07 2019 14:15:00 GMT+0100
-     * Expires: Tue May 07 2019 15:20:00 GMT+0100
-     * 
+     *
      * NB: Bear in mind that we allow 450 seconds (7:30) grace period for both
      * the issued and expires times.
      * Should be rejected as not valid after that
      * time.
-     * 
+     *
      */
     @Test(expected = AuthenticationException.class)
     public void testValidateExpiredToken() {
@@ -138,13 +131,23 @@ public class RequestInterceptorTest {
         String reqURI = "http://appointments.directoryofservices.nhs.uk/poc";
         ExternalLogger ourLogger = ExternalLogger.GetInstance();
         RequestInterceptor instance = new RequestInterceptor(ourLogger);
-        String result = instance.validateToken(token, reqURI);
+        /**
+         * This WILL break, as the public key which should be retrieved and used
+         * to validate the old token is cycled out of use.
+         *
+         * To fix, it, it's necessary to request a new Token, overwrite the
+         * value of the variable "token" above with the token, and then wait
+         * approximately an hour, allowing for the 450 second grace period we've
+         * built in.
+         *
+        **/
+        instance.validateToken(token, reqURI);
     }
 
     /**
      * Method to get an access_token as TestClient
      *
-     * @return
+     * @return An access token
      */
     private String getToken() {
         String token = null;
@@ -167,8 +170,6 @@ public class RequestInterceptorTest {
             Gson gson = new Gson();
             TokenResponse responseObject = gson.fromJson(responseStr, TokenResponse.class);
             token = responseObject.access_token;
-            //LOG.info(responseObject.access_token);
-
             return token;
         }
         catch (IOException ex) {
@@ -177,6 +178,11 @@ public class RequestInterceptorTest {
         return token;
     }
 
+    /**
+     * Method to get a different token.
+     *
+     * @return An access token.
+     */
     private String getTokenExtraGroup() {
         String token = null;
 
@@ -198,8 +204,6 @@ public class RequestInterceptorTest {
             Gson gson = new Gson();
             TokenResponse responseObject = gson.fromJson(responseStr, TokenResponse.class);
             token = responseObject.access_token;
-            //LOG.info(responseObject.access_token);
-
             return token;
         }
         catch (IOException ex) {
@@ -208,6 +212,31 @@ public class RequestInterceptorTest {
         return token;
     }
 
+    /**
+     * Test of incomingRequestPreProcessed method, of class RequestInterceptor.
+     */
+    @Test
+    public void testIncomingRequestPreProcessed() {
+        System.out.println("incomingRequestPreProcessed");
+        ExternalLogger ourLogger = ExternalLogger.GetInstance();
+        RequestInterceptor instance = new RequestInterceptor(ourLogger);
+        String queryString = "http://appointments.directoryofservices.nhs.uk/poc";
+        String token = getToken();
+        String authheader = "Bearer " + token;
+        HttpServletRequest myRequestMock = new MockRequest(queryString, authheader);
+        HttpServletResponse responseMock = new MockResponse();
+
+        boolean expResult = true;
+        boolean result = instance.incomingRequestPreProcessed(myRequestMock, responseMock);
+        assertEquals(expResult, result);
+
+    }
+
+    /**
+     * Inner class which we define to allow GSON to deserialise JSON into a
+     * POJO Object
+     *
+     */
     private class TokenResponse {
 
         private String token_type;
@@ -247,25 +276,4 @@ public class RequestInterceptorTest {
         private long ext_expires_in;
         private String access_token;
     }
-
-    /**
-     * Test of incomingRequestPreProcessed method, of class RequestInterceptor.
-     */
-    @Test
-    public void testIncomingRequestPreProcessed() {
-        System.out.println("incomingRequestPreProcessed");
-        ExternalLogger ourLogger = ExternalLogger.GetInstance();
-        RequestInterceptor instance = new RequestInterceptor(ourLogger);
-        String queryString = "http://appointments.directoryofservices.nhs.uk/poc";
-        String token = getToken();
-        String authheader = "Bearer " + token;
-        HttpServletRequest myRequestMock = new MockRequest(queryString, authheader);
-        HttpServletResponse responseMock = new MockResponse();
-
-        boolean expResult = true;
-        boolean result = instance.incomingRequestPreProcessed(myRequestMock, responseMock);
-        assertEquals(expResult, result);
-
-    }
-
 }
