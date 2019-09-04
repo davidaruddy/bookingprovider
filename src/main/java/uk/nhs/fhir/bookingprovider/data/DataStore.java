@@ -38,7 +38,6 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Schedule;
 import org.hl7.fhir.dstu3.model.Slot;
 import org.hl7.fhir.dstu3.model.Slot.SlotStatus;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * Singleton instance of an in memory data store.
@@ -55,13 +54,13 @@ public final class DataStore {
     /**
      * Where all the profiles are pulled from.
      */
-    private static String profileRoot
+    private static final String PROFILEROOT
             = "https://fhir.hl7.org.uk/STU3/StructureDefinition/";
 
     /**
      * Where any Code Systems are pulled from.
      */
-    private static String codeSystemRoot
+    private static final String CODESYSTEMROOT
             = "https://fhir.hl7.org.uk/STU3/CodeSystem/";
 
     /**
@@ -69,46 +68,38 @@ public final class DataStore {
      */
     private static final Logger LOG
             = Logger.getLogger(DataStore.class.getName());
-
     /**
      * A List of PractitionerRole resources.
      */
-    private ArrayList<PractitionerRole> practitionerRoles = null;
-
+    private ArrayList<PractitionerRole> practitionerRoles;
     /**
      * A List of Practitioner resources.
      */
-    private ArrayList<Practitioner> practitioners = null;
-
+    private ArrayList<Practitioner> practitioners;
     /**
      * A List of Organization resources.
      */
-    private ArrayList<Organization> organizations = null;
-
+    private ArrayList<Organization> organizations;
     /**
      * A List of Location resources.
      */
-    private ArrayList<Object> locations = null;
-
+    private ArrayList<Object> locations;
     /**
      * A List of HealthcareService resources.
      */
-    private ArrayList<HealthcareService> healthcareServices = null;
-
+    private ArrayList<HealthcareService> healthcareServices;
     /**
      * A List of Schedule resources.
      */
-    private ArrayList<Schedule> schedules = null;
-
+    private ArrayList<Schedule> schedules;
     /**
      * A List of Slot resources.
      */
-    private ArrayList<Slot> slots = null;
-
+    private ArrayList<Slot> slots;
     /**
      * And finally a List of Appointment resources.
      */
-    private ArrayList<Appointment> appointments = null;
+    private ArrayList<Appointment> appointments;
 
     /**
      * Private Constructor to prevent unexpected instantiation (forces singleton
@@ -116,6 +107,14 @@ public final class DataStore {
      *
      */
     private DataStore() {
+        this.practitionerRoles = null;
+        this.practitioners = null;
+        this.organizations = null;
+        this.locations = null;
+        this.healthcareServices = null;
+        this.schedules = null;
+        this.slots = null;
+        this.appointments = null;
         LOG.info("New datastore being created and populated...");
     }
 
@@ -257,13 +256,13 @@ public final class DataStore {
 
         PractitionerRole practRole = new PractitionerRole();
         Meta met = new Meta();
-        String profileName = profileRoot + "CareConnect-PractitionerRole-1";
+        String profileName = PROFILEROOT + "CareConnect-PractitionerRole-1";
         met.addProfile(profileName);
         practRole.setMeta(met);
         practRole.setId(new IdDt("R0260"));
         CodeableConcept code = new CodeableConcept();
         Coding codeCoding = new Coding();
-        String codeSystemName = codeSystemRoot + "CareConnect-SDSJobRoleName-1";
+        String codeSystemName = CODESYSTEMROOT + "CareConnect-SDSJobRoleName-1";
         codeCoding.setSystem(codeSystemName);
         codeCoding.setCode("R0260");
         codeCoding.setDisplay("General Medical Practitioner");
@@ -287,7 +286,7 @@ public final class DataStore {
         Practitioner pract = new Practitioner();
 
         Meta met = new Meta();
-        String profileName = profileRoot + "CareConnect-Practitioner-1";
+        String profileName = PROFILEROOT + "CareConnect-Practitioner-1";
         met.addProfile(profileName);
         pract.setMeta(met);
         pract.setId(new IdDt("ABCD123456"));
@@ -325,7 +324,7 @@ public final class DataStore {
         Organization org = new Organization();
 
         Meta met = new Meta();
-        String profileName = profileRoot + "CareConnect-Organization-1";
+        String profileName = PROFILEROOT + "CareConnect-Organization-1";
         met.addProfile(profileName);
         org.setMeta(met);
         org.setId(new IdDt("A91545"));
@@ -353,7 +352,7 @@ public final class DataStore {
         Location locn1 = new Location();
         Location locn2 = new Location();
         Meta met = new Meta();
-        String profileName = profileRoot + "CareConnect-Location-1";
+        String profileName = PROFILEROOT + "CareConnect-Location-1";
         met.addProfile(profileName);
         locn1.setMeta(met);
         locn2.setMeta(met);
@@ -384,7 +383,7 @@ public final class DataStore {
         HealthcareService hcs1 = new HealthcareService();
         HealthcareService hcs2 = new HealthcareService();
         Meta met = new Meta();
-        String profileName = profileRoot + "CareConnect-HealthcareService-1";
+        String profileName = PROFILEROOT + "CareConnect-HealthcareService-1";
         met.addProfile(profileName);
 
         Reference providerRef = new Reference();
@@ -439,7 +438,7 @@ public final class DataStore {
         Schedule sched1 = new Schedule();
         Schedule sched2 = new Schedule();
         Meta met = new Meta();
-        String profileName = profileRoot + "CareConnect-Schedule-1";
+        String profileName = PROFILEROOT + "CareConnect-Schedule-1";
         met.addProfile(profileName);
         sched1.setMeta(met);
         sched2.setMeta(met);
@@ -485,7 +484,7 @@ public final class DataStore {
         Slot slot;
 
         Meta met = new Meta();
-        String profileName = profileRoot + "CareConnect-Slot-1";
+        String profileName = PROFILEROOT + "CareConnect-Slot-1";
         met.addProfile(profileName);
 
         Reference schedRef = new Reference();
@@ -740,8 +739,8 @@ public final class DataStore {
     /**
      * Method to update an Appointment to Cancelled or EnteredInError
      * 
-     * @param identifier
-     * @param proposedStatus 
+     * @param identifier The identifier of the Slot we're manipulating
+     * @param proposedStatus The status we've been asked to change it to
      */
     public void setAppointmentStatus(String identifier, Appointment.AppointmentStatus proposedStatus) {
         LOG.info("Trying to update: " + identifier);
@@ -763,7 +762,7 @@ public final class DataStore {
 
     /**
      * Sets a slot back to free from booked.
-     * @param slotId 
+     * @param id  The ID of the Slot we're manipulating.
      */
     public void setSlotFree(final String id) {
         // First we extract just the ID part from any id we've been sent...
