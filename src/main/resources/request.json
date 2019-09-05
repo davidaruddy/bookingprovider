@@ -8,6 +8,9 @@
     "contained": [
         {
             "resourceType": "DocumentReference",
+            "meta": {
+                "profile": "https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-DocumentReference-1"
+            },
             "id": "123",
             "identifier": {
                 "system": "uuid",

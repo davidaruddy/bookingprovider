@@ -1,5 +1,4 @@
 <Appointment xmlns="http://hl7.org/fhir">
-    <script id="tinyhippos-injected"/>
     <meta>
         <profile value="https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Appointment-1"/>
     </meta>
@@ -8,8 +7,11 @@
     <contained>
         <!-- A DocumentReference, which links this to the CDA Document -->
         <DocumentReference xmlns="http://hl7.org/fhir">
-<!-- Because this is a Contained resource, this ID ONLY has meaning within the containing (Appointment) resource -->
+            <!-- Because this is a Contained resource, this ID ONLY has meaning within the containing (Appointment) resource -->
             <id value="123"/>
+            <meta>
+                <profile value="https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-DocumentReference-1"/>
+            </meta>
             <identifier>
                 <system value="uuid"/>
                 <!-- This is the root ID of the CDA document -->
@@ -36,7 +38,7 @@
     <contained>
         <!-- A Patient which gives details of the Patient the Appointment is for -->
         <Patient xmlns="http://hl7.org/fhir">
-<!-- Because this is a Contained resource, this ID only has any meaning within the containing (Appointment) resource -->
+            <!-- Because this is a Contained resource, this ID only has any meaning within the containing (Appointment) resource -->
             <id value="P1"/>
             <meta>
                 <profile value="https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Patient-1"/>
@@ -85,7 +87,7 @@
     <description value="Reason for calling"/>
     <!-- supportingInformation points to the contained DocumentReference resource (reference prefixed with # indicates contained resource) identified with #123. -->
     <supportingInformation>
-<!-- Here the hash prefix on #123 indicates that this is a reference to a contained resource. -->
+        <!-- Here the hash prefix on #123 indicates that this is a reference to a contained resource. -->
         <reference value="#123"/>
     </supportingInformation>
     <!-- Slot points to a Slot as referenced (by the Provider) when Get Slots was called. -->
@@ -96,7 +98,7 @@
     <!-- participant | actor points to the contained Patient resource identified with P1 -->
     <participant>
         <actor>
-<!-- Here the hash prefix on #P1 indicates that this is a reference to a contained resource. -->
+            <!-- Here the hash prefix on #P1 indicates that this is a reference to a contained resource. -->
             <reference value="#P1"/>
             <identifier>
                 <use value="official"/>
